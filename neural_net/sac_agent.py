@@ -19,9 +19,9 @@ def weights_init(m):
 
 
 class Agent:
-    def __init__(self, alpha=0.0005, beta=0.0005, input_dims=[8],
+    def __init__(self, alpha=0.000005, beta=0.0005, input_dims=[8],
                  max_action=1.0, gamma=0.99, n_actions=2, max_size=100000, tau=0.001,
-                 layer1_size=256, layer2_size=256, batch_size=256, reward_scale=7.0):
+                 layer1_size=256, layer2_size=256, batch_size=256, reward_scale=1.0):
         self.gamma = gamma
         self.tau = tau
         self.memory = ReplayBuffer(max_size, input_dims, n_actions)
