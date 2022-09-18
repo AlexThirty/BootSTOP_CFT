@@ -135,9 +135,10 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
     No validation of the inputs is done.
     """
 
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
-
+        
+        
         # ---Output Parameters---
         self.filename_stem = 'sac'
         self.verbose = 'o'  # When the SAC algorithm should print to the console:
@@ -146,16 +147,16 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         # default is '' which produces no output
 
         # ---Learn Loop Paramaters---
-        self.faff_max = 75  # maximum time spent not improving
+        self.faff_max = config['faff_max']  # maximum time spent not improving
 
         # ---Automation Run Parameters---
-        self.pc_max = 20  # max number of re-initialisations before window decrease
-        self.window_rate = 0.7  # window decrease rate (between 1 and 0)
-        self.max_window_exp = 10  # maximum number of window changes
+        self.pc_max = config['pc_max']  # max number of re-initialisations before window decrease
+        self.window_rate = config['window_rate']  # window decrease rate (between 1 and 0)
+        self.max_window_exp = config['max_window_exp']  # maximum number of window changes
 
         # ---Spin Hierachy Parameters---
-        self.same_spin_hierarchy = True  # same long multiplet operators with the same spin should be ordered
-        self.dyn_shift = 0.3  # set the gap between long multiplet same spin deltas
+        self.same_spin_hierarchy = config['same_spin_hierarchy']  # same long multiplet operators with the same spin should be ordered
+        self.dyn_shift = config['dyn_shift']  # set the gap between long multiplet same spin deltas
 
         # ---Environment Parameters---
         # set guessing run list for conformal weights
@@ -164,7 +165,7 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         # set guessing run list for ope coefficients        
         self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         
-        self.reward_scale = 1.
+        self.reward_scale = config['reward_scale']
         self.delta_max = 10.5
         
         # initial search window size for conformal weights
@@ -186,9 +187,14 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         # ---Starting Point Parameters---
         # initial configuration to explore around
         # set equal to combination of shifts_deltas and shifts_opecoeffs to effectively start from a zero solution
-        print(self.shifts_deltas)
-        print(self.shifts_opecoeffs)
-        self.global_best = np.concatenate((self.shifts_deltas, self.shifts_opecoeffs))
+        
+        print(self.guess_sizes_deltas)
+        
+        delta_start = self.shifts_deltas
+        ope_start = self.shifts_opecoeffs
+        print(delta_start)
+        print(ope_start)
+        self.global_best = np.concatenate((delta_start, ope_start))
         # initial reward to start with
         # set equal to 0.0 to start from a zero solution.
         self.global_reward_start = 0.0

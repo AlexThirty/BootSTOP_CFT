@@ -76,9 +76,18 @@ class Learn:
     env: Environment
         Instance of `Environment` class.
     """
-    def __init__(self, env):
+    def __init__(self, env, agent_config):
         self.env = env
-        self.agent = Agent(input_dims=[env.environment_dim], n_actions=env.search_space_dim)
+        self.agent = Agent(input_dims=[env.environment_dim],
+                           n_actions=env.search_space_dim,
+                           alpha=agent_config['alpha'],
+                           beta=agent_config['beta'],
+                           gamma=agent_config['gamma'],
+                           tau=agent_config['tau'],
+                           layer1_size=agent_config['layer1_size'],
+                           layer2_size=agent_config['layer2_size'],
+                           batch_size=agent_config['batch_size'],
+                           reward_scale=agent_config['reward_scale'])
         self.done = False
         self.fdone = False
         self.observation = self.env.current_constraints
@@ -162,6 +171,7 @@ def soft_actor_critic(func,
                       guessing_run_list,
                       starting_reward,
                       x0,
+                      agent_config,
                       verbose='',
                       args=()):
     """
@@ -218,7 +228,7 @@ def soft_actor_critic(func,
     #
     environment = Environment(func_wrapper, environment_dim, search_space_dim, lower_bounds, search_window_sizes,
                               guessing_run_list)
-    lrn = Learn(environment)
+    lrn = Learn(environment, agent_config)
     # set the initial window size reduction exponent, pc counter and best_reward
     window_scale_exponent = 0
     pc = 0  # records number of neural net reinitialisations
@@ -245,7 +255,7 @@ def soft_actor_critic(func,
         # delete and re-instantiate the Learn class, this re-initialises the Agent class
         del lrn
         environment.reset_env()
-        lrn = Learn(environment)
+        lrn = Learn(environment, agent_config)
 
     # when finished looping print the final reward and corresponding CFT data
     best_reward_location = x0 + lower_bounds
