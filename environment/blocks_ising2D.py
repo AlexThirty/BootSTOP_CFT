@@ -18,7 +18,7 @@ class Ising2D:
         self.verbose = params.verbose
         self.reward_scale = params.reward_scale
         self.best_theoretical_reward = self.compute_single_reward(self.delta_teor, self.lambda_teor)
-        print(self.best_theoretical_reward)
+        #print(self.best_theoretical_reward)
         self.ell_max = params.ell_max
         self.delta_sep = params.delta_sep
         self.delta_start = params.delta_start

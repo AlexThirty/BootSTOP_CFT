@@ -173,6 +173,7 @@ def soft_actor_critic(func,
                       x0,
                       agent_config,
                       verbose='',
+                      best_teor=0.,
                       args=()):
     """
     Apply the soft-Actor-Critic algorithm to a function.
@@ -259,6 +260,7 @@ def soft_actor_critic(func,
 
     # when finished looping print the final reward and corresponding CFT data
     best_reward_location = x0 + lower_bounds
+    utils.output_to_console(f'Best theoretical reward: {best_teor}')
     utils.output_to_console('Maximum reward: %.16f' % best_reward)
     utils.output_to_console('Location of maximum reward: ')
     utils.output_to_console(best_reward_location.tolist())

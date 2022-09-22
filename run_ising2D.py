@@ -25,6 +25,7 @@ if __name__ == '__main__':
     parser.add_argument('--layer1_size', type=int, default=256, help='Dense units for first layer')
     parser.add_argument('--layer2_size', type=int, default=256, help='Dense units for the second layer')
     parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
+    parser.add_argument('--array_index', type=int, default=0, help='Index for the try in case of multitry')
     args = parser.parse_args()
     
     run_config = {}
@@ -59,15 +60,16 @@ if __name__ == '__main__':
     # ---Instantiate the crossing_eqn class---
     cft = Ising2D_SAC(params, zd)
 
+    teor_reward = cft.best_theoretical_reward
     # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
     try:
-        array_index = int(sys.argv[1])
+        array_index = args.array_index
     except IndexError:
         array_index = 0
 
     # form the file_name where the code output is saved to
     file_name = params.filename_stem + str(array_index) + '.csv'
-
+    utils.output_to_file(file_name=file_name, output=teor_reward)
     # determine initial starting point in the form needed for the soft_actor_critic function
     x0 = params.global_best - params.shifts
     

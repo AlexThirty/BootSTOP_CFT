@@ -141,7 +141,7 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         
         # ---Output Parameters---
         self.filename_stem = 'sac'
-        self.verbose = 'o'  # When the SAC algorithm should print to the console:
+        self.verbose = ''  # When the SAC algorithm should print to the console:
         # e - print at every step
         # o - only after a re-initialisation
         # default is '' which produces no output
@@ -188,12 +188,12 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         # initial configuration to explore around
         # set equal to combination of shifts_deltas and shifts_opecoeffs to effectively start from a zero solution
         
-        print(self.guess_sizes_deltas)
+        #print(self.guess_sizes_deltas)
         
         delta_start = self.shifts_deltas
         ope_start = self.shifts_opecoeffs
-        print(delta_start)
-        print(ope_start)
+        #print(delta_start)
+        #print(ope_start)
         self.global_best = np.concatenate((delta_start, ope_start))
         # initial reward to start with
         # set equal to 0.0 to start from a zero solution.
