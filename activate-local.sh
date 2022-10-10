@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=ray-tune-trenta
 ### Modify this according to your Ray workload.
-#SBATCH --nodes=0
+#SBATCH --nodes=3s
 #SBATCH --exclusive
-#SBATCH --tasks-per-node=1
+#SBATCH --tasks-per-node=90
 ### Modify this according to your Ray workload.
-#SBATCH --cpus-per-task=96
+#SBATCH --cpus-per-task=1
 #SBATCH --output=ray.log
 ### Similarly, you can also specify the number of GPUs per node.
 ### Modify this according to your Ray workload. Sometimes this
@@ -48,7 +48,7 @@ ray start --head --node-ip-address=$head_node_ip --port=$port
 
 # optional, though may be useful in certain versions of Ray < 1.0.
 # number of nodes other than the head node
-worker_num=0
+worker_num=2
 
 for ((i = 0; i < worker_num; i++)); do
     node_i=${nodes_array[$i]}

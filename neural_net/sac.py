@@ -104,6 +104,7 @@ class Learn:
         """
         self.solution = current_best
         self.productivity_counter = False
+        self.results = []
         while not self.fdone:
             # ---Running the learning loop---
             self.step += 1
@@ -131,6 +132,7 @@ class Learn:
                 else:
                     file_output = np.concatenate((array_index, current_reward, current_location), axis=None)
                 # append the improved reward and current search space location to the csv file 'file_name'
+                self.results.append(file_output)
                 utils.output_to_file(file_name, file_output)
                 # reset various quantities so that we're ready to go through the while loop again
                 self.env.reset_env()
@@ -153,6 +155,10 @@ class Learn:
                 utils.output_to_console(console_output)
             else:
                 pass  # don't print
+        
+        #for i in range(len(self.results)):
+        #    file_output = self.results[i]
+        #    utils.output_to_file(file_name=file_name, output=file_output)
 
         return self.solution
 
