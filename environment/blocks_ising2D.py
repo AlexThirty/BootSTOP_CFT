@@ -53,7 +53,7 @@ class Ising2D:
     
     def compute_single_reward(self, delta: np.array, lambdads: np.array):
         vector = self.compute_ising2d_vector(delta, self.s, lambdads, self.z, self.z_conj, self.delta_model)
-        return 1/LA.norm(vector) * self.reward_scale
+        return 1/LA.norm(vector)
     
     
     

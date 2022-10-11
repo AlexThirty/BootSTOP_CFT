@@ -31,6 +31,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
     parser.add_argument('--max_cpus', type=int, default=90, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
+    parser.add_argument('--runs_per_args', type=int, default=10, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     
@@ -76,7 +77,6 @@ if __name__ == '__main__':
                       verbose=verbose,
                       best_teor=best_teor)
 
-
     faffs = [300, 500, 1000]
     pcs = [20, 40, 60]
     rates = [0.7, 0.8, 0.9]
@@ -109,50 +109,52 @@ if __name__ == '__main__':
         agent_config['layer1_size'] = args.layer1_size
         agent_config['layer2_size'] = args.layer2_size
         agent_config['batch_size'] = args.batch_size
-    
-        # ---Instantiating some relevant classes---
-        params = ParametersIsing2D_SAC(run_config)
-        zd = ZData()
 
-        # ---Kill portion of the z-sample data if required---
-        zd.kill_data(params.z_kill_list)
+        for j in range(args.runs_per_args):
+            # ---Instantiating some relevant classes---
+            params = ParametersIsing2D_SAC(run_config)
+            zd = ZData()
 
-        # ---Load the pre-generated conformal blocks for long multiplets---
-        #blocks = utils.generate_block_list(max(params.spin_list), params.z_kill_list)
+            # ---Kill portion of the z-sample data if required---
+            zd.kill_data(params.z_kill_list)
 
-        # ---Instantiate the crossing_eqn class---
-        cft = Ising2D_SAC(params, zd)
+            # ---Load the pre-generated conformal blocks for long multiplets---
+            #blocks = utils.generate_block_list(max(params.spin_list), params.z_kill_list)
 
-        teor_reward = cft.best_theoretical_reward
-        # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
-        array_index = i
+            # ---Instantiate the crossing_eqn class---
+            cft = Ising2D_SAC(params, zd)
 
-        # form the file_name where the code output is saved to
-        file_name = os.path.join('results', params.filename_stem + str(array_index) + '.csv')
-        utils.output_to_file(file_name=file_name, output=np.array([teor_reward]))
-        output = grid[i]
-        utils.output_to_file(file_name=file_name, output=output)
-        # determine initial starting point in the form needed for the soft_actor_critic function
-        x0 = params.global_best - params.shifts
-        print(f'Starting run {i+1}')
+            teor_reward = cft.best_theoretical_reward
+            # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
+            array_index = args.runs_per_args*i+j
 
-        remaining_ids.append(run_exp.remote(func=cft.crossing,
-                      max_window_changes=params.max_window_exp,
-                      window_decrease_rate=params.window_rate,
-                      pc_max=params.pc_max,
-                      file_name=file_name,
-                      array_index=array_index,
-                      lower_bounds=params.shifts,
-                      search_window_sizes=params.guess_sizes,
-                      guessing_run_list=params.guessing_run_list,
-                      environment_dim=zd.env_shape,
-                      search_space_dim=params.action_space_N,
-                      faff_max=params.faff_max,
-                      starting_reward=params.global_reward_start,
-                      x0=x0,
-                      agent_config=agent_config,
-                      verbose=params.verbose,
-                      best_teor=teor_reward))
+            # form the file_name where the code output is saved to
+            file_name = os.path.join('results', params.filename_stem + str(array_index) + '.csv')
+            utils.output_to_file(file_name=file_name, output=np.array([teor_reward]))
+            output = grid[i]
+            utils.output_to_file(file_name=file_name, output=output)
+            # determine initial starting point in the form needed for the soft_actor_critic function
+            x0 = params.global_best - params.shifts
+            print(f'Starting run {args.runs_per_args*i+j}')
+
+            remaining_ids.append(run_exp.remote(func=cft.crossing,
+                        max_window_changes=params.max_window_exp,
+                        window_decrease_rate=params.window_rate,
+                        pc_max=params.pc_max,
+                        file_name=file_name,
+                        array_index=array_index,
+                        lower_bounds=params.shifts,
+                        search_window_sizes=params.guess_sizes,
+                        guessing_run_list=params.guessing_run_list,
+                        environment_dim=zd.env_shape,
+                        search_space_dim=params.action_space_N,
+                        faff_max=params.faff_max,
+                        starting_reward=params.global_reward_start,
+                        x0=x0,
+                        agent_config=agent_config,
+                        verbose=params.verbose,
+                        best_teor=teor_reward))
+        
     n_jobs = len(remaining_ids)
     print(f"Total jobs: {n_jobs}")
     #print(remaining_ids)

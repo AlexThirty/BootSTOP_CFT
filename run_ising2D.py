@@ -11,17 +11,17 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--faff_max', type=int, default=200, help='Maximum number of steps without improving')
-    parser.add_argument('--pc_max', type=int, default=20, help='Maximum number of reinitializations before reducing window')
+    parser.add_argument('--faff_max', type=int, default=500, help='Maximum number of steps without improving')
+    parser.add_argument('--pc_max', type=int, default=40, help='Maximum number of reinitializations before reducing window')
     parser.add_argument('--window_rate', type=float, default=0.7, help='Rate of search window reduction')
     parser.add_argument('--max_window_exp', type=int, default=10, help='Maximun number of window reductions')
     parser.add_argument('--same_spin_hierarchy', type=bool, default=True, help='Whether same spin deltas should be ordered')
-    parser.add_argument('--dyn_shift', type=float, default=0.3, help='Minimum distance between same spin deltas')
+    parser.add_argument('--dyn_shift', type=float, default=0.5, help='Minimum distance between same spin deltas')
     parser.add_argument('--alpha', type=float, default=0.0005, help='Learning rate for actor network')
     parser.add_argument('--beta', type=float, default=0.0005, help='Learning rate for critic and value network')
-    parser.add_argument('--reward_scale', type=float, default=7.0, help='The reward scale, also related to the entropy parameter')
+    parser.add_argument('--reward_scale', type=float, default=0.01, help='The reward scale, also related to the entropy parameter')
     parser.add_argument('--gamma', type=float, default=0.99, help='Gamma parameter for cumulative reward')
-    parser.add_argument('--tau', type=float, default=0.3, help='Tau parameter for state-value function update')
+    parser.add_argument('--tau', type=float, default=0.0005, help='Tau parameter for state-value function update')
     parser.add_argument('--layer1_size', type=int, default=256, help='Dense units for first layer')
     parser.add_argument('--layer2_size', type=int, default=256, help='Dense units for the second layer')
     parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     # form the file_name where the code output is saved to
     file_name = params.filename_stem + str(array_index) + '.csv'
-    utils.output_to_file(file_name=file_name, output=teor_reward)
+    utils.output_to_file(file_name=file_name, output=[teor_reward])
     # determine initial starting point in the form needed for the soft_actor_critic function
     x0 = params.global_best - params.shifts
     
