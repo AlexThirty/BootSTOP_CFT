@@ -10,6 +10,7 @@ import os
 import ray
 import itertools
 import numpy as np
+import time
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -136,6 +137,7 @@ if __name__ == '__main__':
             # determine initial starting point in the form needed for the soft_actor_critic function
             x0 = params.global_best - params.shifts
             print(f'Starting run {args.runs_per_args*i+j}')
+            
 
             remaining_ids.append(run_exp.remote(func=cft.crossing,
                         max_window_changes=params.max_window_exp,
@@ -154,6 +156,8 @@ if __name__ == '__main__':
                         agent_config=agent_config,
                         verbose=params.verbose,
                         best_teor=teor_reward))
+            
+            time.sleep(0.5)
         
     n_jobs = len(remaining_ids)
     print(f"Total jobs: {n_jobs}")
