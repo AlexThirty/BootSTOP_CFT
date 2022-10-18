@@ -19,8 +19,8 @@ nodes=$(sinfo -hN --state=idle|awk '{print $1}')
 nodes_array=($nodes)
 
 head_node="localhost"
-head_node_ip=172.16.18.254
-export head_node_ip
+head_node_ip_pro=172.16.18.254
+export head_node_ip_pro
 
 echo $head_node
 # if we detect a space character in the head node IP, we'll
@@ -35,16 +35,16 @@ if [[ "$head_node_ip" == *" "* ]]; then
     echo "IPV6 address detected. We split the IPV4 address as $head_node_ip"
 fi
 
-port=6379
-ip_head=$head_node_ip:$port
-export ip_head
+port_pro=6380
+ip_head_pro=$head_node_ip:$port_pro
+export ip_head_pro
 echo "IP Head: $ip_head"
-export head_node_ip
-RAY_worker_register_timeout_seconds=240
-export RAY_worker_register_timeout_seconds
+export head_node_ip_pro
+RAY_worker_register_timeout_seconds_pro=240
+export RAY_worker_register_timeout_seconds_pro
 
 echo "Starting HEAD at $head_node"
-ray start --head --node-ip-address=$head_node_ip --port=$port
+ray start --head --node-ip-address=$head_node_ip_pro --port=$port_pro --dashboard-port=8266
 
 # optional, though may be useful in certain versions of Ray < 1.0.
 # number of nodes other than the head node
@@ -54,10 +54,10 @@ for ((i = 0; i < worker_num; i++)); do
     node_i=${nodes_array[$i]}
     echo "Starting WORKER $i at $node_i"
     srun --nodes=1 --ntasks=1 -w $node_i \
-        ray start --address $ip_head \
+        ray start --address $ip_head_pro \
         --block &
     sleep 5
 done
 
 # ray/doc/source/cluster/examples/simple-trainer.py
-python -u run_cluster.py
+python -u pro_run_cluster.py

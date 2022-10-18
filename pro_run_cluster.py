@@ -32,11 +32,11 @@ if __name__ == '__main__':
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
     parser.add_argument('--max_cpus', type=int, default=90, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
-    parser.add_argument('--runs_per_args', type=int, default=5, help='Number of runs for each combination of parameters')
+    parser.add_argument('--runs_per_args', type=int, default=50, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     
-    ray.init(address='auto', _node_ip_address="172.16.18.254")
+    ray.init(address='172.16.18.254:6380', _node_ip_address="172.16.18.254")
     print("Connected to Ray cluster.")
     print(f"Available nodes: {ray.nodes()}")
 
@@ -78,8 +78,8 @@ if __name__ == '__main__':
                       verbose=verbose,
                       best_teor=best_teor)
 
-    faffs = [500, 750, 1000, 1250, 1500, 1750, 2000]
-    pcs = [60, 80, 100, 125, 150, 175, 200]
+    faffs = [500, 1000, 1500, 2000]
+    pcs = [50, 100, 150, 200]
     rates = [0.7]
     #windows = [5, 10, 15, 20, 25]
     shifts = [0.7]
@@ -130,7 +130,7 @@ if __name__ == '__main__':
             array_index = args.runs_per_args*i+j
 
             # form the file_name where the code output is saved to
-            file_name = os.path.join('results', params.filename_stem + str(array_index) + '.csv')
+            file_name = os.path.join('pro_results', params.filename_stem + str(array_index) + '.csv')
             utils.output_to_file(file_name=file_name, output=np.array([teor_reward]))
             output = grid[i]
             utils.output_to_file(file_name=file_name, output=output)
