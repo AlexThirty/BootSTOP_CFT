@@ -2,6 +2,15 @@ import numpy as np
 from neural_net.sac_agent import Agent
 import environment.utils as utils
 
+def sigmoid(x):
+    return 1./(1.+np.exp(-x))
+
+def det_rew_scale(windows_scales, start_value, end_value, steps, apply):
+    if not apply:
+        return start_value
+    else:
+        return np.exp(np.log(start_value)+sigmoid(np.arange(start=-10., stop=10., step=20./steps))*np.log(end_value/start_value))[windows_scales]
+    
 
 class ObjectiveFunWrapper:
     """
@@ -133,7 +142,7 @@ class Learn:
                     file_output = np.concatenate((array_index, current_reward, current_location), axis=None)
                 # append the improved reward and current search space location to the csv file 'file_name'
                 self.results.append(file_output)
-                #utils.output_to_file(file_name, file_output)
+                utils.output_to_file(file_name, file_output)
                 # reset various quantities so that we're ready to go through the while loop again
                 self.env.reset_env()
                 self.faff = 0
@@ -156,9 +165,9 @@ class Learn:
             else:
                 pass  # don't print
         
-        for i in range(len(self.results)):
-            file_output = self.results[i]
-            utils.output_to_file(file_name=file_name, output=file_output)
+        #for i in range(len(self.results)):
+        #    file_output = self.results[i]
+        #    utils.output_to_file(file_name=file_name, output=file_output)
 
         return self.solution
 
@@ -240,7 +249,11 @@ def soft_actor_critic(func,
     window_scale_exponent = 0
     pc = 0  # records number of neural net reinitialisations
     best_reward = starting_reward  # at the start the best reward is the starting reward
-
+    
+    # Save the starting value for the reward scale schedule
+    
+    start_rew_scale = agent_config['reward_scale']
+    rew_scale_schedule = agent_config['rew_scale_schedule']
     # ---Looping until a certain window size is reached---
     while window_scale_exponent < max_window_changes:
         lrn.rewards = [best_reward]
@@ -262,6 +275,10 @@ def soft_actor_critic(func,
         # delete and re-instantiate the Learn class, this re-initialises the Agent class
         del lrn
         environment.reset_env()
+        
+        agent_config['reward_scale'] = det_rew_scale(window_scale_exponent, start_rew_scale, 1., max_window_changes, rew_scale_schedule)
+        cur_rew_scale = agent_config['reward_scale']
+        print(f'Reward scale set to {cur_rew_scale}')
         lrn = Learn(environment, agent_config)
 
     # when finished looping print the final reward and corresponding CFT data

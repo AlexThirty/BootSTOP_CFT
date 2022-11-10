@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=ray-tune-trenta
 ### Modify this according to your Ray workload.
-#SBATCH --nodes=7
+#SBATCH --nodes=4
 #SBATCH --exclusive
 #SBATCH --tasks-per-node=90
 ### Modify this according to your Ray workload.
@@ -36,9 +36,9 @@ if [[ "$head_node_ip" == *" "* ]]; then
 fi
 
 port_pro=6380
-ip_head_pro=$head_node_ip:$port_pro
+ip_head_pro=$head_node_ip_pro:$port_pro
 export ip_head_pro
-echo "IP Head: $ip_head"
+echo "IP Head: $ip_head_pro"
 export head_node_ip_pro
 RAY_worker_register_timeout_seconds_pro=240
 export RAY_worker_register_timeout_seconds_pro
@@ -48,7 +48,7 @@ ray start --head --node-ip-address=$head_node_ip_pro --port=$port_pro --dashboar
 
 # optional, though may be useful in certain versions of Ray < 1.0.
 # number of nodes other than the head node
-worker_num=7
+worker_num=4
 
 for ((i = 0; i < worker_num; i++)); do
     node_i=${nodes_array[$i]}

@@ -12,72 +12,31 @@ import itertools
 import numpy as np
 import time
 
-guessings = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                      [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-                      [0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-                      [0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1],
-                      [0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1],
-                      [0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1],
-                      [0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1],
-                      [0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1],
-                      [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                      ])
-
-guess_sizes = np.array([[10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [10.5, 10.5, 0, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [0, 10.5, 0, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [0, 10.5, 0, 8.5, 8.5, 0, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [0, 10.5, 0, 0, 8.5, 0, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [0, 10.5, 0, 0, 8.5, 0, 6.5, 0, 4.5, 2.5, 0.5],
-                        [0, 0, 0, 0, 8.5, 0, 6.5, 0, 4.5, 2.5, 0.5],
-                        [0, 0, 0, 0, 0, 0, 6.5, 0, 4.5, 2.5, 0.5],
-                        [0, 0, 0, 0, 0, 0, 6.5, 0, 4.5, 0, 0.5],
-                        [0, 0, 0, 0, 0, 0, 0, 0, 4.5, 0, 0.5],
-                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5],
-                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-
-starts = np.array([[0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
-                   [0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 0., 2., 6., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 0., 2., 6., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 2., 4., 8., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 2., 4., 8., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 10., 4., 8., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 10., 4., 8., 6., 10., 8., 10.],
-                   [4., 8., 2., 6., 10., 4., 8., 6., 10., 8., 10.]
-                   ])
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--faff_max', type=int, default=1000, help='Maximum number of steps without improving')
-    parser.add_argument('--pc_max', type=int, default=100, help='Maximum number of reinitializations before reducing window')
+    parser.add_argument('--faff_max', type=int, default=200, help='Maximum number of steps without improving')
+    parser.add_argument('--pc_max', type=int, default=20, help='Maximum number of reinitializations before reducing window')
     parser.add_argument('--window_rate', type=float, default=1., help='Rate of search window reduction')
-    parser.add_argument('--max_window_exp', type=int, default=25, help='Maximun number of window reductions')
+    parser.add_argument('--max_window_exp', type=int, default=10, help='Maximun number of window reductions')
     parser.add_argument('--same_spin_hierarchy', type=bool, default=True, help='Whether same spin deltas should be ordered')
-    parser.add_argument('--dyn_shift', type=float, default=0.7, help='Minimum distance between same spin deltas')
+    parser.add_argument('--dyn_shift', type=float, default=0.3, help='Minimum distance between same spin deltas')
     parser.add_argument('--alpha', type=float, default=0.0005, help='Learning rate for actor network')
     parser.add_argument('--beta', type=float, default=0.0005, help='Learning rate for critic and value network')
-    parser.add_argument('--reward_scale', type=float, default=0.001, help='The reward scale, also related to the entropy parameter')
+    parser.add_argument('--reward_scale', type=float, default=7.0, help='The reward scale, also related to the entropy parameter')
     parser.add_argument('--gamma', type=float, default=0.99, help='Gamma parameter for cumulative reward')
-    parser.add_argument('--tau', type=float, default=0.0005, help='Tau parameter for state-value function update')
+    parser.add_argument('--tau', type=float, default=0.3, help='Tau parameter for state-value function update')
     parser.add_argument('--layer1_size', type=int, default=256, help='Dense units for first layer')
     parser.add_argument('--layer2_size', type=int, default=256, help='Dense units for the second layer')
     parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
-    parser.add_argument('--max_cpus', type=int, default=400, help='Maximum number of CPUs')
+    parser.add_argument('--max_cpus', type=int, default=90, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
-    parser.add_argument('--runs_per_args', type=int, default=50, help='Number of runs for each combination of parameters')
+    parser.add_argument('--runs_per_args', type=int, default=20, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     
-    ray.init(address='172.16.18.254:6380', _node_ip_address="172.16.18.254")
+    ray.init(address='auto', _node_ip_address="172.16.18.254")
     print("Connected to Ray cluster.")
     print(f"Available nodes: {ray.nodes()}")
 
@@ -119,44 +78,43 @@ if __name__ == '__main__':
                       verbose=verbose,
                       best_teor=best_teor)
 
+    faffs = [1000]
+    pcs = [150]
+    rates = [0.8]
+    windows = [25]
+    shifts = [0.7]
+    scales = [0.001]
+    #gammas = [0.8, 0.85, 0.9, 0.95, 0.99]
+    taus = [0.0005]
+
+    grid = list(itertools.product(faffs, pcs, rates, shifts, scales, taus, windows))
+
     remaining_ids = []
-    for i in range(12):
+    print(len(grid))
+    for i in range(len(grid)):
         run_config = {}
-        run_config['faff_max'] = args.faff_max
-        run_config['pc_max'] = args.pc_max
-        run_config['window_rate'] = args.window_rate
-        run_config['max_window_exp'] = args.max_window_exp
+        run_config['faff_max'] = grid[i][0]
+        run_config['pc_max'] = grid[i][1]
+        run_config['window_rate'] = grid[i][2]
+        run_config['max_window_exp'] = grid[i][6]
         run_config['same_spin_hierarchy'] = args.same_spin_hierarchy
-        run_config['dyn_shift'] = args.dyn_shift
-        run_config['reward_scale'] = args.reward_scale
+        run_config['dyn_shift'] = grid[i][3]
+        run_config['reward_scale'] = grid[i][4]
     
         agent_config = {}
         agent_config['alpha'] = args.alpha
         agent_config['beta'] = args.beta
-        agent_config['reward_scale'] = args.reward_scale
-        agent_config['rew_scale_schedule'] = 1
+        agent_config['reward_scale'] = grid[i][4]
+        agent_config['rew_scale_schedule'] = 0
         agent_config['gamma'] = args.gamma
-        agent_config['tau'] = args.tau
+        agent_config['tau'] = grid[i][5]
         agent_config['layer1_size'] = args.layer1_size
         agent_config['layer2_size'] = args.layer2_size
         agent_config['batch_size'] = args.batch_size
 
-        params = ParametersIsing2D_SAC(run_config)
-        
-        params.guessing_run_list_deltas = guessings[i]
-        params.guess_sizes_deltas = guess_sizes[i]
-        
-        delta_start = starts[i]
-        ope_start = params.shifts_opecoeffs
-        
-        params.global_best = np.concatenate((delta_start, ope_start))
-        
-        params.guessing_run_list = np.concatenate((params.guessing_run_list_deltas,
-                                                   params.guessing_run_list_opes))
-        params.guess_sizes = np.concatenate((params.guess_sizes_deltas, params.guess_sizes_opes))
-        
         for j in range(args.runs_per_args):
             # ---Instantiating some relevant classes---
+            params = ParametersIsing2D_SAC(run_config)
             zd = ZData()
 
             # ---Kill portion of the z-sample data if required---
@@ -170,16 +128,16 @@ if __name__ == '__main__':
 
             teor_reward = cft.best_theoretical_reward
             # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
-            array_index = 100*i+j
+            array_index = args.runs_per_args*i+j
 
             # form the file_name where the code output is saved to
-            file_name = os.path.join('pro_results', params.filename_stem + str(array_index) + '.csv')
+            file_name = os.path.join('results', params.filename_stem + str(array_index) + '.csv')
             utils.output_to_file(file_name=file_name, output=np.array([teor_reward]))
-            output = str(i)
+            output = grid[i]
             utils.output_to_file(file_name=file_name, output=output)
             # determine initial starting point in the form needed for the soft_actor_critic function
             x0 = params.global_best - params.shifts
-            print(f'Starting run {100*i+j}')
+            print(f'Starting run {args.runs_per_args*i+j}')
             
 
             remaining_ids.append(run_exp.remote(func=cft.crossing,

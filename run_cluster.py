@@ -15,24 +15,24 @@ import time
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--faff_max', type=int, default=200, help='Maximum number of steps without improving')
-    parser.add_argument('--pc_max', type=int, default=20, help='Maximum number of reinitializations before reducing window')
-    parser.add_argument('--window_rate', type=float, default=0.7, help='Rate of search window reduction')
-    parser.add_argument('--max_window_exp', type=int, default=10, help='Maximun number of window reductions')
+    parser.add_argument('--faff_max', type=int, default=1000, help='Maximum number of steps without improving')
+    parser.add_argument('--pc_max', type=int, default=100, help='Maximum number of reinitializations before reducing window')
+    parser.add_argument('--window_rate', type=float, default=1., help='Rate of search window reduction')
+    parser.add_argument('--max_window_exp', type=int, default=25, help='Maximun number of window reductions')
     parser.add_argument('--same_spin_hierarchy', type=bool, default=True, help='Whether same spin deltas should be ordered')
-    parser.add_argument('--dyn_shift', type=float, default=0.3, help='Minimum distance between same spin deltas')
+    parser.add_argument('--dyn_shift', type=float, default=0.7, help='Minimum distance between same spin deltas')
     parser.add_argument('--alpha', type=float, default=0.0005, help='Learning rate for actor network')
     parser.add_argument('--beta', type=float, default=0.0005, help='Learning rate for critic and value network')
-    parser.add_argument('--reward_scale', type=float, default=7.0, help='The reward scale, also related to the entropy parameter')
+    parser.add_argument('--reward_scale', type=float, default=0.001, help='The reward scale, also related to the entropy parameter')
     parser.add_argument('--gamma', type=float, default=0.99, help='Gamma parameter for cumulative reward')
-    parser.add_argument('--tau', type=float, default=0.3, help='Tau parameter for state-value function update')
+    parser.add_argument('--tau', type=float, default=0.0005, help='Tau parameter for state-value function update')
     parser.add_argument('--layer1_size', type=int, default=256, help='Dense units for first layer')
     parser.add_argument('--layer2_size', type=int, default=256, help='Dense units for the second layer')
     parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
-    parser.add_argument('--max_cpus', type=int, default=90, help='Maximum number of CPUs')
+    parser.add_argument('--max_cpus', type=int, default=400, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
-    parser.add_argument('--runs_per_args', type=int, default=5, help='Number of runs for each combination of parameters')
+    parser.add_argument('--runs_per_args', type=int, default=500, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     
@@ -78,68 +78,56 @@ if __name__ == '__main__':
                       verbose=verbose,
                       best_teor=best_teor)
 
-    faffs = [500, 750, 1000, 1250, 1500, 1750, 2000]
-    pcs = [60, 80, 100, 125, 150, 175, 200]
-    rates = [0.7]
-    #windows = [5, 10, 15, 20, 25]
-    shifts = [0.7]
-    scales = [0.01]
-    #gammas = [0.8, 0.85, 0.9, 0.95, 0.99]
-    taus = [0.0005]
-
-    grid = list(itertools.product(faffs, pcs, rates, shifts, scales, taus))
-
     remaining_ids = []
-    print(len(grid))
-    for i in range(len(grid)):
+    for i in range(args.runs_per_args):
         run_config = {}
-        run_config['faff_max'] = grid[i][0]
-        run_config['pc_max'] = grid[i][1]
-        run_config['window_rate'] = grid[i][2]
+        run_config['faff_max'] = args.faff_max
+        run_config['pc_max'] = args.pc_max
+        run_config['window_rate'] = args.window_rate
         run_config['max_window_exp'] = args.max_window_exp
         run_config['same_spin_hierarchy'] = args.same_spin_hierarchy
-        run_config['dyn_shift'] = grid[i][3]
-        run_config['reward_scale'] = grid[i][4]
+        run_config['dyn_shift'] = args.dyn_shift
+        run_config['reward_scale'] = args.reward_scale
     
         agent_config = {}
         agent_config['alpha'] = args.alpha
         agent_config['beta'] = args.beta
-        agent_config['reward_scale'] = grid[i][4]
+        agent_config['reward_scale'] = args.reward_scale
+        agent_config['rew_scale_schedule'] = 1
         agent_config['gamma'] = args.gamma
-        agent_config['tau'] = grid[i][5]
+        agent_config['tau'] = args.tau
         agent_config['layer1_size'] = args.layer1_size
         agent_config['layer2_size'] = args.layer2_size
         agent_config['batch_size'] = args.batch_size
 
-        for j in range(args.runs_per_args):
-            # ---Instantiating some relevant classes---
-            params = ParametersIsing2D_SAC(run_config)
-            zd = ZData()
+        # ---Instantiating some relevant classes---
+        params = ParametersIsing2D_SAC(run_config)
+        zd = ZData()
 
-            # ---Kill portion of the z-sample data if required---
-            zd.kill_data(params.z_kill_list)
+        # ---Kill portion of the z-sample data if required---
+        zd.kill_data(params.z_kill_list)
 
-            # ---Load the pre-generated conformal blocks for long multiplets---
-            #blocks = utils.generate_block_list(max(params.spin_list), params.z_kill_list)
+        # ---Load the pre-generated conformal blocks for long multiplets---
+        #blocks = utils.generate_block_list(max(params.spin_list), params.z_kill_list)
 
-            # ---Instantiate the crossing_eqn class---
-            cft = Ising2D_SAC(params, zd)
+        # ---Instantiate the crossing_eqn class---
+        cft = Ising2D_SAC(params, zd)
 
-            teor_reward = cft.best_theoretical_reward
-            # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
-            array_index = args.runs_per_args*i+j
+        teor_reward = cft.best_theoretical_reward
+        # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
+        array_index = i
 
-            # form the file_name where the code output is saved to
-            file_name = os.path.join('results', params.filename_stem + str(array_index) + '.csv')
-            utils.output_to_file(file_name=file_name, output=np.array([teor_reward]))
-            output = grid[i]
-            utils.output_to_file(file_name=file_name, output=output)
-            # determine initial starting point in the form needed for the soft_actor_critic function
-            x0 = params.global_best - params.shifts
-            print(f'Starting run {args.runs_per_args*i+j}')
+        # form the file_name where the code output is saved to
+        file_name = os.path.join('results', params.filename_stem + str(array_index) + '.csv')
+        utils.output_to_file(file_name=file_name, output=np.array([teor_reward]))
+        output = str(i)
+        utils.output_to_file(file_name=file_name, output=output)
+        # determine initial starting point in the form needed for the soft_actor_critic function
+        x0 = params.global_best - params.shifts
+        print(f'Starting run {i}')
             
 
-            remaining_ids.append(run_exp.remote(func=cft.crossing,
+        remaining_ids.append(run_exp.remote(func=cft.crossing,
                         max_window_changes=params.max_window_exp,
                         window_decrease_rate=params.window_rate,
                         pc_max=params.pc_max,
@@ -157,7 +145,7 @@ if __name__ == '__main__':
                         verbose=params.verbose,
                         best_teor=teor_reward))
             
-            time.sleep(0.5)
+        time.sleep(0.5)
         
     n_jobs = len(remaining_ids)
     print(f"Total jobs: {n_jobs}")

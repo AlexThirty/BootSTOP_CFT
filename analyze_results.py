@@ -2,7 +2,7 @@ from os import listdir
 from os.path import isfile, join
 import csv
 import numpy as np
-path = join('.', 'results0')
+path = join('.', 'pro_results')
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 best_reward = 0.
 delta_len = 11
@@ -29,9 +29,11 @@ for f in onlyfiles:
             best_reward = curr_rew
             deltas = curr_delta
             lambdas = curr_lambda
+            best_par = par
     currf.close()
     
 print(f'Best run: {best_run}')
+print(f'Parameters: {best_par}')
 print(f'Best reward: {best_reward}')
 print(f'Deltas: {deltas}')
 print(f'Lambdas: {lambdas}')
@@ -51,4 +53,4 @@ for i in range(len(means)):
     print(f'Params: {param[i]}, mean: {means[i]}, std: {stds[i]}')
 
 best = np.argmax(means)
-print(f'Best params: {param[best]}, mean: {means[best]}, std: {stds[i]}')
+print(f'Best params: {param[best]}, mean: {means[best]}, std: {stds[best]}')
