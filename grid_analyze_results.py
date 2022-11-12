@@ -29,9 +29,28 @@ for f in onlyfiles:
             best_reward = curr_rew
             deltas = curr_delta
             lambdas = curr_lambda
+            best_par = par
     currf.close()
     
 print(f'Best run: {best_run}')
+print(f'Parameters: {best_par}')
 print(f'Best reward: {best_reward}')
 print(f'Deltas: {deltas}')
 print(f'Lambdas: {lambdas}')
+
+means = []
+stds = []
+param = []
+for i in range(int(len(onlyfiles)/tries_per_param)):
+    res = []
+    for j in range(tries_per_param):
+        res.append(rewards[10*i+j])
+    means.append(np.mean(res))
+    stds.append(np.std(res))
+    param.append(params[10*i])
+
+for i in range(len(means)):
+    print(f'Params: {param[i]}, mean: {means[i]}, std: {stds[i]}')
+
+best = np.argmax(means)
+print(f'Best params: {param[best]}, mean: {means[best]}, std: {stds[best]}')

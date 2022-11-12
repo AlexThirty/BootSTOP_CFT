@@ -71,7 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('--layer2_size', type=int, default=256, help='Dense units for the second layer')
     parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
-    parser.add_argument('--max_cpus', type=int, default=400, help='Maximum number of CPUs')
+    parser.add_argument('--max_cpus', type=int, default=90, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
     parser.add_argument('--runs_per_args', type=int, default=50, help='Number of runs for each combination of parameters')
     
@@ -134,7 +134,7 @@ if __name__ == '__main__':
         agent_config['alpha'] = args.alpha
         agent_config['beta'] = args.beta
         agent_config['reward_scale'] = args.reward_scale
-        agent_config['rew_scale_schedule'] = 1
+        agent_config['rew_scale_schedule'] = 0
         agent_config['gamma'] = args.gamma
         agent_config['tau'] = args.tau
         agent_config['layer1_size'] = args.layer1_size

@@ -278,7 +278,7 @@ def soft_actor_critic(func,
         
         agent_config['reward_scale'] = det_rew_scale(window_scale_exponent, start_rew_scale, 1., max_window_changes, rew_scale_schedule)
         cur_rew_scale = agent_config['reward_scale']
-        print(f'Reward scale set to {cur_rew_scale}')
+        #print(f'Reward scale set to {cur_rew_scale}')
         lrn = Learn(environment, agent_config)
 
     # when finished looping print the final reward and corresponding CFT data

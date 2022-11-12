@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=ray-tune-trenta
 ### Modify this according to your Ray workload.
-#SBATCH --nodes=4
+#SBATCH --nodes=5
 #SBATCH --exclusive
-#SBATCH --tasks-per-node=1
+#SBATCH --tasks-per-node=90
 ### Modify this according to your Ray workload.
-#SBATCH --cpus-per-task=90
+#SBATCH --cpus-per-task=1
 #SBATCH --output=ray.log
 ### Similarly, you can also specify the number of GPUs per node.
 ### Modify this according to your Ray workload. Sometimes this
@@ -18,8 +18,8 @@ conda activate ray
 nodes=$(sinfo -hN --state=idle|awk '{print $1}')
 nodes_array=($nodes)
 
-head_node="localhost"
-head_node_ip=172.16.18.254
+head_node=${nodes_array[0]}
+head_node_ip=$(srun --nodes=1 --ntasks=1 -w "$head_node" hostname --ip-address)
 export head_node_ip
 
 echo $head_node
@@ -40,17 +40,20 @@ ip_head=$head_node_ip:$port
 export ip_head
 echo "IP Head: $ip_head"
 export head_node_ip
-RAY_worker_register_timeout_seconds=240
-export RAY_worker_register_timeout_seconds
 
 echo "Starting HEAD at $head_node"
-ray start --head --node-ip-address=$head_node_ip --port=$port
+
+srun --nodes=1 --ntasks=1 -w $head_node \
+    ray start --head --port=$port \
+    --block &
 
 # optional, though may be useful in certain versions of Ray < 1.0.
+sleep 10
+
 # number of nodes other than the head node
 worker_num=4
 
-for ((i = 0; i < worker_num; i++)); do
+for ((i = 1; i <= worker_num; i++)); do
     node_i=${nodes_array[$i]}
     echo "Starting WORKER $i at $node_i"
     srun --nodes=1 --ntasks=1 -w $node_i \
@@ -60,4 +63,4 @@ for ((i = 0; i < worker_num; i++)); do
 done
 
 # ray/doc/source/cluster/examples/simple-trainer.py
-python -u run_cluster.py
+python -u pro_run_cluster.py
