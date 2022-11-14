@@ -3,9 +3,9 @@
 ### Modify this according to your Ray workload.
 #SBATCH --nodes=4
 #SBATCH --exclusive
-#SBATCH --tasks-per-node=1
+#SBATCH --tasks-per-node=45
 ### Modify this according to your Ray workload.
-#SBATCH --cpus-per-task=90
+#SBATCH --cpus-per-task=1
 #SBATCH --output=ray.log
 ### Similarly, you can also specify the number of GPUs per node.
 ### Modify this according to your Ray workload. Sometimes this

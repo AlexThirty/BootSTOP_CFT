@@ -30,13 +30,13 @@ if __name__ == '__main__':
     parser.add_argument('--layer2_size', type=int, default=256, help='Dense units for the second layer')
     parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
-    parser.add_argument('--max_cpus', type=int, default=90, help='Maximum number of CPUs')
+    parser.add_argument('--max_cpus', type=int, default=400, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
-    parser.add_argument('--runs_per_args', type=int, default=500, help='Number of runs for each combination of parameters')
+    parser.add_argument('--runs_per_args', type=int, default=250, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     
-    ray.init(address='auto', _node_ip_address="172.16.18.254")
+    ray.init(address='172.16.18.254:6379', _node_ip_address="172.16.18.254")
     print("Connected to Ray cluster.")
     print(f"Available nodes: {ray.nodes()}")
 
@@ -145,7 +145,7 @@ if __name__ == '__main__':
                         verbose=params.verbose,
                         best_teor=teor_reward))
             
-        time.sleep(0.5)
+        #time.sleep(0.5)
         
     n_jobs = len(remaining_ids)
     print(f"Total jobs: {n_jobs}")

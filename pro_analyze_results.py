@@ -11,7 +11,7 @@ delta_len = 11
 lambda_len = 11
 
 delta_tries = 12
-tries_per_deltas = 50
+tries_per_deltas = 25
 rewards = []
 params = []
 
