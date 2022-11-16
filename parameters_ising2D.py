@@ -44,10 +44,10 @@ class ParametersIsing2D:
         self.ell_max = 30  # Spin cutoff for the a_chi function in blocks.py. This MUST be an even number
 
         # ---Pre-generated conformal block lattice parameters---
-        self.delta_start = np.array([0., 0., 1.8, 1.8, 1.8, 3.8, 3.8, 5.8, 5.8, 7.8, 9.8])
+        self.delta_start = np.array([0., 1.8, 3.8, 5.8, 7.8, 9.8])
 
         self.delta_sep = 0.0005  # jump in weights between each lattice point
-        self.delta_end_increment = 10.5 - self.delta_start  # maximum deltas are delta_start + delta_end_increment - delta_sep eg 35.7995
+        self.delta_end_increment = 11.5  # maximum deltas are delta_start + delta_end_increment - delta_sep eg 35.7995
 
         # This is a list of the original 180 columns to delete from the '6d_blocks_spin*.csv' files
         self.z_kill_list = []
@@ -144,7 +144,7 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         
         # ---Output Parameters---
         self.filename_stem = 'sac'
-        self.verbose = ''  # When the SAC algorithm should print to the console:
+        self.verbose = 'o'  # When the SAC algorithm should print to the console:
         # e - print at every step
         # o - only after a re-initialisation
         # default is '' which produces no output
@@ -163,7 +163,7 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
 
         # ---Environment Parameters---
         # set guessing run list for conformal weights
-        self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        self.guessing_run_list_deltas = np.array([0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1])
         
         # set guessing run list for ope coefficients        
         self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
@@ -175,14 +175,15 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         # windows for D and B multiplets should be set to zero as they are fixed
         
         # !!! Modified this to set the initial window to respect delta <= delta_max
-        self.guess_sizes_deltas = np.array([10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5])
-        
+        #self.guess_sizes_deltas = np.array([10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5])
+        self.guess_sizes_deltas = np.array([0., 6.5, 0., 8.5, 8.5, 0., 6.5, 4.5, 4.5, 2.5, 0.5])
         # initial search window size for OPE coeffs        
         self.guess_sizes_opes = np.ones(self.num_of_operators)
         
         # set minimum values for conformal weights
         # minimums for D and B multiplets are fixed as weights are known
-        self.shifts_deltas = np.array([0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
+        #self.shifts_deltas = np.array([0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
+        self.shifts_deltas = np.array([4., 4., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
     
         # set minimum values for OPE coeffs
         self.shifts_opecoeffs = np.zeros(self.num_of_operators)
@@ -193,11 +194,10 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         
         #print(self.guess_sizes_deltas)
         
-        delta_start = self.shifts_deltas
-        ope_start = self.shifts_opecoeffs
-        #print(delta_start)
-        #print(ope_start)
-        self.global_best = np.concatenate((delta_start, ope_start))
+        delta_init = self.shifts_deltas
+        ope_init = self.shifts_opecoeffs
+
+        self.global_best = np.concatenate((delta_init, ope_init))
         # initial reward to start with
         # set equal to 0.0 to start from a zero solution.
         self.global_reward_start = 0.0

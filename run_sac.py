@@ -15,7 +15,9 @@ if __name__ == '__main__':
 
     # ---Load the pre-generated conformal blocks for long multiplets---
     blocks = utils.generate_block_list(max(params.spin_list_long), params.z_kill_list)
-
+    print(len(blocks))
+    print(len(blocks[0]))
+    print(len(blocks[0][0]))
     # ---Instantiate the crossing_eqn class---
     cft = CrossingSixD_SAC(blocks, params, zd)
 

@@ -4,20 +4,24 @@ import scipy.special as sc
 from numpy import linalg as LA
 
 class Ising2D:
-    def __init__(self, params, z_data):
+    def __init__(self, block_list, params, z_data):
         self.use_scipy_for_hypers = True
         self.delta_model = params.delta_model
         self.s = params.spin_list
         self.multiplet_index = params.multiplet_index
         self.action_space_N = params.action_space_N
+        self.delta_start = params.delta_start
+        self.delta_end_increment = params.delta_end_increment
+        self.delta_sep = params.delta_sep
         self.z = z_data.z
+        self.block_list = block_list
         self.z_conj = z_data.z_conj
         self.delta_max = params.delta_max
         self.delta_teor = params.delta_teor
         self.lambda_teor = params.lambda_teor
         self.verbose = params.verbose
         self.reward_scale = params.reward_scale
-        self.best_theoretical_reward = self.compute_single_reward(self.delta_teor, self.lambda_teor)
+        #self.best_theoretical_reward = self.compute_single_reward(self.delta_teor, self.lambda_teor)
         #print(self.best_theoretical_reward)
         self.ell_max = params.ell_max
         self.delta_sep = params.delta_sep
@@ -38,29 +42,59 @@ class Ising2D:
         return (1 / (1 + (s == 0).astype(float))) * ((self.g1d((delta+s)/2, z) * self.g1d((delta-s)/2, zbar)) +
                                                      (self.g1d((delta+s)/2, zbar) * self.g1d((delta-s)/2, z)))
 
-
     def ising2d(self, delta: np.array, s: np.array, lambdads: np.array, z, zbar, delta_model: float):
+        blocks = lambdads.reshape(-1,1) * self.precalc_val_array(delta)
+        return ((1-z) * (1-zbar))**(delta_model) - (z*zbar)**(delta_model) + np.sum(blocks, axis=0)
+    
+    def precalc_val(self, delta, spin):
+        spin_index = spin // 2
+        delta = np.clip(delta, a_min=None, a_max=self.delta_start[spin_index] + self.delta_end_increment - self.delta_sep)
+        n = np.rint((delta - self.delta_start[spin_index]) / self.delta_sep)
+        val = self.block_list[spin_index][int(n)]
+        return np.transpose(val)
+    
+    def precalc_val_array(self, deltas):
+        """
+        Aggregates all the long multiplet contributions together into a single array.
+
+        Returns
+        -------
+        long_c : ndarray(num_of_long, env_shape)
+        """
+        vals = self.precalc_val(deltas[0], self.s[0])
+        for x in range(1, deltas.size):
+            vals = np.vstack((vals, self.precalc_val(deltas[x], self.s[x])))
+        return vals
+    
+    def ising2d_precalc(self, delta: np.array, s: np.array, z, zbar, delta_model: float):
+        val = (((1-z) * (1-zbar))**(delta_model) * self.g2d(delta, s, z, zbar) -
+                         (z*zbar)**(delta_model) * self.g2d(delta, s, 1-z, 1-zbar))
+        return val
+    
+    def ising2d_old(self, delta: np.array, s: np.array, lambdads: np.array, z, zbar, delta_model: float):
         blocks = lambdads * (((1-z) * (1-zbar))**(delta_model) * self.g2d(delta, s, z, zbar) -
                          (z*zbar)**(delta_model) * self.g2d(delta, s, 1-z, 1-zbar))
 
         return ((1-z) * (1-zbar))**(delta_model) - (z*zbar)**(delta_model) + np.sum(blocks)
     
     def compute_ising2d_vector(self, delta: np.array, s: np.array, lambdads: np.array, z: np.array, zbar: np.array, delta_model: float):
-        vector = []
-        for zel, zbarel in zip(z, zbar):
-            vector.append(self.ising2d(delta, s, lambdads, zel, zbarel, delta_model).real)
+        vector = self.ising2d(delta, s, lambdads, z, zbar, delta_model).real
         return vector
     
     def compute_single_reward(self, delta: np.array, lambdads: np.array):
         vector = self.compute_ising2d_vector(delta, self.s, lambdads, self.z, self.z_conj, self.delta_model)
         return 1/LA.norm(vector)
     
+    def best_theoretical(self):
+        vector = self.compute_ising2d_vector(self.delta_teor, self.s, self.lambda_teor, self.z, self.z_conj, self.delta_model)
+        return 1/LA.norm(vector)
+    
     
     
 class Ising2D_SAC(Ising2D):
 
-    def __init__(self, params, z_data):
-        super().__init__(params, z_data)
+    def __init__(self, block_list, params, z_data):
+        super().__init__(block_list, params, z_data)
 
         self.same_spin_hierarchy_deltas = params.same_spin_hierarchy  # impose weight separation flag
         self.dyn_shift = params.dyn_shift  # the weight separation value

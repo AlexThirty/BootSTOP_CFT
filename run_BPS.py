@@ -11,15 +11,15 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--faff_max', type=int, default=500, help='Maximum number of steps without improving')
-    parser.add_argument('--pc_max', type=int, default=40, help='Maximum number of reinitializations before reducing window')
-    parser.add_argument('--window_rate', type=float, default=0.7, help='Rate of search window reduction')
-    parser.add_argument('--max_window_exp', type=int, default=10, help='Maximun number of window reductions')
-    parser.add_argument('--same_spin_hierarchy', type=bool, default=True, help='Whether same spin deltas should be ordered')
-    parser.add_argument('--dyn_shift', type=float, default=0.5, help='Minimum distance between same spin deltas')
+    parser.add_argument('--faff_max', type=int, default=10000, help='Maximum number of steps without improving')
+    parser.add_argument('--pc_max', type=int, default=5, help='Maximum number of reinitializations before reducing window')
+    parser.add_argument('--window_rate', type=float, default=0.5, help='Rate of search window reduction')
+    parser.add_argument('--max_window_exp', type=int, default=20, help='Maximun number of window reductions')
+    parser.add_argument('--same_spin_hierarchy', type=bool, default=False, help='Whether same spin deltas should be ordered')
+    parser.add_argument('--dyn_shift', type=float, default=0., help='Minimum distance between same spin deltas')
     parser.add_argument('--alpha', type=float, default=0.0005, help='Learning rate for actor network')
     parser.add_argument('--beta', type=float, default=0.0005, help='Learning rate for critic and value network')
-    parser.add_argument('--reward_scale', type=float, default=0.001, help='The reward scale, also related to the entropy parameter')
+    parser.add_argument('--reward_scale', type=float, default=0.1, help='The reward scale, also related to the entropy parameter')
     parser.add_argument('--gamma', type=float, default=0.99, help='Gamma parameter for cumulative reward')
     parser.add_argument('--tau', type=float, default=0.0005, help='Tau parameter for state-value function update')
     parser.add_argument('--layer1_size', type=int, default=256, help='Dense units for first layer')
@@ -43,6 +43,7 @@ if __name__ == '__main__':
     agent_config['reward_scale'] = args.reward_scale
     agent_config['gamma'] = args.gamma
     agent_config['tau'] = args.tau
+    agent_config['rew_scale_schedule'] = 0
     agent_config['layer1_size'] = args.layer1_size
     agent_config['layer2_size'] = args.layer2_size
     agent_config['batch_size'] = args.batch_size

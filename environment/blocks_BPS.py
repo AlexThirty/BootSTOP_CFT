@@ -11,8 +11,9 @@ def get_C_BPS(g):
     else:
         return (3*sc.iv(1, 4*np.pi*g)/(2*(np.pi)**2 * g**2 * (sc.iv(2, 4*np.pi*g))**2)) * ((2*(np.pi)**2 * g**2 + 1)*sc.iv(1, 4*np.pi*g) - 2*np.pi*g*sc.iv(0, 4*np.pi*g)) - 1
 
-def zero_lambdas(delta):
+def get_teor_lambdas(delta):
     return (sc.gamma(delta+3)*sc.gamma(delta+1)*(delta-1))/(2*sc.gamma(2*delta+2))
+
 
 class BPS:
     def __init__(self, params, z_data):
@@ -42,7 +43,7 @@ class BPS:
     def compute_g0_reward(self):
         vector = []
         for chiel in self.chi:
-            vector.append((1-chiel)**2 * chiel**2 * (1/chiel - 1/(1-chiel)) + chiel**2 * (1-chiel)**2 * (1/(1-chiel) - 1(chiel)))
+            vector.append((1-chiel)**2 * chiel**2 * (1/chiel - 1/(1-chiel)) + chiel**2 * (1-chiel)**2 * (1/(1-chiel) - 1/(chiel)))
         return 1/LA.norm(vector)
     
     def compute_ginf_reward(self):

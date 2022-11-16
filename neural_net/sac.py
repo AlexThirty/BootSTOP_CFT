@@ -132,6 +132,14 @@ class Learn:
             # append the current reward to the list of previous rewards generated within the loop
             self.rewards.append(current_reward)
 
+            #nums = int(current_location.size/2)
+            #delta_print = current_location[:nums]
+            #lambda_print = current_location[nums:]
+            #mask = np.argsort(delta_print)
+            #delta_print = delta_print[mask]
+            #lambda_print = lambda_print[mask]
+            #location_print = np.concatenate((delta_print, lambda_print), axis=None)
+            
             if self.env.reward_improved:
                 # solution is value of parameters above the lower bounds
                 self.solution = np.copy(current_location - self.env.lower_bounds)
@@ -275,8 +283,8 @@ def soft_actor_critic(func,
         # delete and re-instantiate the Learn class, this re-initialises the Agent class
         del lrn
         environment.reset_env()
-        
-        agent_config['reward_scale'] = det_rew_scale(window_scale_exponent, start_rew_scale, 1., max_window_changes, rew_scale_schedule)
+        if window_scale_exponent != max_window_changes:
+            agent_config['reward_scale'] = det_rew_scale(window_scale_exponent, start_rew_scale, 1., max_window_changes, rew_scale_schedule)
         cur_rew_scale = agent_config['reward_scale']
         #print(f'Reward scale set to {cur_rew_scale}')
         lrn = Learn(environment, agent_config)

@@ -28,14 +28,15 @@ class ParametersBPS:
     """
 
     def __init__(self):
-        self.g = 0.
-        self.delta_max = 10.5
+        self.g = 'inf'
+        self.delta_max = 20.5
         #self.delta_teor = np.array([2.7016236744005675,5.050856944348188,2.0213466735433836,4.2856177631124215,4.909299202733042,5.6414889781221405,8.328514525342179,7.605468108807205,8.542512893393454,8.315081625434248,10.22088919725358])
         #self.lambda_teor = np.array([0.9530206983000907,0.4039839938189997,0.6166258049859034,0.17948634587633205,0.04899791188878733,0.04378130084964199,0.011652024319895985,0.0021118376035766362,0.0026691862468548704,0.0026228588405235584,0.0005427505644773896])
     
         # ---Pre-generated conformal block lattice parameters---
-        self.delta_start = np.zeros(math.floor(self.delta_max))
-
+        #self.delta_start = np.zeros(math.floor(self.delta_max))
+        self.delta_start = np.zeros(10)
+        #self.delta_start = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
         self.delta_sep = 0.0005  # jump in weights between each lattice point
         self.delta_end_increment = self.delta_max - self.delta_start  # maximum deltas are delta_start + delta_end_increment - delta_sep eg 35.7995
 
@@ -134,7 +135,7 @@ class ParametersBPS_SAC(ParametersBPS):
         
         # ---Output Parameters---
         self.filename_stem = 'sac'
-        self.verbose = ''  # When the SAC algorithm should print to the console:
+        self.verbose = 'o'  # When the SAC algorithm should print to the console:
         # e - print at every step
         # o - only after a re-initialisation
         # default is '' which produces no output
@@ -153,7 +154,8 @@ class ParametersBPS_SAC(ParametersBPS):
 
         # ---Environment Parameters---
         # set guessing run list for conformal weights
-        self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        #self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        self.guessing_run_list_deltas = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
         
         # set guessing run list for ope coefficients        
         self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
@@ -164,15 +166,17 @@ class ParametersBPS_SAC(ParametersBPS):
         # windows for D and B multiplets should be set to zero as they are fixed
         
         # !!! Modified this to set the initial window to respect delta <= delta_max
-        self.guess_sizes_deltas = np.ones(self.num_of_operators)*self.delta_max
+        #self.guess_sizes_deltas = np.ones(self.num_of_operators)*self.delta_max
+        self.guess_sizes_deltas = np.zeros(self.num_of_operators)
         
         # initial search window size for OPE coeffs        
         self.guess_sizes_opes = np.ones(self.num_of_operators)
         
         # set minimum values for conformal weights
         # minimums for D and B multiplets are fixed as weights are known
-        self.shifts_deltas = np.zeros(self.num_of_operators)
-    
+        #self.shifts_deltas = np.zeros(self.num_of_operators)
+        self.shifts_deltas = 2*np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        
         # set minimum values for OPE coeffs
         self.shifts_opecoeffs = np.zeros(self.num_of_operators)
 
@@ -182,7 +186,8 @@ class ParametersBPS_SAC(ParametersBPS):
         
         #print(self.guess_sizes_deltas)
         
-        delta_start = self.shifts_deltas
+        #delta_start = self.shifts_deltas
+        delta_start = 2*np.array([1., 2., 3., 4., 5., 6., 7., 8., 9., 10.])
         ope_start = self.shifts_opecoeffs
         #print(delta_start)
         #print(ope_start)
