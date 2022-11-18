@@ -15,9 +15,9 @@ import time
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--faff_max', type=int, default=1000, help='Maximum number of steps without improving')
-    parser.add_argument('--pc_max', type=int, default=100, help='Maximum number of reinitializations before reducing window')
-    parser.add_argument('--window_rate', type=float, default=1., help='Rate of search window reduction')
+    parser.add_argument('--faff_max', type=int, default=10000, help='Maximum number of steps without improving')
+    parser.add_argument('--pc_max', type=int, default=10, help='Maximum number of reinitializations before reducing window')
+    parser.add_argument('--window_rate', type=float, default=0.7, help='Rate of search window reduction')
     parser.add_argument('--max_window_exp', type=int, default=25, help='Maximun number of window reductions')
     parser.add_argument('--same_spin_hierarchy', type=bool, default=True, help='Whether same spin deltas should be ordered')
     parser.add_argument('--dyn_shift', type=float, default=0.7, help='Minimum distance between same spin deltas')
@@ -30,9 +30,9 @@ if __name__ == '__main__':
     parser.add_argument('--layer2_size', type=int, default=256, help='Dense units for the second layer')
     parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
-    parser.add_argument('--max_cpus', type=int, default=400, help='Maximum number of CPUs')
+    parser.add_argument('--max_cpus', type=int, default=650, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
-    parser.add_argument('--runs_per_args', type=int, default=250, help='Number of runs for each combination of parameters')
+    parser.add_argument('--runs_per_args', type=int, default=450, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     
@@ -77,7 +77,8 @@ if __name__ == '__main__':
                       agent_config=agent_config,
                       verbose=verbose,
                       best_teor=best_teor)
-
+    
+    blocks = utils.generate_Ising2D_block_list(10, [])
     remaining_ids = []
     for i in range(args.runs_per_args):
         run_config = {}
@@ -104,16 +105,15 @@ if __name__ == '__main__':
         params = ParametersIsing2D_SAC(run_config)
         zd = ZData()
 
-        # ---Kill portion of the z-sample data if required---
         zd.kill_data(params.z_kill_list)
 
         # ---Load the pre-generated conformal blocks for long multiplets---
         #blocks = utils.generate_block_list(max(params.spin_list), params.z_kill_list)
 
         # ---Instantiate the crossing_eqn class---
-        cft = Ising2D_SAC(params, zd)
+        cft = Ising2D_SAC(blocks, params, zd)
 
-        teor_reward = cft.best_theoretical_reward
+        teor_reward = cft.best_theoretical()
         # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
         array_index = i
 
@@ -145,7 +145,7 @@ if __name__ == '__main__':
                         verbose=params.verbose,
                         best_teor=teor_reward))
             
-        #time.sleep(0.5)
+        time.sleep(1)
         
     n_jobs = len(remaining_ids)
     print(f"Total jobs: {n_jobs}")

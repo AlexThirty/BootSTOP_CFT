@@ -28,11 +28,11 @@ guessings = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 
 guess_sizes = np.array([[10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5],
                         [10.5, 10.5, 0, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [0, 10.5, 0, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [0, 10.5, 0, 8.5, 8.5, 0, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [0, 10.5, 0, 0, 8.5, 0, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [0, 10.5, 0, 0, 8.5, 0, 6.5, 0, 4.5, 2.5, 0.5],
-                        [0, 0, 0, 0, 8.5, 0, 6.5, 0, 4.5, 2.5, 0.5],
+                        [0, 6.5, 0, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5],
+                        [0, 6.5, 0, 8.5, 8.5, 0, 6.5, 4.5, 4.5, 2.5, 0.5],
+                        [0, 6.5, 0, 0, 4.5, 0, 6.5, 4.5, 4.5, 2.5, 0.5],
+                        [0, 6.5, 0, 0, 4.5, 0, 6.5, 0, 4.5, 2.5, 0.5],
+                        [0, 0, 0, 0, 4.5, 0, 6.5, 0, 4.5, 2.5, 0.5],
                         [0, 0, 0, 0, 0, 0, 6.5, 0, 4.5, 2.5, 0.5],
                         [0, 0, 0, 0, 0, 0, 6.5, 0, 4.5, 0, 0.5],
                         [0, 0, 0, 0, 0, 0, 0, 0, 4.5, 0, 0.5],
@@ -41,13 +41,13 @@ guess_sizes = np.array([[10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5
 
 starts = np.array([[0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
                    [0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 0., 2., 6., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 0., 2., 6., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 2., 4., 8., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 2., 4., 8., 6., 6., 8., 10.],
+                   [4., 4., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
+                   [4., 4., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
+                   [4., 4., 2., 6., 6., 4., 4., 6., 6., 8., 10.],
+                   [4., 4., 2., 6., 6., 4., 4., 6., 6., 8., 10.],
+                   [4., 8., 2., 6., 6., 4., 4., 6., 6., 8., 10.],
+                   [4., 8., 2., 6., 6., 4., 8., 6., 6., 8., 10.],
+                   [4., 8., 2., 6., 6., 4., 8., 6., 6., 8., 10.],
                    [4., 8., 2., 6., 10., 4., 8., 6., 6., 8., 10.],
                    [4., 8., 2., 6., 10., 4., 8., 6., 10., 8., 10.],
                    [4., 8., 2., 6., 10., 4., 8., 6., 10., 8., 10.]
@@ -56,12 +56,12 @@ starts = np.array([[0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--faff_max', type=int, default=1000, help='Maximum number of steps without improving')
-    parser.add_argument('--pc_max', type=int, default=100, help='Maximum number of reinitializations before reducing window')
-    parser.add_argument('--window_rate', type=float, default=1., help='Rate of search window reduction')
+    parser.add_argument('--faff_max', type=int, default=10000, help='Maximum number of steps without improving')
+    parser.add_argument('--pc_max', type=int, default=10, help='Maximum number of reinitializations before reducing window')
+    parser.add_argument('--window_rate', type=float, default=0.7, help='Rate of search window reduction')
     parser.add_argument('--max_window_exp', type=int, default=25, help='Maximun number of window reductions')
     parser.add_argument('--same_spin_hierarchy', type=bool, default=True, help='Whether same spin deltas should be ordered')
-    parser.add_argument('--dyn_shift', type=float, default=0.7, help='Minimum distance between same spin deltas')
+    parser.add_argument('--dyn_shift', type=float, default=0., help='Minimum distance between same spin deltas')
     parser.add_argument('--alpha', type=float, default=0.0005, help='Learning rate for actor network')
     parser.add_argument('--beta', type=float, default=0.0005, help='Learning rate for critic and value network')
     parser.add_argument('--reward_scale', type=float, default=0.001, help='The reward scale, also related to the entropy parameter')
@@ -71,9 +71,9 @@ if __name__ == '__main__':
     parser.add_argument('--layer2_size', type=int, default=256, help='Dense units for the second layer')
     parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
-    parser.add_argument('--max_cpus', type=int, default=400, help='Maximum number of CPUs')
+    parser.add_argument('--max_cpus', type=int, default=650, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
-    parser.add_argument('--runs_per_args', type=int, default=25, help='Number of runs for each combination of parameters')
+    parser.add_argument('--runs_per_args', type=int, default=50, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     
@@ -118,7 +118,8 @@ if __name__ == '__main__':
                       agent_config=agent_config,
                       verbose=verbose,
                       best_teor=best_teor)
-
+    
+    blocks = utils.generate_Ising2D_block_list(10, [])
     remaining_ids = []
     for i in range(12):
         run_config = {}
@@ -166,9 +167,9 @@ if __name__ == '__main__':
             #blocks = utils.generate_block_list(max(params.spin_list), params.z_kill_list)
 
             # ---Instantiate the crossing_eqn class---
-            cft = Ising2D_SAC(params, zd)
+            cft = Ising2D_SAC(blocks, params, zd)
 
-            teor_reward = cft.best_theoretical_reward
+            teor_reward = cft.best_theoretical()
             # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
             array_index = 100*i+j
 
@@ -200,7 +201,7 @@ if __name__ == '__main__':
                         verbose=params.verbose,
                         best_teor=teor_reward))
             
-            #time.sleep(0.5)
+            time.sleep(1)
         
     n_jobs = len(remaining_ids)
     print(f"Total jobs: {n_jobs}")

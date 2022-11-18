@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=ray-tune-trenta
 ### Modify this according to your Ray workload.
-#SBATCH --nodes=4
+#SBATCH --nodes=7
 #SBATCH --exclusive
-#SBATCH --tasks-per-node=45
+#SBATCH --tasks-per-node=1
 ### Modify this according to your Ray workload.
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=90
 #SBATCH --output=ray.log
 ### Similarly, you can also specify the number of GPUs per node.
 ### Modify this according to your Ray workload. Sometimes this
@@ -44,11 +44,11 @@ RAY_worker_register_timeout_seconds=240
 export RAY_worker_register_timeout_seconds
 
 echo "Starting HEAD at $head_node"
-ray start --head --node-ip-address=$head_node_ip --port=$port
+ray start --head --node-ip-address=$head_node_ip --port=$port --num-cpus=45
 
 # optional, though may be useful in certain versions of Ray < 1.0.
 # number of nodes other than the head node
-worker_num=4
+worker_num=7
 
 for ((i = 0; i < worker_num; i++)); do
     node_i=${nodes_array[$i]}

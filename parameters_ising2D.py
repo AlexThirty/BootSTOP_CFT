@@ -144,7 +144,7 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         
         # ---Output Parameters---
         self.filename_stem = 'sac'
-        self.verbose = 'o'  # When the SAC algorithm should print to the console:
+        self.verbose = ''  # When the SAC algorithm should print to the console:
         # e - print at every step
         # o - only after a re-initialisation
         # default is '' which produces no output
@@ -163,7 +163,7 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
 
         # ---Environment Parameters---
         # set guessing run list for conformal weights
-        self.guessing_run_list_deltas = np.array([0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1])
+        self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         
         # set guessing run list for ope coefficients        
         self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
@@ -175,15 +175,15 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         # windows for D and B multiplets should be set to zero as they are fixed
         
         # !!! Modified this to set the initial window to respect delta <= delta_max
-        #self.guess_sizes_deltas = np.array([10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5])
-        self.guess_sizes_deltas = np.array([0., 6.5, 0., 8.5, 8.5, 0., 6.5, 4.5, 4.5, 2.5, 0.5])
+        self.guess_sizes_deltas = np.array([10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5])
+        #self.guess_sizes_deltas = np.array([0., 6.5, 0., 8.5, 8.5, 0., 6.5, 4.5, 4.5, 2.5, 0.5])
         # initial search window size for OPE coeffs        
         self.guess_sizes_opes = np.ones(self.num_of_operators)
         
         # set minimum values for conformal weights
         # minimums for D and B multiplets are fixed as weights are known
-        #self.shifts_deltas = np.array([0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
-        self.shifts_deltas = np.array([4., 4., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
+        self.shifts_deltas = np.array([0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
+        #self.shifts_deltas = np.array([4., 4., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
     
         # set minimum values for OPE coeffs
         self.shifts_opecoeffs = np.zeros(self.num_of_operators)

@@ -20,8 +20,11 @@ obt_rewards = []
 obt_deltas = []
 obt_lambdads = []
 
+reward_means = []
+
 for i in range(delta_tries):
     best_reward = 0.
+    coll = []
     for j in range(tries_per_deltas):
         currf = open(join(path, 'sac'+str(100*i+j)+'.csv'))
         csv_raw = csv.reader(currf)
@@ -29,6 +32,7 @@ for i in range(delta_tries):
         data = sp[-1]
         if len(data)>10:
             curr_rew = float(data[1])
+            coll.append(curr_rew)
             curr_delta = [float(data[i]) for i in range(2, 2+delta_len)]
             curr_lambda = [float(data[i]) for i in range(2+delta_len, 2+delta_len+lambda_len)]
             if curr_rew > best_reward:
@@ -37,6 +41,7 @@ for i in range(delta_tries):
                 deltas = curr_delta
                 lambdas = curr_lambda
         currf.close()
+    reward_means.append(np.mean(coll))
     obt_runs.append(best_run)
     obt_rewards.append(best_reward)
     obt_deltas.append(deltas)
@@ -48,9 +53,19 @@ for i in range(delta_tries):
     print(f'Best reward: {obt_rewards[i]}')
     print(f'Best deltas: {obt_deltas[i]}')
     print(f'Best lambdas: {obt_lambdads[i]}')
+    print(f'Reward means: {reward_means[i]}')
+    
+
 
 plt.plot(range(delta_tries), obt_rewards)
 plt.title('Best reward w.r.t. deltas fixed')
 plt.xlabel('Number of deltas fixed')
 plt.ylabel('Best reward')
 plt.savefig('rew_for_deltas.jpg')
+plt.close()
+
+plt.plot(range(delta_tries), reward_means)
+plt.title('Best reward w.r.t. deltas fixed')
+plt.xlabel('Number of deltas fixed')
+plt.ylabel('Mean of best rewards')
+plt.savefig('rew_for_deltas_mean.jpg')
