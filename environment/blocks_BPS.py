@@ -3,18 +3,6 @@ import mpmath as mp
 import scipy.special as sc
 from numpy import linalg as LA
 
-def get_C_BPS(g):
-    if g==0.:
-        return 1.
-    elif g=='inf':
-        return 2.
-    else:
-        return (3*sc.iv(1, 4*np.pi*g)/(2*(np.pi)**2 * g**2 * (sc.iv(2, 4*np.pi*g))**2)) * ((2*(np.pi)**2 * g**2 + 1)*sc.iv(1, 4*np.pi*g) - 2*np.pi*g*sc.iv(0, 4*np.pi*g)) - 1
-
-def get_teor_lambdas(delta):
-    return (sc.gamma(delta+3)*sc.gamma(delta+1)*(delta-1))/(2*sc.gamma(2*delta+2))
-
-
 class BPS:
     def __init__(self, params, z_data):
         self.multiplet_index = params.multiplet_index
@@ -24,34 +12,41 @@ class BPS:
         self.g = params.g
         self.verbose = params.verbose
         self.reward_scale = params.reward_scale
-        
-        if self.g == 0.:
-            self.best_theoretical_reward = self.compute_g0_reward()
-        elif self.g == 'inf':
-            self.best_theoretical_reward = self.compute_ginf_reward()
-        else: 
-            self.best_theoretical_reward = 0.
 
-        self.C_BPS = get_C_BPS(self.g)
+        self.C_BPS = self.get_C_BPS(self.g)
 
         self.delta_sep = params.delta_sep
         self.delta_start = params.delta_start
         self.delta_end_increment = params.delta_end_increment
 
         self.env_shape = z_data.env_shape
-        
-    def compute_g0_reward(self):
-        vector = []
-        for chiel in self.chi:
-            vector.append((1-chiel)**2 * chiel**2 * (1/chiel - 1/(1-chiel)) + chiel**2 * (1-chiel)**2 * (1/(1-chiel) - 1/(chiel)))
-        return 1/LA.norm(vector)
     
-    def compute_ginf_reward(self):
-        vector = []
-        for chiel in self.chi:
-            vector.append(((1-chiel)**2 * (chiel + chiel**2/(chiel-1)) + chiel**2 * (1-chiel + (1-chiel)**2/(-chiel))))
-        return 1/LA.norm(vector)
-        
+    def get_C_BPS(self, g):
+        if g==0.:
+            return 1.
+        elif g=='inf':
+            return 2.
+        else:
+            factor1 = (3*sc.iv(1, 4*np.pi*g)/(2*(np.pi)**2 * g**2 * (sc.iv(2, 4*np.pi*g))**2))
+            factor2 = ((2*(np.pi)**2 * g**2 + 1)*sc.iv(1, 4*np.pi*g) - 2*np.pi*g*sc.iv(0, 4*np.pi*g))
+            return factor1*factor2 - 1
+
+    def get_teor_lambdas(self, delta):
+        if self.g==0.:
+            return (sc.gamma(delta+3)*sc.gamma(delta+1)*(delta-1))/(2*sc.gamma(2*delta+2))
+        elif self.g=='inf':
+            return (sc.gamma(delta+3)*sc.gamma(delta+1)*(delta-1))/(sc.gamma(2*delta+2))
+        else:    
+            return -1
+    
+    def compute_g0_function(self):
+        vector = self.chi**2 * (1/self.chi - 1/(1-self.chi))
+        return vector
+    
+    def compute_ginf_function(self):
+        vector = self.chi + self.chi**2/(self.chi-1)
+        return vector
+    
     def f_BPS(self, chi):
         return chi * (1 - sc.hyp2f1(1, 2, 4, chi))
 
@@ -68,6 +63,19 @@ class BPS:
         vector = []
         for chiel in chi:
             vector.append(self.BPS_blocks(delta, lambdads, chiel).real)
+        return np.array(vector)
+    
+    def compute_test_vector(self, delta: np.array, chi: np.array):
+        vector = []
+        lambdas = self.get_teor_lambdas(delta=delta)
+        for chiel in chi:
+            vec = chiel + self.get_C_BPS(self.g)*self.f_BPS(chiel)
+            for i, delta_el in enumerate(delta):
+                if delta_el==1.:
+                    vec = vec - (chiel**2) * sc.hyp2f1(2, 3, 6, chiel) * (sc.gamma(4)*sc.gamma(2)/(2*sc.gamma(4)))
+                else:
+                    vec = vec + lambdas[i]*self.f_delta(delta_el, chiel)
+            vector.append(vec)
         return vector
     
     def compute_single_reward(self, delta: np.array, lambdads: np.array):
