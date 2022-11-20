@@ -3,6 +3,7 @@ from os.path import isfile, join
 import csv
 import numpy as np
 from matplotlib import pyplot as plt
+from environment.utils import output_to_file
 
 path = join('.', 'pro_results')
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
@@ -25,6 +26,8 @@ reward_means = []
 for i in range(delta_tries):
     best_reward = 0.
     coll = []
+    deltas_coll = []
+    lambdas_coll = []
     for j in range(tries_per_deltas):
         currf = open(join(path, 'sac'+str(100*i+j)+'.csv'))
         csv_raw = csv.reader(currf)
@@ -34,13 +37,18 @@ for i in range(delta_tries):
             curr_rew = float(data[1])
             coll.append(curr_rew)
             curr_delta = [float(data[i]) for i in range(2, 2+delta_len)]
+            deltas_coll.append(curr_delta)
             curr_lambda = [float(data[i]) for i in range(2+delta_len, 2+delta_len+lambda_len)]
+            lambdas_coll.append(curr_lambda)
             if curr_rew > best_reward:
                 best_run = float(data[0])
                 best_reward = curr_rew
                 deltas = curr_delta
                 lambdas = curr_lambda
         currf.close()
+    orderer = np.argsort(coll)
+    for el in reversed(orderer):
+        output_to_file(file_name=join('analized','pro_res_deltas'+str(i)+'.csv'), output=np.concatenate(([el], [coll[el]], deltas_coll[el], lambdas_coll[el])))
     reward_means.append(np.mean(coll))
     obt_runs.append(best_run)
     obt_rewards.append(best_reward)
