@@ -65,6 +65,8 @@ class BPS:
             vector.append(self.BPS_blocks(delta, lambdads, chiel).real)
         return np.array(vector)
     
+    
+    
     def compute_test_vector(self, delta: np.array, chi: np.array):
         vector = []
         lambdas = self.get_teor_lambdas(delta=delta)

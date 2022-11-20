@@ -28,21 +28,39 @@ class ParametersIsing2D:
     """
 
     def __init__(self):
+        ### VALUES FOR DELTA MODEL 1.
+        
         # ---Delta Model---
-        self.delta_model = 1.
+        #self.delta_model = 1.
 
         # ---Spin partition---
         # Note: spins HAVE to be given in ascending order
-        self.spin_list = np.array([0, 0, 2, 2, 2, 4, 4, 6, 6, 8, 10])
         
-        self.delta_teor = np.array([4., 8., 2., 6., 10., 4., 8., 6., 10., 8., 10.])
-        self.lambda_teor = np.array([1., 1/100., 1., 1/10., 1/1260., 1/10., 1/126., 1/126., 1/1716., 1/1716., 1/24310.])
+        #self.spin_list = np.array([0, 0, 2, 2, 2, 4, 4, 6, 6, 8, 10])
         
-        #self.delta_teor = np.array([2.7016236744005675,5.050856944348188,2.0213466735433836,4.2856177631124215,4.909299202733042,5.6414889781221405,8.328514525342179,7.605468108807205,8.542512893393454,8.315081625434248,10.22088919725358])
-        #self.lambda_teor = np.array([0.9530206983000907,0.4039839938189997,0.6166258049859034,0.17948634587633205,0.04899791188878733,0.04378130084964199,0.011652024319895985,0.0021118376035766362,0.0026691862468548704,0.0026228588405235584,0.0005427505644773896])
+        #self.delta_teor = np.array([4., 8., 2., 6., 10., 4., 8., 6., 10., 8., 10.])
+        #self.lambda_teor = np.array([1., 1/100., 1., 1/10., 1/1260., 1/10., 1/126., 1/126., 1/1716., 1/1716., 1/24310.])
         
-        self.ell_max = 30  # Spin cutoff for the a_chi function in blocks.py. This MUST be an even number
+        # This are some particular values
+        #self.delta_teor = np.array([2.9351905941038603, 5.204395506226895, 2.3629976233835785, 5.271790065773547, 7.084222860496568, 5.32144934453104, 7.88979329311246, 6.578279003328386, 8.127133722418172, 9.609319116672978, 10.14737640852757])
+        #self.lambda_teor = np.array([1.2759954374611344, 0.23713238449581672, 0.43162002232409385, 0.1765391527271833, 0.004785965403442599, 0.04282433571303775, 0.004842638697416876, 0.0012958440454542478, 0.002189201408211076, 0.0002565299716341855, 3.01555181239649e-05])
 
+        
+        ### VALUES FOR DELTA MODEL = 1/8
+        
+        # ---Delta Model---
+        self.delta_model = 1/8.
+
+        # ---Spin partition---
+        # Note: spins HAVE to be given in ascending order
+        
+        self.spin_list = np.array([0, 0, 0, 0, 2, 2, 2, 4, 4, 4, 6, 6, 6, 8, 8, 10])
+        
+        self.delta_teor = np.array([1., 4., 8., 9., 2., 6., 10., 4., 5., 8., 6., 7., 10., 8., 9., 10.])
+        self.lambda_teor = np.array([1./4, 1./4096, 81./1677721600, 1./1073741824,  1./64, 9./2621440, 45./30064771072, 9./40960, 1./65536,
+                                     25./234881024, 25./3670016, 1./1310720, 15527./3685081939968, 15527./57579405312, 1125./30064771072, 251145./20882130993152])
+        
+        
         # ---Pre-generated conformal block lattice parameters---
         self.delta_start = np.array([0., 1.8, 3.8, 5.8, 7.8, 9.8])
 
@@ -51,15 +69,6 @@ class ParametersIsing2D:
 
         # This is a list of the original 180 columns to delete from the '6d_blocks_spin*.csv' files
         self.z_kill_list = []
-        # An example of a non-empty z_kill_list
-        # self.z_kill_list = [3, 5, 7, 9, 10, 11, 12, 13, 15, 18, 19, 22, 26,
-        #                     27, 28, 29, 30, 31, 32, 35, 37, 40, 43, 44, 46, 48,
-        #                     49, 53, 57, 58, 60, 61, 63, 65, 68, 70, 73, 74, 75,
-        #                     79, 80, 81, 82, 83, 86, 87, 91, 95, 96, 102, 104, 107,
-        #                     113, 114, 115, 116, 119, 121, 122, 124, 129, 131, 132, 134, 136,
-        #                     139, 141, 144, 145, 146, 147, 149, 151, 153, 154, 155, 156, 157,
-        #                     158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170,
-        #                     171, 172, 173, 174, 175, 176, 177, 178, 179]
 
         # DO NOT CHANGE ANYTHING BEYOND THIS POINT IN THIS CLASS
         # ---Non-User Adjustable Parameters---        
@@ -161,12 +170,43 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         self.same_spin_hierarchy = config['same_spin_hierarchy']  # same long multiplet operators with the same spin should be ordered
         self.dyn_shift = config['dyn_shift']  # set the gap between long multiplet same spin deltas
 
+        self.reward_scale = config['reward_scale']
+        self.delta_max = 10.5
+        
+        ### VALUES FOR DELTA MODEL 1.
         # ---Environment Parameters---
         # set guessing run list for conformal weights
-        self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        #self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         
         # set guessing run list for ope coefficients        
-        self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        #self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        
+        # initial search window size for conformal weights
+        # windows for D and B multiplets should be set to zero as they are fixed
+        
+        # !!! Modified this to set the initial window to respect delta <= delta_max
+        #self.guess_sizes_deltas = np.array([10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5])
+        #self.guess_sizes_deltas = np.array([0., 6.5, 0., 8.5, 8.5, 0., 6.5, 4.5, 4.5, 2.5, 0.5])
+        # initial search window size for OPE coeffs        
+        #self.guess_sizes_opes = np.ones(self.num_of_operators)
+        
+        # set minimum values for conformal weights
+        # minimums for D and B multiplets are fixed as weights are known
+        #self.shifts_deltas = np.array([0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
+        #self.shifts_deltas = np.array([4., 4., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
+    
+        # set minimum values for OPE coeffs
+        #self.shifts_opecoeffs = np.zeros(self.num_of_operators)
+
+
+        
+        ### VALUES FOR DELTA MODEL 1/8.
+        # ---Environment Parameters---
+        # set guessing run list for conformal weights
+        self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        
+        # set guessing run list for ope coefficients        
+        self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         
         self.reward_scale = config['reward_scale']
         self.delta_max = 10.5
@@ -175,25 +215,21 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         # windows for D and B multiplets should be set to zero as they are fixed
         
         # !!! Modified this to set the initial window to respect delta <= delta_max
-        self.guess_sizes_deltas = np.array([10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5])
-        #self.guess_sizes_deltas = np.array([0., 6.5, 0., 8.5, 8.5, 0., 6.5, 4.5, 4.5, 2.5, 0.5])
+        self.guess_sizes_deltas = np.array([10.5, 10.5, 10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 6.5, 4.5, 4.5, 4.5, 2.5, 2.5, 0.5])
         # initial search window size for OPE coeffs        
         self.guess_sizes_opes = np.ones(self.num_of_operators)
         
         # set minimum values for conformal weights
         # minimums for D and B multiplets are fixed as weights are known
-        self.shifts_deltas = np.array([0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
-        #self.shifts_deltas = np.array([4., 4., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
+        self.shifts_deltas = np.array([0., 0., 0., 0., 2., 2., 2., 4., 4., 4., 6., 6., 6., 8., 8., 10.])
     
         # set minimum values for OPE coeffs
         self.shifts_opecoeffs = np.zeros(self.num_of_operators)
-
+        
+        
         # ---Starting Point Parameters---
         # initial configuration to explore around
-        # set equal to combination of shifts_deltas and shifts_opecoeffs to effectively start from a zero solution
-        
-        #print(self.guess_sizes_deltas)
-        
+        # set equal to combination of shifts_deltas and shifts_opecoeffs to effectively start from a zero solution        
         delta_init = self.shifts_deltas
         ope_init = self.shifts_opecoeffs
 

@@ -21,9 +21,6 @@ class Ising2D:
         self.lambda_teor = params.lambda_teor
         self.verbose = params.verbose
         self.reward_scale = params.reward_scale
-        #self.best_theoretical_reward = self.compute_single_reward(self.delta_teor, self.lambda_teor)
-        #print(self.best_theoretical_reward)
-        self.ell_max = params.ell_max
         self.delta_sep = params.delta_sep
         self.delta_start = params.delta_start
         self.delta_end_increment = params.delta_end_increment
@@ -47,7 +44,9 @@ class Ising2D:
         return ((1-z) * (1-zbar))**(delta_model) - (z*zbar)**(delta_model) + np.sum(blocks, axis=0)
     
     def precalc_val(self, delta, spin):
+        # Get the spin index
         spin_index = spin // 2
+        # Get the index for delta in the precalculated data
         delta = np.clip(delta, a_min=None, a_max=self.delta_start[spin_index] + self.delta_end_increment - self.delta_sep)
         n = np.rint((delta - self.delta_start[spin_index]) / self.delta_sep)
         val = self.block_list[spin_index][int(n)]
@@ -81,6 +80,12 @@ class Ising2D:
         vector = self.ising2d(delta, s, lambdads, z, zbar, delta_model).real
         return vector
     
+    def compute_ising2d_vector_recalc(self, delta: np.array, s: np.array, lambdads: np.array, z: np.array, zbar: np.array, delta_model: float):
+        vector = []
+        for zel, zbarel in zip(z, zbar):
+            vector.append(self.ising2d_old(delta, s, lambdads, zel, zbarel, delta_model).real)
+        return vector
+    
     def compute_single_reward(self, delta: np.array, lambdads: np.array):
         vector = self.compute_ising2d_vector(delta, self.s, lambdads, self.z, self.z_conj, self.delta_model)
         return 1/LA.norm(vector)
@@ -89,6 +94,9 @@ class Ising2D:
         vector = self.compute_ising2d_vector(self.delta_teor, self.s, self.lambda_teor, self.z, self.z_conj, self.delta_model)
         return 1/LA.norm(vector)
     
+    def best_theoretical_recalc(self):
+        vector = self.compute_ising2d_vector_recalc(self.delta_teor, self.s, self.lambda_teor, self.z, self.z_conj, self.delta_model)
+        return 1/LA.norm(vector)
     
     
 class Ising2D_SAC(Ising2D):
@@ -192,6 +200,46 @@ class Ising2D_SAC(Ising2D):
         #spin_cons = ope_dict['all'].reshape(-1, 1) * self.compute_ising2d_vector(delta_dict['all'])
         
         spin_cons = self.compute_ising2d_vector(delta_dict['all'], self.s, ope_dict['all'], self.z, self.z_conj, self.delta_model)
+        # long_cons.shape = (num_of_long, env_shape)
+
+        # add up all the components
+        constraints = spin_cons  # the .sum implements summation over multiplet spins
+        reward = 1 / LA.norm(constraints)
+
+        return constraints, reward, cft_data
+    
+    def crossing_recalc(self, cft_data):
+        """
+        Evaluates the truncated crossing equations for the given CFT data at all points in the z-sample simultaneously.
+
+        Parameters
+        ----------
+        cft_data : ndarray
+            An array containing the conformal weights and OPE-squared coefficients of all the multiplets.
+
+        Returns
+        -------
+        constraints : ndarray
+            Array of values of the truncated crossing equation.
+        reward : float
+            The reward determined from the constraints.
+        cft_data : ndarray
+            A list of possibly modified CFT data.
+
+        """
+        # get some dictionaries
+        delta_dict, ope_dict = self.split_cft_data(cft_data)
+
+        if self.same_spin_hierarchy_deltas:
+            # impose the mimimum conformal weight separations between operators
+            delta_dict = self.impose_weight_separation(delta_dict)
+            # since we've altered some data we update the long multiplet weights in cft_data
+            cft_data[self.multiplet_index[0]] = delta_dict['all']
+
+        # broadcast the reshaped long multiplet ope coefficients over their crossing contributions
+        #spin_cons = ope_dict['all'].reshape(-1, 1) * self.compute_ising2d_vector(delta_dict['all'])
+        
+        spin_cons = self.compute_ising2d_vector_recalc(delta_dict['all'], self.s, ope_dict['all'], self.z, self.z_conj, self.delta_model)
         # long_cons.shape = (num_of_long, env_shape)
 
         # add up all the components

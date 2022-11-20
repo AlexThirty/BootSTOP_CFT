@@ -117,11 +117,13 @@ class ActorNetwork(nn.Module):
         self.to(self.device)
 
     def forward(self, state):
+        # Double Linear Layer
         prob = self.fc1(state)
         prob = F.relu(prob)
         prob = self.fc2(prob)
         prob = F.relu(prob)
 
+        # Split net in 2: mu and sigma for a normal sample
         mu = self.mu(prob)
         sigma = self.sigma(prob)
         sigma = T.clamp(sigma, min=self.reparam_noise, max=1.0)
@@ -131,15 +133,16 @@ class ActorNetwork(nn.Module):
     def sample_normal(self, state, reparameterize=True):
         mu, sigma = self.forward(state)
         probabilities = Normal(mu, sigma)
-
+        # To use or not the reparametrization trick to sample
         if reparameterize:
             actions = probabilities.rsample()
         else:
             actions = probabilities.sample()
 
+        # Action is got from tanh scaled to max action
         action = T.tanh(actions)*T.tensor(self.max_action).to(self.device)
         log_probs = probabilities.log_prob(actions)
-        log_probs -= T.log(1-T.tanh(actions).pow(2) + 1e-6) #self.reparam_noise)
+        log_probs -= T.log(1-T.tanh(actions).pow(2) + self.reparam_noise) #self.reparam_noise)
         log_probs = log_probs.sum(1, keepdim=True)
 
         return [action, log_probs, sigma]

@@ -250,10 +250,12 @@ def soft_actor_critic(func,
     # the function needs to return an array of constraints, the reward and a (possibly) modified current_location
     func_wrapper = ObjectiveFunWrapper(func, *args)
     #
+    # Initialize the Environment class
     environment = Environment(func_wrapper, environment_dim, search_space_dim, lower_bounds, search_window_sizes,
                               guessing_run_list)
+    # Initialize learning class
     lrn = Learn(environment, agent_config)
-    # set the initial window size reduction exponent, pc counter and best_reward
+    # set the initial window size reduction exponent, pc counter and best_reward (counter for reductions)
     window_scale_exponent = 0
     pc = 0  # records number of neural net reinitialisations
     best_reward = starting_reward  # at the start the best reward is the starting reward

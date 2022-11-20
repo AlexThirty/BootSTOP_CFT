@@ -43,6 +43,7 @@ class Agent:
         self.update_network_parameters(tau=1)
 
     def choose_action(self, observation):
+        # Load observation into the net
         state = T.Tensor(np.array([observation])).to(self.actor.device)
         [actions, _, sigma] = self.actor.sample_normal(state, reparameterize=False)
         self.stdv = sigma.cpu().detach().numpy()[0]
@@ -56,6 +57,7 @@ class Agent:
         if tau is None:
             tau = self.tau
 
+        # LETTERALMENTE NOMI AL CONTRARIO  A QUELLO CHE PENSI
         target_value_params = self.target_value.named_parameters()
         value_params = self.value.named_parameters()
 
@@ -92,9 +94,11 @@ class Agent:
         self.target_value.apply(weights_init)
 
     def learn(self):
+        # Don't learn if no at least batch_size
         if self.memory.mem_cntr < self.batch_size:
             return
 
+        # Get sample transitions from memory
         state, action, reward, new_state, done = \
             self.memory.sample_buffer(self.batch_size)
 
@@ -103,24 +107,29 @@ class Agent:
         state_ = T.tensor(new_state, dtype=T.float).to(self.actor.device)
         state = T.tensor(state, dtype=T.float).to(self.actor.device)
         action = T.tensor(action, dtype=T.float).to(self.actor.device)
-
+        
+        # Get value and traget values from the two nets
         value = self.value(state).view(-1)
         value_ = self.target_value(state_).view(-1)
         value_[done] = 0.0
 
+        # Get the action and the log prob from the actual actor network
         [actions, log_probs, _] = self.actor.sample_normal(state, reparameterize=False)
         log_probs = log_probs.view(-1)
+        # Get teh action value functions from the critics and take the min
         q1_new_policy = self.critic_1.forward(state, actions)
         q2_new_policy = self.critic_2.forward(state, actions)
         critic_value = T.min(q1_new_policy, q2_new_policy)
         critic_value = critic_value.view(-1)
 
+        # Optimize value function just as like the original article
         self.value.optimizer.zero_grad()
         value_target = critic_value - log_probs
         value_loss = 0.5 * F.mse_loss(value, value_target)
         value_loss.backward(retain_graph=True)
         self.value.optimizer.step()
 
+        # Optimize the actor now but with reparametrization just as in the article
         [actions, log_probs, _] = self.actor.sample_normal(state, reparameterize=True)
         log_probs = log_probs.view(-1)
         q1_new_policy = self.critic_1.forward(state, actions)
@@ -134,6 +143,7 @@ class Agent:
         actor_loss.backward(retain_graph=True)
         self.actor.optimizer.step()
 
+        # Optimize the critics just as in the original article  
         self.critic_1.optimizer.zero_grad()
         self.critic_2.optimizer.zero_grad()
         q_hat = self.scale * reward + self.gamma * value_

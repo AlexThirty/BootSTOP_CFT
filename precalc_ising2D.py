@@ -27,7 +27,7 @@ delta_sep = params.delta_sep
 max_spin=10
 for i in range(0, max_spin + 2, 2):
     ell = i//2
-    tmp_name = 'block_lattices/ising2D_blocks_spin' + str(i) + '.csv'
+    tmp_name = 'block_lattices/ising2D_blocks_spin_sigma' + str(i) + '.csv'
     start = delta_start[ell]
     deltas = np.arange(start=start, stop=start+delta_end_increment, step=delta_sep)
     print(deltas)

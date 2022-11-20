@@ -64,7 +64,7 @@ def output_to_console(output):
     print(output)
 
 
-def generate_Ising2D_block_list(max_spin, z_kill_list):
+def generate_Ising2D_block_list(max_spin, z_kill_list, sigma=False):
     """
     Reads the pregenerated conformal blocks data from csv files into a list.
 
@@ -83,7 +83,10 @@ def generate_Ising2D_block_list(max_spin, z_kill_list):
     print('Loading pregenerated conformal block data.')
     block_list = []
     for i in range(0, max_spin + 2, 2):
-        tmp_name = 'block_lattices/ising2D_blocks_spin' + str(i) + '.csv'
+        if sigma:
+            tmp_name = 'block_lattices/ising2D_blocks_spin_sigma' + str(i) + '.csv'
+        else:
+            tmp_name = 'block_lattices/ising2D_blocks_spin' + str(i) + '.csv'
         tmp = np.genfromtxt(tmp_name, delimiter=',')
         # if the kill list is empty append the whole array
         if len(z_kill_list) == 0:

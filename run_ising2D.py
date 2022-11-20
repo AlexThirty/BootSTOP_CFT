@@ -50,11 +50,11 @@ if __name__ == '__main__':
     
     # ---Instantiating some relevant classes---
     params = ParametersIsing2D_SAC(run_config)
-    zd = ZData()
+    zd = ZData(randomize=False)
 
     # ---Kill portion of the z-sample data if required---
     zd.kill_data(params.z_kill_list)
-    blocks = utils.generate_Ising2D_block_list(max(params.spin_list), params.z_kill_list)
+    blocks = utils.generate_Ising2D_block_list(max(params.spin_list), params.z_kill_list, sigma=True)
     print(len(blocks))
     print(len(blocks[0]))
     print(len(blocks[0][0]))
