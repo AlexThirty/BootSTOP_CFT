@@ -27,38 +27,38 @@ class ParametersIsing2D:
     No validation of the inputs is done.
     """
 
-    def __init__(self):
-        ### VALUES FOR DELTA MODEL 1.
+    def __init__(self, sigma=False):
+        if sigma:
+            ### VALUES FOR DELTA MODEL = 1/8
         
-        # ---Delta Model---
-        #self.delta_model = 1.
+            # ---Delta Model---
+            self.delta_model = 1/8.
 
-        # ---Spin partition---
-        # Note: spins HAVE to be given in ascending order
+            # ---Spin partition---
+            # Note: spins HAVE to be given in ascending order
         
-        #self.spin_list = np.array([0, 0, 2, 2, 2, 4, 4, 6, 6, 8, 10])
+            self.spin_list = np.array([0, 0, 0, 0, 2, 2, 2, 4, 4, 4, 6, 6, 6, 8, 8, 10])
         
-        #self.delta_teor = np.array([4., 8., 2., 6., 10., 4., 8., 6., 10., 8., 10.])
-        #self.lambda_teor = np.array([1., 1/100., 1., 1/10., 1/1260., 1/10., 1/126., 1/126., 1/1716., 1/1716., 1/24310.])
-        
-        # This are some particular values
-        #self.delta_teor = np.array([2.9351905941038603, 5.204395506226895, 2.3629976233835785, 5.271790065773547, 7.084222860496568, 5.32144934453104, 7.88979329311246, 6.578279003328386, 8.127133722418172, 9.609319116672978, 10.14737640852757])
-        #self.lambda_teor = np.array([1.2759954374611344, 0.23713238449581672, 0.43162002232409385, 0.1765391527271833, 0.004785965403442599, 0.04282433571303775, 0.004842638697416876, 0.0012958440454542478, 0.002189201408211076, 0.0002565299716341855, 3.01555181239649e-05])
-
-        
-        ### VALUES FOR DELTA MODEL = 1/8
-        
-        # ---Delta Model---
-        self.delta_model = 1/8.
-
-        # ---Spin partition---
-        # Note: spins HAVE to be given in ascending order
-        
-        self.spin_list = np.array([0, 0, 0, 0, 2, 2, 2, 4, 4, 4, 6, 6, 6, 8, 8, 10])
-        
-        self.delta_teor = np.array([1., 4., 8., 9., 2., 6., 10., 4., 5., 8., 6., 7., 10., 8., 9., 10.])
-        self.lambda_teor = np.array([1./4, 1./4096, 81./1677721600, 1./1073741824,  1./64, 9./2621440, 45./30064771072, 9./40960, 1./65536,
+            self.delta_teor = np.array([1., 4., 8., 9., 2., 6., 10., 4., 5., 8., 6., 7., 10., 8., 9., 10.])
+            self.lambda_teor = np.array([1./4, 1./4096, 81./1677721600, 1./1073741824,  1./64, 9./2621440, 45./30064771072, 9./40960, 1./65536,
                                      25./234881024, 25./3670016, 1./1310720, 15527./3685081939968, 15527./57579405312, 1125./30064771072, 251145./20882130993152])
+            
+        else:
+            ### VALUES FOR DELTA MODEL 1.
+            # ---Delta Model---
+            self.delta_model = 1.
+
+            # ---Spin partition---
+            # Note: spins HAVE to be given in ascending order
+        
+            self.spin_list = np.array([0, 0, 2, 2, 2, 4, 4, 6, 6, 8, 10])
+        
+            self.delta_teor = np.array([4., 8., 2., 6., 10., 4., 8., 6., 10., 8., 10.])
+            self.lambda_teor = np.array([1., 1/100., 1., 1/10., 1/1260., 1/10., 1/126., 1/126., 1/1716., 1/1716., 1/24310.])
+        
+            # This are some particular values
+            #self.delta_teor = np.array([2.9351905941038603, 5.204395506226895, 2.3629976233835785, 5.271790065773547, 7.084222860496568, 5.32144934453104, 7.88979329311246, 6.578279003328386, 8.127133722418172, 9.609319116672978, 10.14737640852757])
+            #self.lambda_teor = np.array([1.2759954374611344, 0.23713238449581672, 0.43162002232409385, 0.1765391527271833, 0.004785965403442599, 0.04282433571303775, 0.004842638697416876, 0.0012958440454542478, 0.002189201408211076, 0.0002565299716341855, 3.01555181239649e-05])
         
         
         # ---Pre-generated conformal block lattice parameters---
@@ -147,8 +147,8 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
     No validation of the inputs is done.
     """
 
-    def __init__(self, config):
-        super().__init__()
+    def __init__(self, config, sigma=False):
+        super().__init__(sigma=sigma)
         
         
         # ---Output Parameters---
@@ -173,58 +173,58 @@ class ParametersIsing2D_SAC(ParametersIsing2D):
         self.reward_scale = config['reward_scale']
         self.delta_max = 10.5
         
-        ### VALUES FOR DELTA MODEL 1.
-        # ---Environment Parameters---
-        # set guessing run list for conformal weights
-        #self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        if sigma:
+            ### VALUES FOR DELTA MODEL 1/8.
+            # ---Environment Parameters---
+            # set guessing run list for conformal weights
+            self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         
-        # set guessing run list for ope coefficients        
-        #self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+            # set guessing run list for ope coefficients        
+            self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         
-        # initial search window size for conformal weights
-        # windows for D and B multiplets should be set to zero as they are fixed
+            self.reward_scale = config['reward_scale']
+            self.delta_max = 10.5
         
-        # !!! Modified this to set the initial window to respect delta <= delta_max
-        #self.guess_sizes_deltas = np.array([10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5])
-        #self.guess_sizes_deltas = np.array([0., 6.5, 0., 8.5, 8.5, 0., 6.5, 4.5, 4.5, 2.5, 0.5])
-        # initial search window size for OPE coeffs        
-        #self.guess_sizes_opes = np.ones(self.num_of_operators)
+            # initial search window size for conformal weights
+            # windows for D and B multiplets should be set to zero as they are fixed
         
-        # set minimum values for conformal weights
-        # minimums for D and B multiplets are fixed as weights are known
-        #self.shifts_deltas = np.array([0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
-        #self.shifts_deltas = np.array([4., 4., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
+            # !!! Modified this to set the initial window to respect delta <= delta_max
+            self.guess_sizes_deltas = np.array([10.5, 10.5, 10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 6.5, 4.5, 4.5, 4.5, 2.5, 2.5, 0.5])
+            # initial search window size for OPE coeffs        
+            self.guess_sizes_opes = np.ones(self.num_of_operators)
+        
+            # set minimum values for conformal weights
+            # minimums for D and B multiplets are fixed as weights are known
+            self.shifts_deltas = np.array([0., 0., 0., 0., 2., 2., 2., 4., 4., 4., 6., 6., 6., 8., 8., 10.])
     
-        # set minimum values for OPE coeffs
-        #self.shifts_opecoeffs = np.zeros(self.num_of_operators)
+            # set minimum values for OPE coeffs
+            self.shifts_opecoeffs = np.zeros(self.num_of_operators)
 
-
+        else:
+            ### VALUES FOR DELTA MODEL 1.
+            # ---Environment Parameters---
+            # set guessing run list for conformal weights
+            self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         
-        ### VALUES FOR DELTA MODEL 1/8.
-        # ---Environment Parameters---
-        # set guessing run list for conformal weights
-        self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+            # set guessing run list for ope coefficients        
+            self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         
-        # set guessing run list for ope coefficients        
-        self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+            # initial search window size for conformal weights
+            # windows for D and B multiplets should be set to zero as they are fixed
         
-        self.reward_scale = config['reward_scale']
-        self.delta_max = 10.5
+            # !!! Modified this to set the initial window to respect delta <= delta_max
+            self.guess_sizes_deltas = np.array([10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5])
+            self.guess_sizes_deltas = np.array([0., 6.5, 0., 8.5, 8.5, 0., 6.5, 4.5, 4.5, 2.5, 0.5])
+            # initial search window size for OPE coeffs        
+            self.guess_sizes_opes = np.ones(self.num_of_operators)
         
-        # initial search window size for conformal weights
-        # windows for D and B multiplets should be set to zero as they are fixed
-        
-        # !!! Modified this to set the initial window to respect delta <= delta_max
-        self.guess_sizes_deltas = np.array([10.5, 10.5, 10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 6.5, 4.5, 4.5, 4.5, 2.5, 2.5, 0.5])
-        # initial search window size for OPE coeffs        
-        self.guess_sizes_opes = np.ones(self.num_of_operators)
-        
-        # set minimum values for conformal weights
-        # minimums for D and B multiplets are fixed as weights are known
-        self.shifts_deltas = np.array([0., 0., 0., 0., 2., 2., 2., 4., 4., 4., 6., 6., 6., 8., 8., 10.])
+            # set minimum values for conformal weights
+            # minimums for D and B multiplets are fixed as weights are known
+            self.shifts_deltas = np.array([0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
+            self.shifts_deltas = np.array([4., 4., 2., 2., 2., 4., 4., 6., 6., 8., 10.])
     
-        # set minimum values for OPE coeffs
-        self.shifts_opecoeffs = np.zeros(self.num_of_operators)
+            # set minimum values for OPE coeffs
+            self.shifts_opecoeffs = np.zeros(self.num_of_operators)
         
         
         # ---Starting Point Parameters---

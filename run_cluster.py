@@ -12,18 +12,21 @@ import itertools
 import numpy as np
 import time
 
+sigma=True
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--faff_max', type=int, default=10000, help='Maximum number of steps without improving')
+    parser.add_argument('--faff_max', type=int, default=12000, help='Maximum number of steps without improving')
     parser.add_argument('--pc_max', type=int, default=10, help='Maximum number of reinitializations before reducing window')
     parser.add_argument('--window_rate', type=float, default=0.7, help='Rate of search window reduction')
-    parser.add_argument('--max_window_exp', type=int, default=25, help='Maximun number of window reductions')
+    parser.add_argument('--max_window_exp', type=int, default=20, help='Maximun number of window reductions')
     parser.add_argument('--same_spin_hierarchy', type=bool, default=True, help='Whether same spin deltas should be ordered')
-    parser.add_argument('--dyn_shift', type=float, default=0.7, help='Minimum distance between same spin deltas')
+    parser.add_argument('--dyn_shift', type=float, default=0., help='Minimum distance between same spin deltas')
     parser.add_argument('--alpha', type=float, default=0.0005, help='Learning rate for actor network')
     parser.add_argument('--beta', type=float, default=0.0005, help='Learning rate for critic and value network')
-    parser.add_argument('--reward_scale', type=float, default=0.001, help='The reward scale, also related to the entropy parameter')
+    parser.add_argument('--reward_scale', type=float, default=0.0001, help='The reward scale, also related to the entropy parameter')
     parser.add_argument('--gamma', type=float, default=0.99, help='Gamma parameter for cumulative reward')
     parser.add_argument('--tau', type=float, default=0.0005, help='Tau parameter for state-value function update')
     parser.add_argument('--layer1_size', type=int, default=256, help='Dense units for first layer')
@@ -32,7 +35,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
     parser.add_argument('--max_cpus', type=int, default=650, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
-    parser.add_argument('--runs_per_args', type=int, default=450, help='Number of runs for each combination of parameters')
+    parser.add_argument('--runs_per_args', type=int, default=500, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     
@@ -78,7 +81,7 @@ if __name__ == '__main__':
                       verbose=verbose,
                       best_teor=best_teor)
     
-    blocks = utils.generate_Ising2D_block_list(10, [])
+    blocks = utils.generate_Ising2D_block_list(10, [], sigma=sigma)
     remaining_ids = []
     for i in range(args.runs_per_args):
         run_config = {}
@@ -102,7 +105,7 @@ if __name__ == '__main__':
         agent_config['batch_size'] = args.batch_size
 
         # ---Instantiating some relevant classes---
-        params = ParametersIsing2D_SAC(run_config)
+        params = ParametersIsing2D_SAC(run_config, sigma=sigma)
         zd = ZData()
 
         zd.kill_data(params.z_kill_list)

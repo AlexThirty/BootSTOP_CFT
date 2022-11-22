@@ -7,6 +7,7 @@ import environment.utils as utils
 from neural_net.sac import soft_actor_critic
 import argparse
 
+sigma=True
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     agent_config['batch_size'] = args.batch_size
     
     # ---Instantiating some relevant classes---
-    params = ParametersIsing2D_SAC(run_config)
+    params = ParametersIsing2D_SAC(run_config, sigma=sigma)
     zd = ZData(randomize=False)
 
     # ---Kill portion of the z-sample data if required---

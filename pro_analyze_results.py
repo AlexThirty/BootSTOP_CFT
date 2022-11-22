@@ -73,7 +73,7 @@ plt.savefig('rew_for_deltas.jpg')
 plt.close()
 
 plt.plot(range(delta_tries), reward_means)
-plt.title('Best reward w.r.t. deltas fixed')
+plt.title('Mean reward w.r.t. deltas fixed')
 plt.xlabel('Number of deltas fixed')
 plt.ylabel('Mean of best rewards')
 plt.savefig('rew_for_deltas_mean.jpg')

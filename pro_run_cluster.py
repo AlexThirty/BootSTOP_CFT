@@ -5,6 +5,7 @@ from environment.blocks_ising2D import Ising2D_SAC
 from environment.data_z_sample import ZData
 import environment.utils as utils
 from neural_net.sac import soft_actor_critic
+from pro_get_params import get_grid_Ising2D_params
 import argparse
 import os
 import ray
@@ -12,46 +13,8 @@ import itertools
 import numpy as np
 import time
 
-guessings = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                      [1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-                      [0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-                      [0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1],
-                      [0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1],
-                      [0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1],
-                      [0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1],
-                      [0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1],
-                      [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                      ])
-
-guess_sizes = np.array([[10.5, 10.5, 8.5, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [10.5, 10.5, 0, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [0, 6.5, 0, 8.5, 8.5, 6.5, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [0, 6.5, 0, 8.5, 8.5, 0, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [0, 6.5, 0, 0, 4.5, 0, 6.5, 4.5, 4.5, 2.5, 0.5],
-                        [0, 6.5, 0, 0, 4.5, 0, 6.5, 0, 4.5, 2.5, 0.5],
-                        [0, 0, 0, 0, 4.5, 0, 6.5, 0, 4.5, 2.5, 0.5],
-                        [0, 0, 0, 0, 0, 0, 6.5, 0, 4.5, 2.5, 0.5],
-                        [0, 0, 0, 0, 0, 0, 6.5, 0, 4.5, 0, 0.5],
-                        [0, 0, 0, 0, 0, 0, 0, 0, 4.5, 0, 0.5],
-                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5],
-                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
-
-starts = np.array([[0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
-                   [0., 0., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 4., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 4., 2., 2., 2., 4., 4., 6., 6., 8., 10.],
-                   [4., 4., 2., 6., 6., 4., 4., 6., 6., 8., 10.],
-                   [4., 4., 2., 6., 6., 4., 4., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 6., 4., 4., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 6., 4., 8., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 6., 4., 8., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 10., 4., 8., 6., 6., 8., 10.],
-                   [4., 8., 2., 6., 10., 4., 8., 6., 10., 8., 10.],
-                   [4., 8., 2., 6., 10., 4., 8., 6., 10., 8., 10.]
-                   ])
+sigma=True
+guessings, guess_sizes, starts = get_grid_Ising2D_params(sigma=sigma)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -119,9 +82,9 @@ if __name__ == '__main__':
                       verbose=verbose,
                       best_teor=best_teor)
     
-    blocks = utils.generate_Ising2D_block_list(10, [])
+    blocks = utils.generate_Ising2D_block_list(10, [], sigma=sigma)
     remaining_ids = []
-    for i in range(12):
+    for i in range(guessings.size[0]):
         run_config = {}
         run_config['faff_max'] = args.faff_max
         run_config['pc_max'] = args.pc_max
