@@ -84,7 +84,7 @@ if __name__ == '__main__':
     
     blocks = utils.generate_Ising2D_block_list(10, [], sigma=sigma)
     remaining_ids = []
-    for i in range(guessings.size[0]):
+    for i in range(guessings.shape[0]):
         run_config = {}
         run_config['faff_max'] = args.faff_max
         run_config['pc_max'] = args.pc_max
@@ -105,7 +105,7 @@ if __name__ == '__main__':
         agent_config['layer2_size'] = args.layer2_size
         agent_config['batch_size'] = args.batch_size
 
-        params = ParametersIsing2D_SAC(run_config)
+        params = ParametersIsing2D_SAC(run_config, sigma=sigma)
         
         params.guessing_run_list_deltas = guessings[i]
         params.guess_sizes_deltas = guess_sizes[i]

@@ -6,9 +6,17 @@ from environment.utils import output_to_file
 path = join('.', 'results')
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 best_reward = 0.
-delta_len = 11
-lambda_len = 11
-tries_per_param = 500
+sigma = True
+
+if sigma:
+    delta_len = 16
+    lambda_len = 16
+    suffix = 'sigma'
+else:
+    delta_len = 11
+    lambda_len = 11
+    suffix = 'eps'
+    
 rewards = []
 params = []
 deltas_all = []
@@ -44,4 +52,4 @@ print(f'Lambdas: {lambdas}')
 orderer = np.argsort(rewards)
 for el in reversed(orderer):
     file_out = np.concatenate(([el], [rewards[el]], deltas_all[el], lambdas_all[el]))
-    output_to_file(join('analized','res_analize.csv'), output=file_out)
+    output_to_file(join('analized_'+suffix, 'res_analize.csv'), output=file_out)
