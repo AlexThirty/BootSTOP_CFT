@@ -11,7 +11,7 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--faff_max', type=int, default=10000, help='Maximum number of steps without improving')
+    parser.add_argument('--faff_max', type=int, default=1000, help='Maximum number of steps without improving')
     parser.add_argument('--pc_max', type=int, default=5, help='Maximum number of reinitializations before reducing window')
     parser.add_argument('--window_rate', type=float, default=0.5, help='Rate of search window reduction')
     parser.add_argument('--max_window_exp', type=int, default=20, help='Maximun number of window reductions')
@@ -48,8 +48,11 @@ if __name__ == '__main__':
     agent_config['layer2_size'] = args.layer2_size
     agent_config['batch_size'] = args.batch_size
     
+    g = 1.
+    integral_mode = 1
+    
     # ---Instantiating some relevant classes---
-    params = ParametersBPS_SAC(run_config)
+    params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode)
     zd = ZData()
 
     # ---Kill portion of the z-sample data if required---
@@ -61,7 +64,6 @@ if __name__ == '__main__':
     # ---Instantiate the crossing_eqn class---
     cft = BPS_SAC(params, zd)
 
-    teor_reward = cft.best_theoretical_reward
     # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
     try:
         array_index = args.array_index
@@ -70,7 +72,6 @@ if __name__ == '__main__':
 
     # form the file_name where the code output is saved to
     file_name = params.filename_stem + str(array_index) + '.csv'
-    utils.output_to_file(file_name=file_name, output=[teor_reward])
     # determine initial starting point in the form needed for the soft_actor_critic function
     x0 = params.global_best - params.shifts
     

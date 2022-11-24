@@ -1,6 +1,22 @@
 from environment.blocks_ising2D import Ising2D
 import numpy as np
 import math
+import values_BPS
+
+def get_teor_deltas(g):
+    deltas = np.zeros(10)
+    deltas[0] = values_BPS.delta1[str(g)]
+    deltas[1] = values_BPS.delta2[str(g)]
+    deltas[2] = values_BPS.delta3[str(g)]
+    deltas[3] = values_BPS.delta4[str(g)]
+    deltas[4] = values_BPS.delta5[str(g)]
+    deltas[5] = values_BPS.delta6[str(g)]
+    deltas[6] = values_BPS.delta7[str(g)]
+    deltas[7] = values_BPS.delta8[str(g)]
+    deltas[8] = values_BPS.delta9[str(g)]
+    deltas[9] = values_BPS.delta10[str(g)]
+    return deltas
+
 
 class ParametersBPS:
     """
@@ -27,12 +43,13 @@ class ParametersBPS:
     No validation of the inputs is done.
     """
 
-    def __init__(self):
-        self.g = 'inf'
-        self.delta_max = 20.5
-        #self.delta_teor = np.array([2.7016236744005675,5.050856944348188,2.0213466735433836,4.2856177631124215,4.909299202733042,5.6414889781221405,8.328514525342179,7.605468108807205,8.542512893393454,8.315081625434248,10.22088919725358])
-        #self.lambda_teor = np.array([0.9530206983000907,0.4039839938189997,0.6166258049859034,0.17948634587633205,0.04899791188878733,0.04378130084964199,0.011652024319895985,0.0021118376035766362,0.0026691862468548704,0.0026228588405235584,0.0005427505644773896])
-    
+    def __init__(self, g, integral_mode):
+        self.g = g
+        self.Curvature = values_BPS.Curvature[str(g)]
+        self.delta_max = 10.5
+        self.integral_mode = integral_mode
+        self.w1 = 1.
+        self.w2 = 1.
         # ---Pre-generated conformal block lattice parameters---
         #self.delta_start = np.zeros(math.floor(self.delta_max))
         self.delta_start = np.zeros(10)
@@ -129,8 +146,8 @@ class ParametersBPS_SAC(ParametersBPS):
     No validation of the inputs is done.
     """
 
-    def __init__(self, config):
-        super().__init__()
+    def __init__(self, config, g, integral_mode):
+        super().__init__(g, integral_mode)
         
         
         # ---Output Parameters---
@@ -154,7 +171,6 @@ class ParametersBPS_SAC(ParametersBPS):
 
         # ---Environment Parameters---
         # set guessing run list for conformal weights
-        #self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         self.guessing_run_list_deltas = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
         
         # set guessing run list for ope coefficients        
@@ -174,23 +190,18 @@ class ParametersBPS_SAC(ParametersBPS):
         
         # set minimum values for conformal weights
         # minimums for D and B multiplets are fixed as weights are known
-        #self.shifts_deltas = np.zeros(self.num_of_operators)
-        self.shifts_deltas = 2*np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        self.shifts_deltas = get_teor_deltas(self.g)
         
         # set minimum values for OPE coeffs
         self.shifts_opecoeffs = np.zeros(self.num_of_operators)
 
         # ---Starting Point Parameters---
         # initial configuration to explore around
-        # set equal to combination of shifts_deltas and shifts_opecoeffs to effectively start from a zero solution
+        # set equal to combination of shifts_deltas and shifts_opecoeffs to effectively start from a zero solution        
+        delta_start = self.shifts_deltas
         
-        #print(self.guess_sizes_deltas)
-        
-        #delta_start = self.shifts_deltas
-        delta_start = 2*np.array([1., 2., 3., 4., 5., 6., 7., 8., 9., 10.])
         ope_start = self.shifts_opecoeffs
-        #print(delta_start)
-        #print(ope_start)
+        
         self.global_best = np.concatenate((delta_start, ope_start))
         # initial reward to start with
         # set equal to 0.0 to start from a zero solution.

@@ -2,6 +2,7 @@ import numpy as np
 import mpmath as mp
 import scipy.special as sc
 from numpy import linalg as LA
+import scipy.integrate as si
 
 class BPS:
     def __init__(self, params, z_data):
@@ -12,9 +13,19 @@ class BPS:
         self.g = params.g
         self.verbose = params.verbose
         self.reward_scale = params.reward_scale
-
+        self.integral_mode = params.integral_mode
+        self.w1 = params.w1
+        self.w2 = params.w2
+        
+        self.Curvature = params.Curvature
         self.C_BPS = self.get_C_BPS(self.g)
-
+        self.F = self.get_F(self.g)
+        self.B = self.get_B(self.g)
+        self.RHS_1 = self.get_RHS_1()
+        self.RHS_2 = self.get_RHS_2()
+        self.f_BPS_chi = self.f_BPS(self.chi)
+        self.f_BPS_inv = self.f_BPS(1-self.chi)
+        
         self.delta_sep = params.delta_sep
         self.delta_start = params.delta_start
         self.delta_end_increment = params.delta_end_increment
@@ -30,6 +41,21 @@ class BPS:
             factor1 = (3*sc.iv(1, 4*np.pi*g)/(2*(np.pi)**2 * g**2 * (sc.iv(2, 4*np.pi*g))**2))
             factor2 = ((2*(np.pi)**2 * g**2 + 1)*sc.iv(1, 4*np.pi*g) - 2*np.pi*g*sc.iv(0, 4*np.pi*g))
             return factor1*factor2 - 1
+        
+    def get_F(self, g):
+        return 1. + self.C_BPS
+    
+    def get_B(self, g):
+        B = g/np.pi * (sc.iv(2, 4*np.pi*g)/sc.iv(1, 4*np.pi*g))
+        return B
+    
+    def get_RHS_1(self):
+        RHS_1 = (self.B - 3*self.Curvature)/(8*self.B**2) + (7*np.log(2)-41/8)*(self.F-1) + np.log(2)
+        return RHS_1
+    
+    def get_RHS_2(self):
+        RHS_2 = (1-self.F)/6 + (2-self.F)*np.log(2) + 1 - self.Curvature/(4*self.B**2)
+        return RHS_2
 
     def get_teor_lambdas(self, delta):
         if self.g==0.:
@@ -66,7 +92,6 @@ class BPS:
         return np.array(vector)
     
     
-    
     def compute_test_vector(self, delta: np.array, chi: np.array):
         vector = []
         lambdas = self.get_teor_lambdas(delta=delta)
@@ -84,7 +109,50 @@ class BPS:
         vector = self.compute_BPS_vector(delta, lambdads, self.chi)
         return 1/LA.norm(vector)
     
+    def integrand_1(self, x, delta):
+        integrand = (x - 1 - x**2) * self.f_delta(delta, x)/(x**2) * (1 - 2*x)/(x - x**2)
+        return -integrand
     
+    def integrand_2(self, x, delta):
+        integrand = (self.f_delta(delta, x)*(2*x - 1))/(x**2)
+        return integrand
+    
+    def integral_1(self, delta):
+        integral, err = si.quad(func=self.integrand_1, a=0, b=0.5, args=(delta,))
+        return integral
+    
+    def integral_2(self, delta):
+        integral, err = si.quad(func=self.integrand_2, a=0, b=0.5, args=(delta,))
+        return integral
+    
+    def calc_constraint_1(self, delta, lambdads):
+        vector = []
+        for el in delta:
+            vector.append(self.integral_1(el))
+        return abs(np.sum(lambdads * vector) + self.RHS_1)
+    
+    def calc_constraint_2(self, delta, lambdads):
+        vector = []
+        for el in delta:
+            vector.append(self.integral_2(el))
+        return abs(np.sum(lambdads * vector) + self.RHS_2)
+    
+    def precalc_block(self, delta):
+        block_chi = self.f_delta(delta, self.chi)
+        block_inv = self.f_delta(delta, 1-self.chi)
+        return (1 - self.chi)**2 * block_chi + self.chi**2 * block_inv
+    
+    def get_precalc_vector(self, deltas, lambdads):
+        blocks = self.block_list * lambdads
+        return np.sum(blocks) + (1 - self.chi)**2 * (self.chi + self.C_BPS*self.f_BPS_chi) + (self.chi)**2 * (1-self.chi + self.C_BPS + self.f_BPS_inv)
+    
+    def get_precalc_constraint_1(self, lambdads):
+        constr = self.integral_list_1 * lambdads
+        return np.sum(constr) + self.RHS_1
+    
+    def get_precalc_constraint_2(self, lambdads):
+        constr = self.integral_list_2 * lambdads
+        return np.sum(constr) + self.RHS_2
     
 class BPS_SAC(BPS):
 
@@ -186,11 +254,14 @@ class BPS_SAC(BPS):
         # broadcast the reshaped long multiplet ope coefficients over their crossing contributions
         #spin_cons = ope_dict['all'].reshape(-1, 1) * self.compute_ising2d_vector(delta_dict['all'])
         
-        spin_cons = self.compute_BPS_vector(delta_dict['all'], ope_dict['all'], self.chi)
+        constraints = self.compute_BPS_vector(delta_dict['all'], ope_dict['all'], self.chi)
         # long_cons.shape = (num_of_long, env_shape)
 
         # add up all the components
-        constraints = spin_cons  # the .sum implements summation over multiplet spins
-        reward = 1 / LA.norm(constraints)
-
+        if self.integral_mode == 0:
+            reward = 1 / LA.norm(constraints)
+        elif self.integral_mode == 1:
+            reward = 1/ LA.norm(constraints) + self.w1 / self.calc_constraint_1(delta_dict['all'], ope_dict['all'])
+        elif self.integral_mode == 2:
+            reward = 1/ LA.norm(constraints) + self.w1 / self.calc_constraint_1(delta_dict['all'], ope_dict['all']) + self.w2 / self.calc_constraint_2(delta_dict['all'], ope_dict['all'])
         return constraints, reward, cft_data
