@@ -97,3 +97,84 @@ def generate_Ising2D_block_list(max_spin, z_kill_list, sigma=False):
 
     print('Done loading pregenerated conformal block data.')
     return block_list
+
+def generate_BPS_block_list(g_index):
+    """
+    Reads the pregenerated conformal blocks data from csv files into a list.
+
+    Parameters
+    ----------
+    max_spin : int
+        The upper bound of spin for loading conformal blocks.
+    z_kill_list : list
+        A list of z-point positions to remove.
+    Returns
+    -------
+    block_list : list
+        A list of ndarrays containing pregenerated conformal block data.
+    """
+    # since this takes a long time give the user some feedback
+    print('Loading pregenerated conformal block data.')
+    block_list = []
+    for delta in range(1, 11, 1):
+        tmp_name = 'BPS_precalc/blocks_delta' + str(delta) + '.csv'
+        tmp = np.genfromtxt(tmp_name, delimiter=',')
+        # if the kill list is empty append the whole array
+        block_list.append(tmp[g_index].reshape((-1)))
+
+    print('Done loading pregenerated conformal block data.')
+    return block_list
+
+def generate_BPS_int1_list(g_index):
+    """
+    Reads the pregenerated conformal blocks data from csv files into a list.
+
+    Parameters
+    ----------
+    max_spin : int
+        The upper bound of spin for loading conformal blocks.
+    z_kill_list : list
+        A list of z-point positions to remove.
+    Returns
+    -------
+    block_list : list
+        A list of ndarrays containing pregenerated conformal block data.
+    """
+    # since this takes a long time give the user some feedback
+    print('Loading pregenerated conformal block data.')
+    int1_list = []
+    for delta in range(1, 11, 1):
+        tmp_name = 'BPS_precalc/integral1_delta' + str(delta) + '.csv'
+        tmp = np.genfromtxt(tmp_name, delimiter=',')
+        # if the kill list is empty append the whole array
+        int1_list.append(tmp[g_index])
+
+    print('Done loading pregenerated conformal block data.')
+    return int1_list
+
+def generate_BPS_int2_list(g_index):
+    """
+    Reads the pregenerated conformal blocks data from csv files into a list.
+
+    Parameters
+    ----------
+    max_spin : int
+        The upper bound of spin for loading conformal blocks.
+    z_kill_list : list
+        A list of z-point positions to remove.
+    Returns
+    -------
+    block_list : list
+        A list of ndarrays containing pregenerated conformal block data.
+    """
+    # since this takes a long time give the user some feedback
+    print('Loading pregenerated conformal block data.')
+    int2_list = []
+    for delta in range(1, 11, 1):
+        tmp_name = 'BPS_precalc/integral2_delta' + str(delta) + '.csv'
+        tmp = np.genfromtxt(tmp_name, delimiter=',')
+        # if the kill list is empty append the whole array
+        int2_list.append(tmp[g_index])
+
+    print('Done loading pregenerated conformal block data.')
+    return int2_list

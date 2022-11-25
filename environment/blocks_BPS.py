@@ -5,7 +5,7 @@ from numpy import linalg as LA
 import scipy.integrate as si
 
 class BPS:
-    def __init__(self, params, z_data):
+    def __init__(self, params, z_data, block_list, integral_list_1, integral_list_2):
         self.multiplet_index = params.multiplet_index
         self.action_space_N = params.action_space_N
         self.chi = z_data.z
@@ -29,6 +29,10 @@ class BPS:
         self.delta_sep = params.delta_sep
         self.delta_start = params.delta_start
         self.delta_end_increment = params.delta_end_increment
+        
+        self.block_list = np.array(block_list)
+        self.integral_list_1 = np.array(integral_list_1).reshape((-1))
+        self.integral_list_2 = np.array(integral_list_2).reshape((-1))
 
         self.env_shape = z_data.env_shape
     
@@ -81,8 +85,7 @@ class BPS:
 
     def BPS_blocks(self, delta: np.array, lambdads: np.array, chi):
         blocks_chi = lambdads * self.f_delta(delta, chi)
-        blocks_inv = lambdads * self.f_delta(delta, 1-chi)
-        
+        blocks_inv = lambdads * self.f_delta(delta, 1-chi)      
         return (1-chi)**2 * (chi + self.C_BPS*self.f_BPS(chi) + np.sum(blocks_chi)) + (chi)**2 * ((1-chi) + self.C_BPS*self.f_BPS(1-chi) + np.sum(blocks_inv))
     
     def compute_BPS_vector(self, delta: np.array, lambdads: np.array, chi: np.array):
@@ -90,7 +93,6 @@ class BPS:
         for chiel in chi:
             vector.append(self.BPS_blocks(delta, lambdads, chiel).real)
         return np.array(vector)
-    
     
     def compute_test_vector(self, delta: np.array, chi: np.array):
         vector = []
@@ -142,27 +144,28 @@ class BPS:
         block_inv = self.f_delta(delta, 1-self.chi)
         return (1 - self.chi)**2 * block_chi + self.chi**2 * block_inv
     
-    def get_precalc_vector(self, deltas, lambdads):
-        blocks = self.block_list * lambdads
-        return np.sum(blocks) + (1 - self.chi)**2 * (self.chi + self.C_BPS*self.f_BPS_chi) + (self.chi)**2 * (1-self.chi + self.C_BPS + self.f_BPS_inv)
+    def get_precalc_vector(self, lambdads):
+        blocks = self.block_list * lambdads[:, np.newaxis]
+        res = np.sum(blocks, axis=0) + (1 - self.chi)**2 * (self.chi + self.C_BPS*self.f_BPS(self.chi)) + (self.chi)**2 * ((1-self.chi) + self.C_BPS * self.f_BPS(1-self.chi))
+        return res.real
     
     def get_precalc_constraint_1(self, lambdads):
         constr = self.integral_list_1 * lambdads
-        return np.sum(constr) + self.RHS_1
+        return abs(np.sum(constr) + self.RHS_1)
     
     def get_precalc_constraint_2(self, lambdads):
         constr = self.integral_list_2 * lambdads
-        return np.sum(constr) + self.RHS_2
+        return abs(np.sum(constr) + self.RHS_2)
     
 class BPS_SAC(BPS):
 
-    def __init__(self, params, z_data):
-        super().__init__(params, z_data)
+    def __init__(self, params, z_data, block_list, integral_list_1, integral_list_2):
+        super().__init__(params, z_data, block_list, integral_list_1, integral_list_2)
 
         self.same_spin_hierarchy_deltas = params.same_spin_hierarchy  # impose weight separation flag
         self.dyn_shift = params.dyn_shift  # the weight separation value
         self.dup_list = np.ones(params.num_of_operators)  # which long spins are degenerate
-
+        self.best_rew = 0.
     def split_cft_data(self, cft_data):
         """
         Sets up dictionaries to decompose the search space data into easily identifiable pieces.
@@ -261,7 +264,61 @@ class BPS_SAC(BPS):
         if self.integral_mode == 0:
             reward = 1 / LA.norm(constraints)
         elif self.integral_mode == 1:
-            reward = 1/ LA.norm(constraints) + self.w1 / self.calc_constraint_1(delta_dict['all'], ope_dict['all'])
+            const_1 = self.calc_constraint_1(delta_dict['all'], ope_dict['all'])
+            reward = 1/ LA.norm(constraints) + self.w1 / const_1
         elif self.integral_mode == 2:
-            reward = 1/ LA.norm(constraints) + self.w1 / self.calc_constraint_1(delta_dict['all'], ope_dict['all']) + self.w2 / self.calc_constraint_2(delta_dict['all'], ope_dict['all'])
+            const_1 = self.calc_constraint_1(delta_dict['all'], ope_dict['all'])
+            const_2 = self.calc_constraint_2(delta_dict['all'], ope_dict['all'])
+            reward = 1/ LA.norm(constraints) + self.w1 / const_1 + self.w2 / const_2
+        return constraints, reward, cft_data
+    
+    def crossing_precalc(self, cft_data):
+        """
+        Evaluates the truncated crossing equations for the given CFT data at all points in the z-sample simultaneously.
+
+        Parameters
+        ----------
+        cft_data : ndarray
+            An array containing the conformal weights and OPE-squared coefficients of all the multiplets.
+
+        Returns
+        -------
+        constraints : ndarray
+            Array of values of the truncated crossing equation.
+        reward : float
+            The reward determined from the constraints.
+        cft_data : ndarray
+            A list of possibly modified CFT data.
+
+        """
+        # get some dictionaries
+        delta_dict, ope_dict = self.split_cft_data(cft_data)
+
+        if self.same_spin_hierarchy_deltas:
+            # impose the mimimum conformal weight separations between operators
+            delta_dict = self.impose_weight_separation(delta_dict)
+            # since we've altered some data we update the long multiplet weights in cft_data
+            cft_data[self.multiplet_index[0]] = delta_dict['all']
+
+        # broadcast the reshaped long multiplet ope coefficients over their crossing contributions
+        #spin_cons = ope_dict['all'].reshape(-1, 1) * self.compute_ising2d_vector(delta_dict['all'])
+        
+        constraints = self.get_precalc_vector(ope_dict['all'])
+        # long_cons.shape = (num_of_long, env_shape)
+
+        # add up all the components
+        if self.integral_mode == 0:
+            reward = 1 / LA.norm(constraints)
+        elif self.integral_mode == 1:
+            const_1 = self.get_precalc_constraint_1(ope_dict['all'])
+            #reward = 1/ LA.norm(constraints) + self.w1 / const_1
+            reward = 1/(LA.norm(constraints) + self.w1*const_1)
+            if reward > self.best_rew:
+                self.best_rew = reward
+                #print(f'Base reward: {1/LA.norm(constraints)}, reward from constraint_1: {1/const_1}')
+                print(f'Base norm: {LA.norm(constraints)}, constraint_1: {const_1}')
+        elif self.integral_mode == 2:
+            const_1 = self.get_precalc_constraint_1(ope_dict['all'])
+            const_2 = self.get_precalc_constraint_2(ope_dict['all'])
+            reward = 1/ LA.norm(constraints) + self.w1 / const_1 + self.w2 / const_2
         return constraints, reward, cft_data
