@@ -52,7 +52,7 @@ if __name__ == '__main__':
     gs = np.around(gs, decimals=2)
     
     g = 1.
-    integral_mode = 1
+    integral_mode = 2
     
     # ---Instantiating some relevant classes---
     params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode)

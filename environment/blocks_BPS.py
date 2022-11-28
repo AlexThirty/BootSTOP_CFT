@@ -320,5 +320,9 @@ class BPS_SAC(BPS):
         elif self.integral_mode == 2:
             const_1 = self.get_precalc_constraint_1(ope_dict['all'])
             const_2 = self.get_precalc_constraint_2(ope_dict['all'])
-            reward = 1/ LA.norm(constraints) + self.w1 / const_1 + self.w2 / const_2
+            reward = 1/ (LA.norm(constraints) + self.w1 * const_1 + self.w2 * const_2)
+            if reward > self.best_rew:
+                self.best_rew = reward
+                #print(f'Base reward: {1/LA.norm(constraints)}, reward from constraint_1: {1/const_1}')
+                print(f'Base norm: {LA.norm(constraints)}, constraint_1: {const_1}, constraint_2: {const_2}')
         return constraints, reward, cft_data
