@@ -48,8 +48,8 @@ class ParametersBPS:
         self.Curvature = values_BPS.Curvature[str(g)]
         self.delta_max = 10.5
         self.integral_mode = integral_mode
-        self.w1 = 100.
-        self.w2 = 100.
+        self.w1 = 1.
+        self.w2 = 1.
         # ---Pre-generated conformal block lattice parameters---
         #self.delta_start = np.zeros(math.floor(self.delta_max))
         self.delta_start = np.zeros(10)

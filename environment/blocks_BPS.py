@@ -305,24 +305,27 @@ class BPS_SAC(BPS):
         
         constraints = self.get_precalc_vector(ope_dict['all'])
         # long_cons.shape = (num_of_long, env_shape)
+        cross = LA.norm(constraints)
+        const_1 = 0.
+        const_2 = 0.
 
         # add up all the components
         if self.integral_mode == 0:
-            reward = 1 / LA.norm(constraints)
+            reward = 1 / cross
         elif self.integral_mode == 1:
             const_1 = self.get_precalc_constraint_1(ope_dict['all'])
             #reward = 1/ LA.norm(constraints) + self.w1 / const_1
-            reward = 1/(LA.norm(constraints) + self.w1*const_1)
+            reward = 1/(cross + self.w1*const_1)
             if reward > self.best_rew:
                 self.best_rew = reward
                 #print(f'Base reward: {1/LA.norm(constraints)}, reward from constraint_1: {1/const_1}')
-                print(f'Base norm: {LA.norm(constraints)}, constraint_1: {const_1}')
+                print(f'Base norm: {cross}, constraint_1: {const_1}')
         elif self.integral_mode == 2:
             const_1 = self.get_precalc_constraint_1(ope_dict['all'])
             const_2 = self.get_precalc_constraint_2(ope_dict['all'])
-            reward = 1/ (LA.norm(constraints) + self.w1 * const_1 + self.w2 * const_2)
+            reward = 1/(cross + self.w1 * const_1 + self.w2 * const_2)
             if reward > self.best_rew:
                 self.best_rew = reward
                 #print(f'Base reward: {1/LA.norm(constraints)}, reward from constraint_1: {1/const_1}')
-                print(f'Base norm: {LA.norm(constraints)}, constraint_1: {const_1}, constraint_2: {const_2}')
-        return constraints, reward, cft_data
+                print(f'Base norm: {cross}, constraint_1: {const_1}, constraint_2: {const_2}')
+        return constraints, reward, cft_data, cross, const_1, const_2 

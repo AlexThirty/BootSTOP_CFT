@@ -4,7 +4,7 @@ from parameters_BPS import ParametersBPS_SAC
 from environment.blocks_BPS import BPS_SAC
 from environment.data_z_sample import ZData
 import environment.utils as utils
-from neural_net.sac import soft_actor_critic
+from neural_net.sac_test import soft_actor_critic
 import argparse
 import numpy as np
 
@@ -29,6 +29,12 @@ if __name__ == '__main__':
     parser.add_argument('--array_index', type=int, default=0, help='Index for the try in case of multitry')
     args = parser.parse_args()
     
+    gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01), np.arange(start=0.25, stop=4.05, step=0.05)))
+    gs = np.around(gs, decimals=2)
+    
+    g = 1.
+    integral_mode = 1
+    
     run_config = {}
     run_config['faff_max'] = args.faff_max
     run_config['pc_max'] = args.pc_max
@@ -48,11 +54,7 @@ if __name__ == '__main__':
     agent_config['layer1_size'] = args.layer1_size
     agent_config['layer2_size'] = args.layer2_size
     agent_config['batch_size'] = args.batch_size
-    gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01), np.arange(start=0.25, stop=4.05, step=0.05)))
-    gs = np.around(gs, decimals=2)
-    
-    g = 1.
-    integral_mode = 2
+    agent_config['integral_mode'] = integral_mode
     
     # ---Instantiating some relevant classes---
     params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode)
