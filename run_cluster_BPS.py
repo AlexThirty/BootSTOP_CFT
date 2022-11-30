@@ -33,7 +33,7 @@ if __name__ == '__main__':
     parser.add_argument('--layer2_size', type=int, default=256, help='Dense units for the second layer')
     parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
-    parser.add_argument('--max_cpus', type=int, default=650, help='Maximum number of CPUs')
+    parser.add_argument('--max_cpus', type=int, default=540, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
     parser.add_argument('--runs_per_args', type=int, default=150, help='Number of runs for each combination of parameters')
     

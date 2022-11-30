@@ -152,7 +152,7 @@ class ParametersBPS_SAC(ParametersBPS):
         
         # ---Output Parameters---
         self.filename_stem = 'sac'
-        self.verbose = 'o'  # When the SAC algorithm should print to the console:
+        self.verbose = ''  # When the SAC algorithm should print to the console:
         # e - print at every step
         # o - only after a re-initialisation
         # default is '' which produces no output
