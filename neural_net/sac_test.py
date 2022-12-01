@@ -1,6 +1,7 @@
 import numpy as np
 from neural_net.sac_agent import Agent
 import environment.utils as utils
+from neural_net.reward_normalizer import RewNormalizer
 
 def sigmoid(x):
     return 1./(1.+np.exp(-x))
