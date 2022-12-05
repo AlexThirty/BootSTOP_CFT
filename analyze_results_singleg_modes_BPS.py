@@ -96,7 +96,8 @@ for integral_mode in range(3):
             
             curr_delta = [float(data[i]) for i in range(3+integral_mode, 3+integral_mode+delta_len)]
             deltas_coll.append(curr_delta)
-            
+            print(integral_mode)
+            print(j)
             curr_lambda = [float(data[i]) for i in range(3+integral_mode+delta_len, 3+integral_mode+delta_len+lambda_len)]
             lambdas_coll.append(curr_lambda)
             
