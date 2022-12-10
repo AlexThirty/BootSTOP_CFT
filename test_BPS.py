@@ -3,7 +3,22 @@ from environment.data_z_sample import ZData
 from environment import utils
 import numpy as np
 import values_BPS
-from parameters_BPS_free import ParametersBPS_SAC
+from parameters_BPS_hybrid import ParametersBPS_SAC
+
+def get_teor_deltas(g):
+    deltas = np.zeros(10)
+    deltas[0] = values_BPS.delta1[str(g)]
+    deltas[1] = values_BPS.delta2[str(g)]
+    deltas[2] = values_BPS.delta3[str(g)]
+    deltas[3] = values_BPS.delta4[str(g)]
+    deltas[4] = values_BPS.delta5[str(g)]
+    deltas[5] = values_BPS.delta6[str(g)]
+    deltas[6] = values_BPS.delta7[str(g)]
+    deltas[7] = values_BPS.delta8[str(g)]
+    deltas[8] = values_BPS.delta9[str(g)]
+    deltas[9] = values_BPS.delta10[str(g)]
+    return deltas
+
 
 run_config = {}
 run_config['faff_max'] = 10000
@@ -37,10 +52,9 @@ blocks_free = utils.generate_BPS_block_list_free()
 int1_list_free = utils.generate_BPS_int1_list_free().reshape((-1))
 int2_list_free = utils.generate_BPS_int2_list_free().reshape((-1))
 # ---Instantiate the crossing_eqn class---
-cft = BPS_SAC(params, zd, blocks, int1_list, int2_list)
-cft_free = BPS_SAC(params, zd, blocks_free, int1_list_free, int2_list_free)
+cft = BPS_SAC(params, zd, blocks, int1_list, int2_list, 1, blocks_free, int1_list_free, int2_list_free)
 
-deltas = np.random.random(10)*10
+deltas = np.random.random(5)*10
 blocks = []
 integrals1 = []
 integrals2 = []
@@ -52,20 +66,22 @@ for i in range(len(deltas)):
     integrals1.append(int1_list_free[n])
     integrals2.append(int2_list_free[n])
 
+deltas = np.concatenate((get_teor_deltas(g=g), deltas))
+
 for i in range(10):
-    lambdas = np.random.random(10)
-    a = cft_free.compute_BPS_vector(deltas, lambdas, cft.chi)
-    b = cft_free.get_free_vector(block_list=blocks, lambdads=lambdas)
+    lambdas = np.random.random(15)
+    a = cft.compute_BPS_vector(deltas, lambdas, cft.chi)
+    b = cft.get_hybrid_vector(blocks, lambdas[:10], lambdas[10:])
     print(np.linalg.norm(a-b))
     
 for i in range(10):
-    lambdas = np.random.random(10)
-    a = cft_free.calc_constraint_1(deltas, lambdas)
-    b = cft_free.get_free_constraint_1(integrals=integrals1, lambdads=lambdas)
+    lambdas = np.random.random(15)
+    a = cft.calc_constraint_1(deltas, lambdas)
+    b = cft.get_hybrid_constraint_1(integrals1, lambdas[:10], lambdas[10:])
     print(np.linalg.norm(a-b))
     
 for i in range(10):
-    lambdas = np.random.random(10)
-    a = cft_free.calc_constraint_2(deltas, lambdas)
-    b = cft_free.get_free_constraint_2(integrals=integrals2, lambdads=lambdas)
+    lambdas = np.random.random(15)
+    a = cft.calc_constraint_2(deltas, lambdas)
+    b = cft.get_hybrid_constraint_2(integrals2, lambdas[:10], lambdas[10:])
     print(np.linalg.norm(a-b))

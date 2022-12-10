@@ -5,7 +5,8 @@ from numpy import linalg as LA
 import scipy.integrate as si
 
 class BPS:
-    def __init__(self, params, z_data, block_list, integral_list_1, integral_list_2):
+    def __init__(self, params, z_data, block_list, integral_list_1, integral_list_2, hybrid=0,
+                 block_list_unk=None, integral_list_1_unk=None, integral_list_2_unk=None):
         self.multiplet_index = params.multiplet_index
         self.action_space_N = params.action_space_N
         self.chi = z_data.z
@@ -33,7 +34,11 @@ class BPS:
         self.block_list = np.array(block_list)
         self.integral_list_1 = np.array(integral_list_1).reshape((-1))
         self.integral_list_2 = np.array(integral_list_2).reshape((-1))
-
+        
+        self.block_list_unk = np.array(block_list_unk)
+        self.integral_list_1_unk = np.array(integral_list_1_unk).reshape((-1))
+        self.integral_list_2_unk = np.array(integral_list_2_unk).reshape((-1))
+        
         self.env_shape = z_data.env_shape
     
     def get_C_BPS(self, g):
@@ -170,15 +175,35 @@ class BPS:
         constr = integrals * lambdads
         return abs(np.sum(constr) + self.RHS_2)
     
+    def get_hybrid_vector(self, blocks_unk, lambdads, lambdads_unk):
+        res = np.sum(self.block_list * lambdads[:, np.newaxis], axis=0)
+        res = res + np.sum(blocks_unk * lambdads_unk[:, np.newaxis], axis=0)
+        res = res + (1 - self.chi)**2 * (self.chi + self.C_BPS*self.f_BPS(self.chi)) + (self.chi)**2 * ((1-self.chi) + self.C_BPS * self.f_BPS(1-self.chi))
+        return res.real
+    
+    def get_hybrid_constraint_1(self, integrals_unk, lambdads, lambdads_unk):
+        constr = np.sum(self.integral_list_1 * lambdads)
+        constr = constr + np.sum(integrals_unk * lambdads_unk)
+        return abs(constr + self.RHS_1)
+    
+    def get_hybrid_constraint_2(self, integrals_unk, lambdads, lambdads_unk):
+        constr = np.sum(self.integral_list_2 * lambdads)
+        constr = constr + np.sum(integrals_unk * lambdads_unk)
+        return abs(constr + self.RHS_2)
+    
+    
 class BPS_SAC(BPS):
 
-    def __init__(self, params, z_data, block_list, integral_list_1, integral_list_2):
-        super().__init__(params, z_data, block_list, integral_list_1, integral_list_2)
+    def __init__(self, params, z_data, block_list, integral_list_1, integral_list_2, hybrid=0,
+                 block_list_unk=None, integral_list_1_unk=None, integral_list_2_unk=None):
+        super().__init__(params, z_data, block_list, integral_list_1, integral_list_2, hybrid,
+                         block_list_unk, integral_list_1_unk, integral_list_2_unk)
 
         self.same_spin_hierarchy_deltas = params.same_spin_hierarchy  # impose weight separation flag
         self.dyn_shift = params.dyn_shift  # the weight separation value
         self.dup_list = np.ones(params.num_of_operators)  # which long spins are degenerate
         self.best_rew = 0.
+        
     def split_cft_data(self, cft_data):
         """
         Sets up dictionaries to decompose the search space data into easily identifiable pieces.
@@ -488,4 +513,60 @@ class BPS_SAC(BPS):
             const_2 = self.get_precalc_constraint_2(ope_dict['all'])
             reward1 = 1/abs(const_1)
             reward2 = 1/abs(const_2)
-        return constraints, reward0, reward1, reward2, cft_data, cross, const_1, const_2 
+        return constraints, reward0, reward1, reward2, cft_data, cross, const_1, const_2
+    
+    
+    def crossing_hybrid(self, cft_data):
+        # get some dictionaries
+        delta_dict, ope_dict = self.split_cft_data(cft_data)
+
+        if self.same_spin_hierarchy_deltas:
+            # impose the mimimum conformal weight separations between operators
+            delta_dict = self.impose_weight_separation(delta_dict)
+            # since we've altered some data we update the long multiplet weights in cft_data
+            cft_data[self.multiplet_index[0]] = delta_dict['all']
+
+        blocks = []
+        integrals1 = []
+        integrals2 = []
+        deltas = delta_dict['all']
+        deltas_unk = deltas[10:]
+        
+        for delta in deltas_unk:
+            delta = np.clip(delta, a_min=None, a_max=self.delta_start + self.delta_end_increment - self.delta_sep)
+            n = int(np.rint((delta - self.delta_start) / self.delta_sep))
+            blocks.append(self.block_list_unk[n])
+            integrals1.append(self.integral_list_1_unk[n])
+            integrals2.append(self.integral_list_2_unk[n])
+            
+        blocks = np.array(blocks)
+        integrals1 = np.array(integrals1)
+        integrals2 = np.array(integrals2)
+        
+        constraints = self.get_hybrid_vector(blocks, ope_dict['all'][:10], ope_dict['all'][10:])
+        # long_cons.shape = (num_of_long, env_shape)
+        cross = LA.norm(constraints)
+        const_1 = 0.
+        const_2 = 0.
+
+        # add up all the components
+        if self.integral_mode == 0:
+            reward = 1 / cross
+        elif self.integral_mode == 1:
+            const_1 = self.get_hybrid_constraint_1(integrals1, ope_dict['all'][:10], ope_dict['all'][10:])
+            #reward = 1/ LA.norm(constraints) + self.w1 / const_1
+            reward = 1/(cross + self.w1*const_1)
+            if reward > self.best_rew:
+                self.best_rew = reward
+                #print(f'Base reward: {1/LA.norm(constraints)}, reward from constraint_1: {1/const_1}')
+                #print(f'Base norm: {cross}, constraint_1: {const_1}')
+        elif self.integral_mode == 2:
+            const_1 = self.get_hybrid_constraint_1(integrals1, ope_dict['all'][:10], ope_dict['all'][10:])
+            const_2 = self.get_hybrid_constraint_2(integrals2, ope_dict['all'][:10], ope_dict['all'][10:])
+            reward = 1/(cross + self.w1 * const_1 + self.w2 * const_2)
+            if reward > self.best_rew:
+                self.best_rew = reward
+                #print(f'Base reward: {1/LA.norm(constraints)}, reward from constraint_1: {1/const_1}')
+                #print(f'Base norm: {cross}, constraint_1: {const_1}, constraint_2: {const_2}')
+        return constraints, reward, cft_data, cross, const_1, const_2 
+    

@@ -47,7 +47,7 @@ class ParametersBPS:
         self.g = g
         self.Curvature = values_BPS.Curvature[str(g)]
         self.delta_max = 10.5
-        self.num_of_operators = 10
+        self.num_of_operators = 15
         self.integral_mode = integral_mode
         self.w1 = 1.
         self.w2 = 1.
@@ -171,10 +171,10 @@ class ParametersBPS_SAC(ParametersBPS):
 
         # ---Environment Parameters---
         # set guessing run list for conformal weights
-        self.guessing_run_list_deltas = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])        
+        self.guessing_run_list_deltas = np.concatenate((np.zeros(10), np.ones(self.num_of_operators - 10)))
         
         # set guessing run list for ope coefficients        
-        self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        self.guessing_run_list_opes = np.ones(self.num_of_operators)
         
         self.reward_scale = config['reward_scale']
         
@@ -182,14 +182,14 @@ class ParametersBPS_SAC(ParametersBPS):
         # windows for D and B multiplets should be set to zero as they are fixed
         
         # !!! Modified this to set the initial window to respect delta <= delta_max
-        self.guess_sizes_deltas = np.zeros(self.num_of_operators)
+        self.guess_sizes_deltas = np.concatenate((np.zeros(10), self.delta_max*np.ones(self.num_of_operators - 10)-1.5))
         
         # initial search window size for OPE coeffs        
         self.guess_sizes_opes = np.ones(self.num_of_operators)
         
         # set minimum values for conformal weights
         # minimums for D and B multiplets are fixed as weights are known
-        self.shifts_deltas = get_teor_deltas(self.g)
+        self.shifts_deltas = np.concatenate((get_teor_deltas(self.g), np.ones(self.num_of_operators - 10) + 0.5))
         
         # set minimum values for OPE coeffs
         self.shifts_opecoeffs = np.zeros(self.num_of_operators)
