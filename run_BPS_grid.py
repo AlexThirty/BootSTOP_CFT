@@ -105,8 +105,8 @@ if __name__ == '__main__':
     agent_config['integral_mode'] = integral_mode
     
     
-    w1s = [0.01, 0.1, 1., 10., 100., 1000., 10000, 100000.]
-    w2s = [0.01, 0.1, 1., 10., 100., 1000., 10000, 100000.]
+    w1s = [0.01, 0.1, 1., 10., 100., 1000., 10000, 100000., 1e6, 1e7]
+    w2s = [0.01, 0.1, 1., 10., 100., 1000., 10000, 100000., 1e6, 1e7]
     
     # ---Instantiating some relevant classes---
     params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode)

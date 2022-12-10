@@ -52,4 +52,4 @@ print(f'Lambdas: {lambdas}')
 orderer = np.argsort(rewards)
 for el in reversed(orderer):
     file_out = np.concatenate(([el], [rewards[el]], deltas_all[el], lambdas_all[el]))
-    output_to_file(join('analized_'+suffix, 'res_analize.csv'), output=file_out)
+    output_to_file(join('analyzed_'+suffix, 'res_analyze.csv'), output=file_out)
