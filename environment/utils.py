@@ -178,3 +178,74 @@ def generate_BPS_int2_list(g_index):
 
     print('Done loading pregenerated conformal block data.')
     return int2_list
+
+
+
+def generate_BPS_block_list_free():
+    """
+    Reads the pregenerated conformal blocks data from csv files into a list.
+
+    Parameters
+    ----------
+    max_spin : int
+        The upper bound of spin for loading conformal blocks.
+    z_kill_list : list
+        A list of z-point positions to remove.
+    Returns
+    -------
+    block_list : list
+        A list of ndarrays containing pregenerated conformal block data.
+    """
+    # since this takes a long time give the user some feedback
+    print('Loading pregenerated conformal block data.')
+    tmp_name = 'BPS_precalc_free/blocks.csv'
+    block_list = np.genfromtxt(tmp_name, delimiter=',')
+
+    print('Done loading pregenerated conformal block data.')
+    return block_list
+
+def generate_BPS_int1_list_free():
+    """
+    Reads the pregenerated conformal blocks data from csv files into a list.
+
+    Parameters
+    ----------
+    max_spin : int
+        The upper bound of spin for loading conformal blocks.
+    z_kill_list : list
+        A list of z-point positions to remove.
+    Returns
+    -------
+    block_list : list
+        A list of ndarrays containing pregenerated conformal block data.
+    """
+    # since this takes a long time give the user some feedback
+    print('Loading pregenerated conformal block data.')
+    tmp_name = 'BPS_precalc_free/integral1.csv'
+    integral = np.genfromtxt(tmp_name, delimiter=',')
+
+    print('Done loading pregenerated conformal block data.')
+    return integral
+
+def generate_BPS_int2_list_free():
+    """
+    Reads the pregenerated conformal blocks data from csv files into a list.
+
+    Parameters
+    ----------
+    max_spin : int
+        The upper bound of spin for loading conformal blocks.
+    z_kill_list : list
+        A list of z-point positions to remove.
+    Returns
+    -------
+    block_list : list
+        A list of ndarrays containing pregenerated conformal block data.
+    """
+    # since this takes a long time give the user some feedback
+    print('Loading pregenerated conformal block data.')
+    tmp_name = 'BPS_precalc_free/integral2.csv'
+    integral = np.genfromtxt(tmp_name, delimiter=',')
+
+    print('Done loading pregenerated conformal block data.')
+    return integral

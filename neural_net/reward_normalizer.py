@@ -69,7 +69,7 @@ class RewNormalizer:
         self.ret_rms = RunningMeanStd(shape=())
         self.clip_reward = clip_reward
         # Returns: discounted rewards
-        self.returns = np.zeros(self.num_envs)
+        self.returns = np.zeros(1)
         self.gamma = gamma
         self.epsilon = epsilon
         self.training = training
@@ -89,7 +89,8 @@ class RewNormalizer:
         Calling this method does not update statistics.
         """
         if self.norm_reward:
-            reward = np.clip(reward / np.sqrt(self.ret_rms.var + self.epsilon), -self.clip_reward, self.clip_reward)
+            reward = np.clip((reward - self.ret_rms.mean) / np.sqrt(self.ret_rms.var + self.epsilon), -self.clip_reward, self.clip_reward)
+            #reward = np.clip(reward / np.sqrt(self.ret_rms.var + self.epsilon), -self.clip_reward, self.clip_reward)
         return reward
 
     def unnormalize_reward(self, reward: np.ndarray) -> np.ndarray:
@@ -102,3 +103,8 @@ class RewNormalizer:
         Returns an unnormalized version of the rewards from the most recent step.
         """
         return self.old_reward.copy()
+    
+    def reset(self):
+        self.ret_rms = RunningMeanStd(shape=())
+        self.returns = np.zeros(self.num_envs)
+        self.old_reward = np.array([])

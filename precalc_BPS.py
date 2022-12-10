@@ -26,7 +26,10 @@ run_config['same_spin_hierarchy'] = False
 run_config['dyn_shift'] = 0.
 run_config['reward_scale'] = 0.001
 
-gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01), np.arange(start=0.25, stop=4.05, step=0.05)))
+gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
+                     np.arange(start=0.25, stop=4.05, step=0.05),
+                     #np.arange(start=4.25, stop=5.25, step=0.25)
+                     ))
 integral_mode = 0
 print(gs)
 gs = np.around(gs, decimals=2)
@@ -38,7 +41,7 @@ for delta in range(1, 11, 1):
     for g in gs:
         delta_val = deltas[delta-1][str(g)]
         params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode)
-        cft = BPS_SAC(params, zd)
+        cft = BPS_SAC(params, zd, [], [], [])
         value = cft.precalc_block(delta=delta_val).real
         utils.output_to_file(file_name=tmp_name, output=value)
         
@@ -47,7 +50,7 @@ for delta in range(1, 11, 1):
     for g in gs:
         delta_val = deltas[delta-1][str(g)]
         params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode)
-        cft = BPS_SAC(params, zd)
+        cft = BPS_SAC(params, zd, [], [], [])
         value = cft.integral_1(delta=delta_val)
         utils.output_to_file(file_name=tmp_name, output=[value])
         
@@ -56,6 +59,6 @@ for delta in range(1, 11, 1):
     for g in gs:
         delta_val = deltas[delta-1][str(g)]
         params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode)
-        cft = BPS_SAC(params, zd)
+        cft = BPS_SAC(params, zd, [], [], [])
         value = cft.integral_2(delta=delta_val)
         utils.output_to_file(file_name=tmp_name, output=[value])

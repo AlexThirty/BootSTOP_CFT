@@ -1,6 +1,6 @@
 from ast import Param
 import sys
-from parameters_BPS import ParametersBPS_SAC
+from parameters_BPS_free import ParametersBPS_SAC
 from environment.blocks_BPS import BPS_SAC
 from environment.data_z_sample import ZData
 import environment.utils as utils
@@ -29,11 +29,14 @@ if __name__ == '__main__':
     parser.add_argument('--array_index', type=int, default=0, help='Index for the try in case of multitry')
     args = parser.parse_args()
     
-    gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01), np.arange(start=0.25, stop=4.05, step=0.05)))
+    gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
+                     np.arange(start=0.25, stop=4.05, step=0.05),
+                     #np.arange(start=4.25, stop=5.25, step=0.25)
+                     ))
     gs = np.around(gs, decimals=2)
     
     g = 4.
-    integral_mode = 1
+    integral_mode = 2
     
     run_config = {}
     run_config['faff_max'] = args.faff_max
@@ -64,10 +67,9 @@ if __name__ == '__main__':
     # ---Kill portion of the z-sample data if required---
     
     zd.kill_data(params.z_kill_list)
-    g_index = np.argwhere(gs==g)[0]
-    blocks = utils.generate_BPS_block_list(g_index=g_index)
-    int1_list = utils.generate_BPS_int1_list(g_index=g_index)
-    int2_list = utils.generate_BPS_int2_list(g_index=g_index)
+    blocks = utils.generate_BPS_block_list_free()
+    int1_list = utils.generate_BPS_int1_list_free()
+    int2_list = utils.generate_BPS_int2_list_free()
     # ---Load the pre-generated conformal blocks for long multiplets---
     #blocks = utils.generate_block_list(max(params.spin_list), params.z_kill_list)
     
@@ -86,7 +88,7 @@ if __name__ == '__main__':
     x0 = params.global_best - params.shifts
     
     # ---Run the soft actor critic algorithm---
-    soft_actor_critic(func=cft.crossing,
+    soft_actor_critic(func=cft.crossing_precalc_free,
                       max_window_changes=params.max_window_exp,
                       window_decrease_rate=params.window_rate,
                       pc_max=params.pc_max,

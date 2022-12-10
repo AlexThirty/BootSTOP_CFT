@@ -3,21 +3,6 @@ import numpy as np
 import math
 import values_BPS
 
-def get_teor_deltas(g):
-    deltas = np.zeros(10)
-    deltas[0] = values_BPS.delta1[str(g)]
-    deltas[1] = values_BPS.delta2[str(g)]
-    deltas[2] = values_BPS.delta3[str(g)]
-    deltas[3] = values_BPS.delta4[str(g)]
-    deltas[4] = values_BPS.delta5[str(g)]
-    deltas[5] = values_BPS.delta6[str(g)]
-    deltas[6] = values_BPS.delta7[str(g)]
-    deltas[7] = values_BPS.delta8[str(g)]
-    deltas[8] = values_BPS.delta9[str(g)]
-    deltas[9] = values_BPS.delta10[str(g)]
-    return deltas
-
-
 class ParametersBPS:
     """
     Class used to hold parameters needed to initialise Ising2D located in blocks_ising2D.py
@@ -47,17 +32,14 @@ class ParametersBPS:
         self.g = g
         self.Curvature = values_BPS.Curvature[str(g)]
         self.delta_max = 10.5
-        self.num_of_operators = 10
         self.integral_mode = integral_mode
-        self.w1 = 1.
-        self.w2 = 1.
+        self.w1 = 1000.
+        self.w2 = 10.
         # ---Pre-generated conformal block lattice parameters---
-        #self.delta_start = np.zeros(math.floor(self.delta_max))
         self.delta_start = 0.
-        #self.delta_start = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
         self.delta_sep = 0.00005  # jump in weights between each lattice point
         self.delta_end_increment = self.delta_max - self.delta_start  # maximum deltas are delta_start + delta_end_increment - delta_sep eg 35.7995
-
+        self.num_of_operators = 10
         # This is a list of the original 180 columns to delete from the '6d_blocks_spin*.csv' files
         self.z_kill_list = []
         # An example of a non-empty z_kill_list
@@ -171,7 +153,8 @@ class ParametersBPS_SAC(ParametersBPS):
 
         # ---Environment Parameters---
         # set guessing run list for conformal weights
-        self.guessing_run_list_deltas = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])        
+        self.guessing_run_list_deltas = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        
         
         # set guessing run list for ope coefficients        
         self.guessing_run_list_opes = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
@@ -182,14 +165,14 @@ class ParametersBPS_SAC(ParametersBPS):
         # windows for D and B multiplets should be set to zero as they are fixed
         
         # !!! Modified this to set the initial window to respect delta <= delta_max
-        self.guess_sizes_deltas = np.zeros(self.num_of_operators)
+        self.guess_sizes_deltas = np.ones(self.num_of_operators)*self.delta_max -1.5
         
         # initial search window size for OPE coeffs        
         self.guess_sizes_opes = np.ones(self.num_of_operators)
         
         # set minimum values for conformal weights
         # minimums for D and B multiplets are fixed as weights are known
-        self.shifts_deltas = get_teor_deltas(self.g)
+        self.shifts_deltas = np.ones(self.num_of_operators) + 0.5
         
         # set minimum values for OPE coeffs
         self.shifts_opecoeffs = np.zeros(self.num_of_operators)
@@ -197,7 +180,7 @@ class ParametersBPS_SAC(ParametersBPS):
         # ---Starting Point Parameters---
         # initial configuration to explore around
         # set equal to combination of shifts_deltas and shifts_opecoeffs to effectively start from a zero solution        
-        delta_init = self.shifts_deltas
+        delta_init = self.shifts_deltas+1
         
         ope_init = self.shifts_opecoeffs
         

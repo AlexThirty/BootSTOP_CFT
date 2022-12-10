@@ -31,7 +31,7 @@ class Environment:
     """
 
     def __init__(self, func_wrapper, environment_dim, search_space_dim,
-                 lower_bounds, search_window_sizes, guessing_run_list, agent_config):
+                 lower_bounds, search_window_sizes, guessing_run_list):
         self.func_wrapper = func_wrapper
         self.environment_dim = environment_dim
         self.search_space_dim = search_space_dim
@@ -45,12 +45,6 @@ class Environment:
         self.current_crossing = None
         self.current_int_constr_1 = None
         self.current_int_constr_2 = None
-        self.w1 = agent_config['w1']
-        self.w2 = agent_config['w2']
-        self.integral_mode = agent_config['integral_mode']
-        self.normalizer0 = RewNormalizer(training=True, norm_reward=True, clip_reward=np.inf)
-        self.normalizer1 = RewNormalizer(training=True, norm_reward=True, clip_reward=np.inf)
-        self.normalizer2 = RewNormalizer(training=True, norm_reward=True, clip_reward=np.inf)
 
     def move(self, action, largest, solution):
         """
@@ -70,25 +64,9 @@ class Environment:
                                                         + (1 - self.guessing_run_list) * solution)
 
         # evaluate the function at the updated location and update attributes
-        self.current_constraints, reward0, reward1, reward2, self.current_location, \
-            self.current_crossing, self.current_int_constr_1, self.current_int_constr_2 \
+        self.current_constraints, self.current_reward, self.current_location, self.current_crossing, self.current_int_constr_1, self.current_int_constr_2 \
             = self.func_wrapper.fun(self.current_location)
 
-        self.normalizer0._update_reward(reward=reward0)
-        self.current_reward = self.normalizer0.normalize_reward(reward=reward0)
-        
-        
-        if self.integral_mode == 1:
-            self.normalizer1._update_reward(reward=reward1)
-            self.current_reward = self.current_reward + self.w1*self.normalizer1.normalize_reward(reward1)
-        
-        if self.integral_mode == 2:
-            self.normalizer1._update_reward(reward=reward1)
-            self.current_reward = self.current_reward + self.w1*self.normalizer1.normalize_reward(reward1)
-            self.normalizer2._update_reward(reward=reward2)
-            self.current_reward = self.current_reward + self.w2*self.normalizer1.normalize_reward(reward2)
-        
-        
         # check if we've found a new maximum
         if self.current_reward > largest:
             self.reward_improved = True
@@ -289,7 +267,7 @@ def soft_actor_critic(func,
     #
     # Initialize the Environment class
     environment = Environment(func_wrapper, environment_dim, search_space_dim, lower_bounds, search_window_sizes,
-                              guessing_run_list, agent_config)
+                              guessing_run_list)
     # Initialize learning class
     lrn = Learn(environment, agent_config)
     # set the initial window size reduction exponent, pc counter and best_reward (counter for reductions)
@@ -322,11 +300,6 @@ def soft_actor_critic(func,
         # delete and re-instantiate the Learn class, this re-initialises the Agent class
         del lrn
         environment.reset_env()
-        
-        #environment.normalizer0.reset()
-        #environment.normalizer1.reset()
-        #environment.normalizer2.reset()
-        
         if window_scale_exponent != max_window_changes:
             agent_config['reward_scale'] = det_rew_scale(window_scale_exponent, start_rew_scale, 1., max_window_changes, rew_scale_schedule)
         cur_rew_scale = agent_config['reward_scale']
