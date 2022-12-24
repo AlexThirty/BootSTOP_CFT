@@ -105,8 +105,8 @@ if __name__ == '__main__':
     agent_config['integral_mode'] = integral_mode
     
     
-    w1s = [0.01, 0.1, 1., 10., 100., 1000., 10000, 100000., 1e6, 1e7]
-    w2s = [0.01, 0.1, 1., 10., 100., 1000., 10000, 100000., 1e6, 1e7]
+    w1s = [0.1, 1., 10., 100., 1000., 10000, 100000., 1e6]
+    w2s = [0.1, 1., 10., 100., 1000., 10000, 100000., 1e6]
     
     # ---Instantiating some relevant classes---
     params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode)
@@ -116,8 +116,12 @@ if __name__ == '__main__':
     remaining_ids = []
     print(len(grid))
     for i in range(len(grid)):
-        agent_config['w1'] = params.w1
-        agent_config['w2'] = params.w2
+        w1 = grid[i][0]
+        w2 = grid[i][1]
+        agent_config['w1'] = w1
+        agent_config['w2'] = w2
+        params.w1 = w1
+        params.w2 = w2
 
         for j in range(args.runs_per_args):
             # ---Instantiating some relevant classes---
@@ -141,7 +145,7 @@ if __name__ == '__main__':
 
             # form the file_name where the code output is saved to
             file_name = os.path.join('results_BPS_grid', params.filename_stem + str(array_index) + '.csv')
-            output = str(array_index)
+            output = f'{array_index}, w1={params.w1}, w2={params.w2}'
             utils.output_to_file(file_name=file_name, output=output)
             # determine initial starting point in the form needed for the soft_actor_critic function
             x0 = params.global_best - params.shifts

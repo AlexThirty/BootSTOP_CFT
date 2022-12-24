@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=ray-tune-trenta
 ### Modify this according to your Ray workload.
-#SBATCH --nodes=12
+#SBATCH --nodes=14
 #SBATCH --exclusive
 #SBATCH --tasks-per-node=1
 ### Modify this according to your Ray workload.
@@ -44,17 +44,17 @@ RAY_worker_register_timeout_seconds=240
 export RAY_worker_register_timeout_seconds
 
 echo "Starting HEAD at $head_node"
-ray start --head --node-ip-address=$head_node_ip --port=$port --num-cpus=45
+ray start --head --node-ip-address=$head_node_ip --port=$port --num-cpus=90
 
 # optional, though may be useful in certain versions of Ray < 1.0.
 # number of nodes other than the head node
-worker_num=12
+worker_num=14
 
 for ((i = 0; i < worker_num; i++)); do
     node_i=${nodes_array[$i]}
     echo "Starting WORKER $i at $node_i"
     srun --nodes=1 --ntasks=1 -w $node_i \
-        ray start --address $ip_head \
+        ray start --address $ip_head --num-cpus=90 \
         --block &
     sleep 5
 done
