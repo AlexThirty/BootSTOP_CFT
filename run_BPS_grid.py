@@ -32,7 +32,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
     parser.add_argument('--max_cpus', type=int, default=1100, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
-    parser.add_argument('--runs_per_args', type=int, default=20, help='Number of runs for each combination of parameters')
+    parser.add_argument('--runs_per_args', type=int, default=10, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     

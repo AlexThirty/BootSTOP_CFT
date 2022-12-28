@@ -6,6 +6,7 @@ from environment.utils import output_to_file
 from ope_bounds_BPS import bounds_OPE1, bounds_OPE2, bounds_OPE3
 from matplotlib import pyplot as plt
 import itertools
+import os
 
 gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      np.arange(start=0.25, stop=4.05, step=0.05),
@@ -55,11 +56,11 @@ path = join('.', 'results_BPS_grid')
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 best_reward = 0.
 
-w1s = [0.01, 0.1, 1., 10., 100., 1000., 10000, 100000., 1e6, 1e7]
-w2s = [0.01, 0.1, 1., 10., 100., 1000., 10000, 100000., 1e6, 1e7]
+w1s = [0.1, 1., 10., 100., 1000., 10000, 100000., 1e6]
+w2s = [0.1, 1., 10., 100., 1000., 10000, 100000., 1e6]
 grid = list(itertools.product(w1s, w2s))
 grid_pts = len(grid)
-tries_per_mode = 20
+tries_per_mode = 10
 delta_len = 10
 lambda_len = 10
 
@@ -81,14 +82,15 @@ for i in range(grid_pts):
     crossing_coll = []
     constraint1_coll = []
     constraint2_coll = []
-    
+    w1 = grid[i][0]
+    w2 = grid[i][1]
+    if not os.path.exists(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}')):
+        os.makedirs(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}'))
     for j in range(tries_per_mode):
         currf = open(join(path, 'sac'+str(i*tries_per_mode+j)+'.csv'))
         csv_raw = csv.reader(currf)
         sp = list(csv_raw)
         data = sp[-1]
-        w1 = grid[i][0]
-        w2 = grid[i][1]
         
         if len(data)>10:
             curr_rew = float(data[1])
@@ -103,7 +105,7 @@ for i in range(grid_pts):
             
             curr_delta = [float(data[i]) for i in range(5, 5+delta_len)]
             deltas_coll.append(curr_delta)
-            print(integral_mode)
+            print(f'w1={w1}, w2={w2}')
             print(j)
             curr_lambda = [float(data[i]) for i in range(5+delta_len, 5+delta_len+lambda_len)]
             lambdas_coll.append(curr_lambda)
@@ -131,7 +133,7 @@ for i in range(grid_pts):
     orderer = np.argsort(rew_coll)
     for el in reversed(orderer):
         
-        output = np.concatenate(([el], [rew_coll[el]], [ope1_err[integral_mode, el]], [ope2_err[integral_mode, el]], [ope3_err[integral_mode, el]], [crossing_coll[el]], [constraint1_coll[el]], [constraint2_coll[el]], deltas_coll[el], lambdas_coll[el]))
+        output = np.concatenate(([el], [rew_coll[el]], [ope1_err[i, el]], [ope2_err[i, el]], [ope3_err[i, el]], [crossing_coll[el]], [constraint1_coll[el]], [constraint2_coll[el]], deltas_coll[el], lambdas_coll[el]))
         output_to_file(file_name=join('BPS_grid_analyzed',f'w1_{w1}_w2_{w2}.csv'), output=output)
     
     rewards[i] = rew_coll
@@ -142,7 +144,7 @@ for i in range(grid_pts):
     # Best by reward
     orderer = np.argsort(rew_coll)
     with open(join('BPS_grid_analyzed', 'best_rew.txt'), 'a') as f:
-        print(f'Integral mode: {integral_mode}', file=f)
+        print(f'w1={w1}, w2={w2}', file=f)
         print(f'Best run: {best_run}', file=f)
         print(f'Reward: {rew_coll[orderer[-1]]}', file=f)
         print(f'OPE1 error: {ope1_err[i, orderer[-1]]}', file=f)
@@ -167,7 +169,7 @@ for i in range(grid_pts):
     plt.close()
     
     plt.figure(figsize=(6, 6))
-    plt.scatter(range(10), constraint_1[i, rew_ordered], c=range(10), cmap='tab10')
+    plt.scatter(range(10), constraints1[i, rew_ordered], c=range(10), cmap='tab10')
     plt.title('Constraint 1 norm (best rew)')
     plt.xlabel('Best 10 tries')
     plt.ylabel('constraint1 norm')
@@ -177,7 +179,7 @@ for i in range(grid_pts):
     plt.close()
     
     plt.figure(figsize=(6, 6))
-    plt.scatter(range(10), constraint_2[i, rew_ordered], c=range(10), cmap='tab10')
+    plt.scatter(range(10), constraints2[i, rew_ordered], c=range(10), cmap='tab10')
     plt.title('Constraint 2 norm (best rew)')
     plt.xlabel('Best 10 tries')
     plt.ylabel('constraint2 norm')
@@ -219,7 +221,7 @@ for i in range(grid_pts):
     # Best by OPE1
     orderer = np.argsort(ope1_err[i,:])
     with open(join('BPS_grid_analyzed', 'best_ope1.txt'), 'a') as f:
-        print(f'Integral mode: {integral_mode}', file=f)
+        print(f'w1={w1}, w2={w2}', file=f)
         print(f'Best run: {best_run}', file=f)
         print(f'Reward: {rew_coll[orderer[0]]}', file=f)
         print(f'OPE1 error: {ope1_err[i, orderer[0]]}', file=f)
@@ -244,7 +246,7 @@ for i in range(grid_pts):
     plt.close()
     
     plt.figure(figsize=(6, 6))
-    plt.scatter(range(10), constraint_1[i, ope1_ordered], c=range(10), cmap='tab10')
+    plt.scatter(range(10), constraints1[i, ope1_ordered], c=range(10), cmap='tab10')
     plt.title('Constraint 1 norm (best OPE1)')
     plt.xlabel('Best 10 tries')
     plt.ylabel('constraint1 norm')
@@ -254,7 +256,7 @@ for i in range(grid_pts):
     plt.close()
     
     plt.figure(figsize=(6, 6))
-    plt.scatter(range(10), constraint_2[i, ope1_ordered], c=range(10), cmap='tab10')
+    plt.scatter(range(10), constraints2[i, ope1_ordered], c=range(10), cmap='tab10')
     plt.title('Constraint 2 norm (best OPE1)')
     plt.xlabel('Best 10 tries')
     plt.ylabel('constraint2 norm')
@@ -297,7 +299,7 @@ for i in range(grid_pts):
     # Best by OPE2
     orderer = np.argsort(ope2_err[i,:])
     with open(join('BPS_grid_analyzed', 'best_ope2.txt'), 'a') as f:
-        print(f'Integral mode: {integral_mode}', file=f)
+        print(f'w1={w1}, w2={w2}', file=f)
         print(f'Best run: {best_run}', file=f)
         print(f'Reward: {rew_coll[orderer[0]]}', file=f)
         print(f'OPE1 error: {ope1_err[i, orderer[0]]}', file=f)
@@ -322,7 +324,7 @@ for i in range(grid_pts):
     plt.close()
     
     plt.figure(figsize=(6, 6))
-    plt.scatter(range(10), constraint_1[i, ope2_ordered], c=range(10), cmap='tab10')
+    plt.scatter(range(10), constraints1[i, ope2_ordered], c=range(10), cmap='tab10')
     plt.title('Constraint 1 norm (best OPE2)')
     plt.xlabel('Best 10 tries')
     plt.ylabel('constraint1 norm')
@@ -332,7 +334,7 @@ for i in range(grid_pts):
     plt.close()
     
     plt.figure(figsize=(6, 6))
-    plt.scatter(range(10), constraint_2[i, ope2_ordered], c=range(10), cmap='tab10')
+    plt.scatter(range(10), constraints2[i, ope2_ordered], c=range(10), cmap='tab10')
     plt.title('Constraint 2 norm (best OPE2)')
     plt.xlabel('Best 10 tries')
     plt.ylabel('constraint2 norm')
@@ -375,7 +377,7 @@ for i in range(grid_pts):
     # Best by OPE3
     orderer = np.argsort(ope3_err[i,:])
     with open(join('BPS_grid_analyzed', 'best_ope1.txt'), 'a') as f:
-        print(f'Integral mode: {integral_mode}', file=f)
+        print(f'w1={w1}, w2={w2}', file=f)
         print(f'Best run: {best_run}', file=f)
         print(f'Reward: {rew_coll[orderer[0]]}', file=f)
         print(f'OPE1 error: {ope1_err[i, orderer[0]]}', file=f)
@@ -400,7 +402,7 @@ for i in range(grid_pts):
     plt.close()
     
     plt.figure(figsize=(6, 6))
-    plt.scatter(range(10), constraint_1[i, ope3_ordered], c=range(10), cmap='tab10')
+    plt.scatter(range(10), constraints1[i, ope3_ordered], c=range(10), cmap='tab10')
     plt.title('Constraint 1 norm (best OPE3)')
     plt.xlabel('Best 10 tries')
     plt.ylabel('constraint1 norm')
@@ -410,7 +412,7 @@ for i in range(grid_pts):
     plt.close()
     
     plt.figure(figsize=(6, 6))
-    plt.scatter(range(10), constraint_2[i, ope3_ordered], c=range(10), cmap='tab10')
+    plt.scatter(range(10), constraints2[i, ope3_ordered], c=range(10), cmap='tab10')
     plt.title('Constraint 2 norm (best OPE3)')
     plt.xlabel('Best 10 tries')
     plt.ylabel('constraint2 norm')
