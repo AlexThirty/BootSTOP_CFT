@@ -376,7 +376,7 @@ for i in range(grid_pts):
     
     # Best by OPE3
     orderer = np.argsort(ope3_err[i,:])
-    with open(join('BPS_grid_analyzed', 'best_ope1.txt'), 'a') as f:
+    with open(join('BPS_grid_analyzed', 'best_ope3.txt'), 'a') as f:
         print(f'w1={w1}, w2={w2}', file=f)
         print(f'Best run: {best_run}', file=f)
         print(f'Reward: {rew_coll[orderer[0]]}', file=f)
