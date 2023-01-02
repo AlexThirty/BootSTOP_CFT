@@ -52,12 +52,13 @@ def get_lambda_error(val, ope_index, g_index):
     else:
         raise ValueError
 
-path = join('.', 'results_BPS_grid')
+path = join('.', 'results_BPS_grid_recip')
+save_path = join('.', 'BPS_grid_analyzed_recip')
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 best_reward = 0.
 
-w1s = [0.1, 1., 10., 100., 1000., 10000, 100000., 1e6]
-w2s = [0.1, 1., 10., 100., 1000., 10000, 100000., 1e6]
+w1s = [0.1, 1., 10., 100., 1000., 10000., 100000., 1e6]
+w2s = [0.1, 1., 10., 100., 1000., 10000., 100000., 1e6]
 grid = list(itertools.product(w1s, w2s))
 grid_pts = len(grid)
 tries_per_mode = 10
@@ -84,8 +85,8 @@ for i in range(grid_pts):
     constraint2_coll = []
     w1 = grid[i][0]
     w2 = grid[i][1]
-    if not os.path.exists(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}')):
-        os.makedirs(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}'))
+    if not os.path.exists(join(save_path, f'w1_{w1}_w2_{w2}')):
+        os.makedirs(join(save_path, f'w1_{w1}_w2_{w2}'))
     for j in range(tries_per_mode):
         currf = open(join(path, 'sac'+str(i*tries_per_mode+j)+'.csv'))
         csv_raw = csv.reader(currf)
@@ -134,7 +135,7 @@ for i in range(grid_pts):
     for el in reversed(orderer):
         
         output = np.concatenate(([el], [rew_coll[el]], [ope1_err[i, el]], [ope2_err[i, el]], [ope3_err[i, el]], [crossing_coll[el]], [constraint1_coll[el]], [constraint2_coll[el]], deltas_coll[el], lambdas_coll[el]))
-        output_to_file(file_name=join('BPS_grid_analyzed',f'w1_{w1}_w2_{w2}.csv'), output=output)
+        output_to_file(file_name=join(save_path,f'w1_{w1}_w2_{w2}.csv'), output=output)
     
     rewards[i] = rew_coll
     crossing_norms[i] = crossing_coll
@@ -143,7 +144,7 @@ for i in range(grid_pts):
     
     # Best by reward
     orderer = np.argsort(rew_coll)
-    with open(join('BPS_grid_analyzed', 'best_rew.txt'), 'a') as f:
+    with open(join(save_path, 'best_rew.txt'), 'a') as f:
         print(f'w1={w1}, w2={w2}', file=f)
         print(f'Best run: {best_run}', file=f)
         print(f'Reward: {rew_coll[orderer[-1]]}', file=f)
@@ -156,7 +157,7 @@ for i in range(grid_pts):
         print(f'Deltas: {deltas_coll[orderer[-1]]}', file=f)
         print(f'Lambdas: {lambdas_coll[orderer[-1]]}', file=f)
         
-    rew_ordered = np.argsort(rewards[i,:])[-10:]
+    rew_ordered = np.flip(np.argsort(rewards[i,:])[-10:])
 
     plt.figure(figsize=(6, 6))
     plt.scatter(range(10), crossing_norms[i, rew_ordered], c=range(10), cmap='tab10')
@@ -165,7 +166,7 @@ for i in range(grid_pts):
     plt.ylabel('Crossing equation vector norm')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','rew_crossing_norms.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','rew_crossing_norms.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -175,7 +176,7 @@ for i in range(grid_pts):
     plt.ylabel('constraint1 norm')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','rew_constraint1.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','rew_constraint1.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -185,7 +186,7 @@ for i in range(grid_pts):
     plt.ylabel('constraint2 norm')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','rew_constraint2.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','rew_constraint2.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -195,7 +196,7 @@ for i in range(grid_pts):
     plt.ylabel('Error')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','rew_ope1_err.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','rew_ope1_err.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -205,7 +206,7 @@ for i in range(grid_pts):
     plt.ylabel('Error')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','rew_ope2_err.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','rew_ope2_err.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -215,12 +216,12 @@ for i in range(grid_pts):
     plt.ylabel('Error')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','rew_ope3_err.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','rew_ope3_err.jpg'), dpi=300)
     plt.close()
     
     # Best by OPE1
     orderer = np.argsort(ope1_err[i,:])
-    with open(join('BPS_grid_analyzed', 'best_ope1.txt'), 'a') as f:
+    with open(join(save_path, 'best_ope1.txt'), 'a') as f:
         print(f'w1={w1}, w2={w2}', file=f)
         print(f'Best run: {best_run}', file=f)
         print(f'Reward: {rew_coll[orderer[0]]}', file=f)
@@ -242,7 +243,7 @@ for i in range(grid_pts):
     plt.ylabel('Crossing equation vector norm')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE1_crossing_norms.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE1_crossing_norms.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -252,7 +253,7 @@ for i in range(grid_pts):
     plt.ylabel('constraint1 norm')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE1_constraint1.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE1_constraint1.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -262,7 +263,7 @@ for i in range(grid_pts):
     plt.ylabel('constraint2 norm')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE1_constraint2.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE1_constraint2.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -272,7 +273,7 @@ for i in range(grid_pts):
     plt.ylabel('Error')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE1_ope1_err.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE1_ope1_err.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -282,7 +283,7 @@ for i in range(grid_pts):
     plt.ylabel('Error')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE1_ope2_err.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE1_ope2_err.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -292,13 +293,13 @@ for i in range(grid_pts):
     plt.ylabel('Error')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE1_ope3_err.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE1_ope3_err.jpg'), dpi=300)
     plt.close()
     
     
     # Best by OPE2
     orderer = np.argsort(ope2_err[i,:])
-    with open(join('BPS_grid_analyzed', 'best_ope2.txt'), 'a') as f:
+    with open(join(save_path, 'best_ope2.txt'), 'a') as f:
         print(f'w1={w1}, w2={w2}', file=f)
         print(f'Best run: {best_run}', file=f)
         print(f'Reward: {rew_coll[orderer[0]]}', file=f)
@@ -320,7 +321,7 @@ for i in range(grid_pts):
     plt.ylabel('Crossing equation vector norm')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE2_crossing_norms.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE2_crossing_norms.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -330,7 +331,7 @@ for i in range(grid_pts):
     plt.ylabel('constraint1 norm')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE2_constraint1.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE2_constraint1.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -340,7 +341,7 @@ for i in range(grid_pts):
     plt.ylabel('constraint2 norm')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE2_constraint2.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE2_constraint2.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -350,7 +351,7 @@ for i in range(grid_pts):
     plt.ylabel('Error')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE2_ope1_err.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE2_ope1_err.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -360,7 +361,7 @@ for i in range(grid_pts):
     plt.ylabel('Error')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE2_ope2_err.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE2_ope2_err.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -370,13 +371,13 @@ for i in range(grid_pts):
     plt.ylabel('Error')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE2_ope3_err.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE2_ope3_err.jpg'), dpi=300)
     plt.close()
     
     
     # Best by OPE3
     orderer = np.argsort(ope3_err[i,:])
-    with open(join('BPS_grid_analyzed', 'best_ope3.txt'), 'a') as f:
+    with open(join(save_path, 'best_ope3.txt'), 'a') as f:
         print(f'w1={w1}, w2={w2}', file=f)
         print(f'Best run: {best_run}', file=f)
         print(f'Reward: {rew_coll[orderer[0]]}', file=f)
@@ -398,7 +399,7 @@ for i in range(grid_pts):
     plt.ylabel('Crossing equation vector norm')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE3_crossing_norms.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE3_crossing_norms.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -408,7 +409,7 @@ for i in range(grid_pts):
     plt.ylabel('constraint1 norm')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE3_constraint1.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE3_constraint1.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -418,7 +419,7 @@ for i in range(grid_pts):
     plt.ylabel('constraint2 norm')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE3_constraint2.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE3_constraint2.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -428,7 +429,7 @@ for i in range(grid_pts):
     plt.ylabel('Error')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE3_ope1_err.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE3_ope1_err.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -438,7 +439,7 @@ for i in range(grid_pts):
     plt.ylabel('Error')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE3_ope2_err.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE3_ope2_err.jpg'), dpi=300)
     plt.close()
     
     plt.figure(figsize=(6, 6))
@@ -448,5 +449,5 @@ for i in range(grid_pts):
     plt.ylabel('Error')
     plt.yscale('log')
     #plt.legend(fontsize=5)
-    plt.savefig(join('BPS_grid_analyzed', f'w1_{w1}_w2_{w2}','OPE3_ope3_err.jpg'), dpi=300)
+    plt.savefig(join(save_path, f'w1_{w1}_w2_{w2}','OPE3_ope3_err.jpg'), dpi=300)
     plt.close()

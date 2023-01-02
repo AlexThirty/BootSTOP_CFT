@@ -31,11 +31,11 @@ if __name__ == '__main__':
     parser.add_argument('--tau', type=float, default=0.0005, help='Tau parameter for state-value function update')
     parser.add_argument('--layer1_size', type=int, default=256, help='Dense units for first layer')
     parser.add_argument('--layer2_size', type=int, default=256, help='Dense units for the second layer')
-    parser.add_argument('--batch_size', type=int, default=256, help='Batch size')
+    parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
     parser.add_argument('--max_cpus', type=int, default=1100, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
-    parser.add_argument('--runs_per_args', type=int, default=640, help='Number of runs for each combination of parameters')
+    parser.add_argument('--runs_per_args', type=int, default=150, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     
@@ -43,7 +43,6 @@ if __name__ == '__main__':
     gs = np.around(gs, decimals=2)
     
     g = 1.
-    integral_mode = 2
     
     
     ray.init(address='172.16.18.254:6379', _node_ip_address="172.16.18.254")
@@ -87,80 +86,79 @@ if __name__ == '__main__':
                       verbose=verbose)
     
     remaining_ids = []
+    for integral_mode in range(3):
         
-    for i in range(args.runs_per_args):
-        run_config = {}
-        run_config['faff_max'] = args.faff_max
-        run_config['pc_max'] = args.pc_max
-        run_config['window_rate'] = args.window_rate
-        run_config['max_window_exp'] = args.max_window_exp
-        run_config['same_spin_hierarchy'] = args.same_spin_hierarchy
-        run_config['dyn_shift'] = args.dyn_shift
-        run_config['reward_scale'] = args.reward_scale
-    
-        agent_config = {}
-        agent_config['alpha'] = args.alpha
-        agent_config['beta'] = args.beta
-        agent_config['reward_scale'] = args.reward_scale
-        agent_config['rew_scale_schedule'] = 0
-        agent_config['gamma'] = args.gamma
-        agent_config['tau'] = args.tau
-        agent_config['layer1_size'] = args.layer1_size
-        agent_config['layer2_size'] = args.layer2_size
-        agent_config['batch_size'] = args.batch_size
-        agent_config['integral_mode'] = integral_mode
-        agent_config['output_steps'] = 1
-        agent_config['mean_output_k'] = 100
-
+        for i in range(args.runs_per_args):
+            run_config = {}
+            run_config['faff_max'] = args.faff_max
+            run_config['pc_max'] = args.pc_max
+            run_config['window_rate'] = args.window_rate
+            run_config['max_window_exp'] = args.max_window_exp
+            run_config['same_spin_hierarchy'] = args.same_spin_hierarchy
+            run_config['dyn_shift'] = args.dyn_shift
+            run_config['reward_scale'] = args.reward_scale
         
-        # ---Instantiating some relevant classes---
-        params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode, g_index=g_index, OPE_fix=3)
-        agent_config['w1'] = params.w1
-        agent_config['w2'] = params.w2
-        zd = ZData()
+            agent_config = {}
+            agent_config['alpha'] = args.alpha
+            agent_config['beta'] = args.beta
+            agent_config['reward_scale'] = args.reward_scale
+            agent_config['rew_scale_schedule'] = 1
+            agent_config['gamma'] = args.gamma
+            agent_config['tau'] = args.tau
+            agent_config['layer1_size'] = args.layer1_size
+            agent_config['layer2_size'] = args.layer2_size
+            agent_config['batch_size'] = args.batch_size
+            agent_config['integral_mode'] = integral_mode
+            agent_config['output_steps'] = 1
+            agent_config['means_output_k'] = 100
 
-        # ---Kill portion of the z-sample data if required---
-        zd.kill_data(params.z_kill_list)
-        g_index = np.argwhere(gs==g)[0]
-        blocks = utils.generate_BPS_block_list(g_index=g_index)
-        int1_list = utils.generate_BPS_int1_list(g_index=g_index)
-        int2_list = utils.generate_BPS_int2_list(g_index=g_index)
-
-        # ---Instantiate the crossing_eqn class---
-        cft = BPS_SAC(params, zd, blocks, int1_list, int2_list)
-
-        # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
-        array_index = i
-
-        # form the file_name where the code output is saved to
-        file_name = os.path.join('results', params.filename_stem + str(array_index) + '.csv')
-        file_name_steps = os.path.join('results', params.filename_stem + str(array_index) + '_steps.csv')
-        output = str(array_index)
-        utils.output_to_file(file_name=file_name, output=output)
-        # determine initial starting point in the form needed for the soft_actor_critic function
-        x0 = params.global_best - params.shifts
-        print(f'Starting run {array_index}')
             
+            # ---Instantiating some relevant classes---
+            params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode)
+            zd = ZData()
 
-        remaining_ids.append(run_exp.remote(func=cft.crossing_precalc,
-                        max_window_changes=params.max_window_exp,
-                        window_decrease_rate=params.window_rate,
-                        pc_max=params.pc_max,
-                        file_name=file_name,
-                        file_name_steps=file_name_steps,
-                        array_index=array_index,
-                        lower_bounds=params.shifts,
-                        search_window_sizes=params.guess_sizes,
-                        guessing_run_list=params.guessing_run_list,
-                        environment_dim=zd.env_shape,
-                        search_space_dim=params.action_space_N,
-                        faff_max=params.faff_max,
-                        starting_reward=params.global_reward_start,
-                        x0=x0,
-                        agent_config=agent_config,
-                        verbose=params.verbose))
+            # ---Kill portion of the z-sample data if required---
+            zd.kill_data(params.z_kill_list)
+            g_index = np.argwhere(gs==g)[0]
+            blocks = utils.generate_BPS_block_list(g_index=g_index)
+            int1_list = utils.generate_BPS_int1_list(g_index=g_index)
+            int2_list = utils.generate_BPS_int2_list(g_index=g_index)
+
+            # ---Instantiate the crossing_eqn class---
+            cft = BPS_SAC(params, zd, blocks, int1_list, int2_list)
+
+            # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
+            array_index = 1000*integral_mode + i
+
+            # form the file_name where the code output is saved to
+            file_name = os.path.join('results', params.filename_stem + str(array_index) + '.csv')
+            file_name_steps = os.path.join('results', params.filename_stem + str(array_index) + '_steps.csv')
+            output = str(array_index)
+            utils.output_to_file(file_name=file_name, output=output)
+            # determine initial starting point in the form needed for the soft_actor_critic function
+            x0 = params.global_best - params.shifts
+            print(f'Starting run {array_index}')
                 
-        time.sleep(1)
+
+            remaining_ids.append(run_exp.remote(func=cft.crossing_precalc,
+                            max_window_changes=params.max_window_exp,
+                            window_decrease_rate=params.window_rate,
+                            pc_max=params.pc_max,
+                            file_name=file_name,
+                            file_name_steps=file_name_steps,
+                            array_index=array_index,
+                            lower_bounds=params.shifts,
+                            search_window_sizes=params.guess_sizes,
+                            guessing_run_list=params.guessing_run_list,
+                            environment_dim=zd.env_shape,
+                            search_space_dim=params.action_space_N,
+                            faff_max=params.faff_max,
+                            starting_reward=params.global_reward_start,
+                            x0=x0,
+                            agent_config=agent_config,
+                            verbose=params.verbose))
+                
+            time.sleep(1)
         
     n_jobs = len(remaining_ids)
     print(f"Total jobs: {n_jobs}")

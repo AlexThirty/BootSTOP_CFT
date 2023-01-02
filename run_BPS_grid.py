@@ -32,7 +32,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
     parser.add_argument('--max_cpus', type=int, default=1100, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
-    parser.add_argument('--runs_per_args', type=int, default=10, help='Number of runs for each combination of parameters')
+    parser.add_argument('--runs_per_args', type=int, default=25, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     
@@ -54,6 +54,7 @@ if __name__ == '__main__':
                 window_decrease_rate,
                 pc_max,
                 file_name,
+                file_name_steps,
                 array_index,
                 lower_bounds,
                 search_window_sizes,
@@ -70,6 +71,7 @@ if __name__ == '__main__':
                       window_decrease_rate=window_decrease_rate,
                       pc_max=pc_max,
                       file_name=file_name,
+                      file_name_steps=file_name_steps,
                       array_index=array_index,
                       lower_bounds=lower_bounds,
                       search_window_sizes=search_window_sizes,
@@ -103,25 +105,31 @@ if __name__ == '__main__':
     agent_config['layer2_size'] = args.layer2_size
     agent_config['batch_size'] = args.batch_size
     agent_config['integral_mode'] = integral_mode
+    agent_config['output_steps'] = 1
+    agent_config['mean_output_k'] = 1000
     
     
-    w1s = [0.1, 1., 10., 100., 1000., 10000, 100000., 1e6]
-    w2s = [0.1, 1., 10., 100., 1000., 10000, 100000., 1e6]
+    ab = [0.0001, 0.0005, 0.001, 0.005]
+    scale = [0.001, 0.01, 0.1, 1., 10.]
     
     # ---Instantiating some relevant classes---
     params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode)
 
-    grid = list(itertools.product(w1s, w2s))
+    grid = list(itertools.product(ab, scale))
 
     remaining_ids = []
     print(len(grid))
     for i in range(len(grid)):
-        w1 = grid[i][0]
-        w2 = grid[i][1]
-        agent_config['w1'] = w1
-        agent_config['w2'] = w2
-        params.w1 = w1
-        params.w2 = w2
+        ab_val = grid[i][0]
+        scale_val = grid[i][1]
+        agent_config['w1'] = 1000.
+        agent_config['w2'] = 10000.
+        params.w1 = 1000.
+        params.w2 = 10000.
+        agent_config['alpha'] = ab_val
+        agent_config['beta'] = ab_val
+        agent_config['reward_scale'] = scale_val
+        run_config['reward_scale'] = scale_val
 
         for j in range(args.runs_per_args):
             # ---Instantiating some relevant classes---
@@ -144,8 +152,9 @@ if __name__ == '__main__':
             array_index = args.runs_per_args*i+j
 
             # form the file_name where the code output is saved to
-            file_name = os.path.join('results_BPS_grid', params.filename_stem + str(array_index) + '.csv')
-            output = f'{array_index}, w1={params.w1}, w2={params.w2}'
+            file_name = os.path.join('results_BPS_grid_scale', params.filename_stem + str(array_index) + '.csv')
+            file_name_steps = os.path.join('results_BPS_grid_scale', params.filename_stem + str(array_index) + '_steps.csv')
+            output = [array_index, ab_val, scale_val]
             utils.output_to_file(file_name=file_name, output=output)
             # determine initial starting point in the form needed for the soft_actor_critic function
             x0 = params.global_best - params.shifts
@@ -157,6 +166,7 @@ if __name__ == '__main__':
                             window_decrease_rate=params.window_rate,
                             pc_max=params.pc_max,
                             file_name=file_name,
+                            file_name_steps=file_name_steps,
                             array_index=array_index,
                             lower_bounds=params.shifts,
                             search_window_sizes=params.guess_sizes,

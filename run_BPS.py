@@ -13,9 +13,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--faff_max', type=int, default=10000, help='Maximum number of steps without improving')
-    parser.add_argument('--pc_max', type=int, default=5, help='Maximum number of reinitializations before reducing window')
+    parser.add_argument('--pc_max', type=int, default=10, help='Maximum number of reinitializations before reducing window')
     parser.add_argument('--window_rate', type=float, default=0.7, help='Rate of search window reduction')
-    parser.add_argument('--max_window_exp', type=int, default=20, help='Maximun number of window reductions')
+    parser.add_argument('--max_window_exp', type=int, default=25, help='Maximun number of window reductions')
     parser.add_argument('--same_spin_hierarchy', type=bool, default=False, help='Whether same spin deltas should be ordered')
     parser.add_argument('--dyn_shift', type=float, default=0., help='Minimum distance between same spin deltas')
     parser.add_argument('--alpha', type=float, default=0.0005, help='Learning rate for actor network')
@@ -32,8 +32,9 @@ if __name__ == '__main__':
     gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01), np.arange(start=0.25, stop=4.05, step=0.05)))
     gs = np.around(gs, decimals=2)
     
-    g = 4.
-    integral_mode = 1
+    g = 1.
+    integral_mode = 2
+    g_index = np.argwhere(gs==g)[0]
     
     run_config = {}
     run_config['faff_max'] = args.faff_max
@@ -43,21 +44,23 @@ if __name__ == '__main__':
     run_config['same_spin_hierarchy'] = args.same_spin_hierarchy
     run_config['dyn_shift'] = args.dyn_shift
     run_config['reward_scale'] = args.reward_scale
-    
+
     agent_config = {}
     agent_config['alpha'] = args.alpha
     agent_config['beta'] = args.beta
     agent_config['reward_scale'] = args.reward_scale
+    agent_config['rew_scale_schedule'] = 0
     agent_config['gamma'] = args.gamma
     agent_config['tau'] = args.tau
-    agent_config['rew_scale_schedule'] = 0
     agent_config['layer1_size'] = args.layer1_size
     agent_config['layer2_size'] = args.layer2_size
     agent_config['batch_size'] = args.batch_size
     agent_config['integral_mode'] = integral_mode
+    agent_config['output_steps'] = 1
+    agent_config['mean_output_k'] = 100
     
     # ---Instantiating some relevant classes---
-    params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode)
+    params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode, g_index=g_index, OPE_fix=3)
     agent_config['w1'] = params.w1
     agent_config['w2'] = params.w2
     zd = ZData()
@@ -82,23 +85,25 @@ if __name__ == '__main__':
 
     # form the file_name where the code output is saved to
     file_name = params.filename_stem + str(array_index) + '.csv'
+    file_name_steps = params.filename_stem + str(array_index) + '_steps.csv'
     # determine initial starting point in the form needed for the soft_actor_critic function
     x0 = params.global_best - params.shifts
     
     # ---Run the soft actor critic algorithm---
-    soft_actor_critic(func=cft.crossing,
-                      max_window_changes=params.max_window_exp,
-                      window_decrease_rate=params.window_rate,
-                      pc_max=params.pc_max,
-                      file_name=file_name,
-                      array_index=array_index,
-                      lower_bounds=params.shifts,
-                      search_window_sizes=params.guess_sizes,
-                      guessing_run_list=params.guessing_run_list,
-                      environment_dim=zd.env_shape,
-                      search_space_dim=params.action_space_N,
-                      faff_max=params.faff_max,
-                      starting_reward=params.global_reward_start,
-                      x0=x0,
-                      agent_config=agent_config,
-                      verbose=params.verbose)
+    soft_actor_critic(func=cft.crossing_precalc,
+                    max_window_changes=params.max_window_exp,
+                    window_decrease_rate=params.window_rate,
+                    pc_max=params.pc_max,
+                    file_name=file_name,
+                    file_name_steps=file_name_steps,
+                    array_index=array_index,
+                    lower_bounds=params.shifts,
+                    search_window_sizes=params.guess_sizes,
+                    guessing_run_list=params.guessing_run_list,
+                    environment_dim=zd.env_shape,
+                    search_space_dim=params.action_space_N,
+                    faff_max=params.faff_max,
+                    starting_reward=params.global_reward_start,
+                    x0=x0,
+                    agent_config=agent_config,
+                    verbose=params.verbose)

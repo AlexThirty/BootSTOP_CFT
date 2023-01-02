@@ -392,6 +392,64 @@ class BPS_SAC(BPS):
                 #print(f'Base norm: {cross}, constraint_1: {const_1}, constraint_2: {const_2}')
         return constraints, reward, cft_data, cross, const_1, const_2 
     
+    def crossing_precalc_sum(self, cft_data):
+        """
+        Evaluates the truncated crossing equations for the given CFT data at all points in the z-sample simultaneously.
+
+        Parameters
+        ----------
+        cft_data : ndarray
+            An array containing the conformal weights and OPE-squared coefficients of all the multiplets.
+
+        Returns
+        -------
+        constraints : ndarray
+            Array of values of the truncated crossing equation.
+        reward : float
+            The reward determined from the constraints.
+        cft_data : ndarray
+            A list of possibly modified CFT data.
+
+        """
+        # get some dictionaries
+        delta_dict, ope_dict = self.split_cft_data(cft_data)
+
+        if self.same_spin_hierarchy_deltas:
+            # impose the mimimum conformal weight separations between operators
+            delta_dict = self.impose_weight_separation(delta_dict)
+            # since we've altered some data we update the long multiplet weights in cft_data
+            cft_data[self.multiplet_index[0]] = delta_dict['all']
+
+        # broadcast the reshaped long multiplet ope coefficients over their crossing contributions
+        #spin_cons = ope_dict['all'].reshape(-1, 1) * self.compute_ising2d_vector(delta_dict['all'])
+        
+        constraints = self.get_precalc_vector(ope_dict['all'])
+        # long_cons.shape = (num_of_long, env_shape)
+        cross = LA.norm(constraints)
+        const_1 = 0.
+        const_2 = 0.
+
+        # add up all the components
+        if self.integral_mode == 0:
+            reward = 1 / cross
+        elif self.integral_mode == 1:
+            const_1 = self.get_precalc_constraint_1(ope_dict['all'])
+            #reward = 1/ LA.norm(constraints) + self.w1 / const_1
+            reward = 1/cross + self.w1 * 1./const_1
+            if reward > self.best_rew:
+                self.best_rew = reward
+                #print(f'Base reward: {1/LA.norm(constraints)}, reward from constraint_1: {1/const_1}')
+                #print(f'Base norm: {cross}, constraint_1: {const_1}')
+        elif self.integral_mode == 2:
+            const_1 = self.get_precalc_constraint_1(ope_dict['all'])
+            const_2 = self.get_precalc_constraint_2(ope_dict['all'])
+            reward = 1/cross + self.w1 * 1./const_1 + self.w2 * 1/const_2
+            if reward > self.best_rew:
+                self.best_rew = reward
+                #print(f'Base reward: {1/LA.norm(constraints)}, reward from constraint_1: {1/const_1}')
+                #print(f'Base norm: {cross}, constraint_1: {const_1}, constraint_2: {const_2}')
+        return constraints, reward, cft_data, cross, const_1, const_2 
+    
     
     def crossing_precalc_free(self, cft_data):
         """
