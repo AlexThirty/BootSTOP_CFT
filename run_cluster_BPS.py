@@ -24,9 +24,9 @@ if __name__ == '__main__':
     parser.add_argument('--max_window_exp', type=int, default=25, help='Maximun number of window reductions')
     parser.add_argument('--same_spin_hierarchy', type=bool, default=False, help='Whether same spin deltas should be ordered')
     parser.add_argument('--dyn_shift', type=float, default=0., help='Minimum distance between same spin deltas')
-    parser.add_argument('--alpha', type=float, default=0.0005, help='Learning rate for actor network')
-    parser.add_argument('--beta', type=float, default=0.0005, help='Learning rate for critic and value network')
-    parser.add_argument('--reward_scale', type=float, default=0.001, help='The reward scale, also related to the entropy parameter')
+    parser.add_argument('--alpha', type=float, default=0.005, help='Learning rate for actor network')
+    parser.add_argument('--beta', type=float, default=0.005, help='Learning rate for critic and value network')
+    parser.add_argument('--reward_scale', type=float, default=10.0, help='The reward scale, also related to the entropy parameter')
     parser.add_argument('--gamma', type=float, default=0.99, help='Gamma parameter for cumulative reward')
     parser.add_argument('--tau', type=float, default=0.0005, help='Tau parameter for state-value function update')
     parser.add_argument('--layer1_size', type=int, default=256, help='Dense units for first layer')
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
     parser.add_argument('--max_cpus', type=int, default=1100, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
-    parser.add_argument('--runs_per_args', type=int, default=640, help='Number of runs for each combination of parameters')
+    parser.add_argument('--runs_per_args', type=int, default=500, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     

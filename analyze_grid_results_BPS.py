@@ -7,6 +7,7 @@ from ope_bounds_BPS import bounds_OPE1, bounds_OPE2, bounds_OPE3
 from matplotlib import pyplot as plt
 import itertools
 import os
+import re
 
 gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      np.arange(start=0.25, stop=4.05, step=0.05),
@@ -52,16 +53,21 @@ def get_lambda_error(val, ope_index, g_index):
     else:
         raise ValueError
 
-path = join('.', 'results_BPS_grid_recip')
-save_path = join('.', 'BPS_grid_analyzed_recip')
+path = join('.', 'results_BPS_grid_scale')
+save_path = join('.', 'BPS_grid_analyzed_scale')
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
+r = re.compile('sac[0-9]+.csv')
+onlyfiles = list(filter(r.match, onlyfiles))
+#print(onlyfiles)
 best_reward = 0.
 
-w1s = [0.1, 1., 10., 100., 1000., 10000., 100000., 1e6]
-w2s = [0.1, 1., 10., 100., 1000., 10000., 100000., 1e6]
+w1s = [0.0001, 0.0005, 0.001, 0.005]
+w2s = [0.001, 0.01, 0.1, 1., 10.]
+#w1s = [0.1, 1., 10., 100., 1000., 10000., 100000., 1e6]
+#w2s = [0.1, 1., 10., 100., 1000., 10000., 100000., 1e6]
 grid = list(itertools.product(w1s, w2s))
 grid_pts = len(grid)
-tries_per_mode = 10
+tries_per_mode = 25
 delta_len = 10
 lambda_len = 10
 
