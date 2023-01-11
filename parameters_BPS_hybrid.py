@@ -2,6 +2,8 @@ from environment.blocks_ising2D import Ising2D
 import numpy as np
 import math
 import values_BPS
+from ope_bounds_BPS import bounds_OPE1, bounds_OPE2, bounds_OPE3
+
 
 def get_teor_deltas(g):
     deltas = np.zeros(10)
@@ -16,6 +18,21 @@ def get_teor_deltas(g):
     deltas[8] = values_BPS.delta9[str(g)]
     deltas[9] = values_BPS.delta10[str(g)]
     return deltas
+
+def get_teor_lambdads(g_index):
+    lower = bounds_OPE1[g_index, 0]
+    upper = bounds_OPE1[g_index, 1]
+    OPE1 = (lower+upper)/2
+    
+    lower = bounds_OPE2[g_index, 0]
+    upper = bounds_OPE2[g_index, 1]
+    OPE2 = (lower+upper)/2
+    
+    lower = bounds_OPE3[g_index, 0]
+    upper = bounds_OPE3[g_index, 1]
+    OPE3 = (lower+upper)/2
+    
+    return OPE1, OPE2, OPE3
 
 
 class ParametersBPS:
@@ -49,8 +66,8 @@ class ParametersBPS:
         self.delta_max = 10.5
         self.num_of_operators = 15
         self.integral_mode = integral_mode
-        self.w1 = 1.
-        self.w2 = 1.
+        self.w1 = 1000.
+        self.w2 = 10000.
         # ---Pre-generated conformal block lattice parameters---
         #self.delta_start = np.zeros(math.floor(self.delta_max))
         self.delta_start = 0.
@@ -146,7 +163,7 @@ class ParametersBPS_SAC(ParametersBPS):
     No validation of the inputs is done.
     """
 
-    def __init__(self, config, g, integral_mode):
+    def __init__(self, config, g, integral_mode, g_index=0, OPE_fix=0):
         super().__init__(g, integral_mode)
         
         
@@ -174,7 +191,7 @@ class ParametersBPS_SAC(ParametersBPS):
         self.guessing_run_list_deltas = np.concatenate((np.zeros(10), np.ones(self.num_of_operators - 10)))
         
         # set guessing run list for ope coefficients        
-        self.guessing_run_list_opes = np.ones(self.num_of_operators)
+        self.guessing_run_list_opes = np.concatenate((np.zeros(OPE_fix), np.ones(self.num_of_operators-OPE_fix)))
         
         self.reward_scale = config['reward_scale']
         
@@ -185,7 +202,7 @@ class ParametersBPS_SAC(ParametersBPS):
         self.guess_sizes_deltas = np.concatenate((np.zeros(10), self.delta_max*np.ones(self.num_of_operators - 10)-1.5))
         
         # initial search window size for OPE coeffs        
-        self.guess_sizes_opes = np.ones(self.num_of_operators)
+        self.guess_sizes_opes = np.concatenate((np.zeros(OPE_fix), np.ones(self.num_of_operators-OPE_fix)))
         
         # set minimum values for conformal weights
         # minimums for D and B multiplets are fixed as weights are known
@@ -193,6 +210,14 @@ class ParametersBPS_SAC(ParametersBPS):
         
         # set minimum values for OPE coeffs
         self.shifts_opecoeffs = np.zeros(self.num_of_operators)
+        if OPE_fix > 0:
+            ope1, ope2, ope3 = get_teor_lambdads(g_index=g_index)
+            if OPE_fix > 0:
+                self.shifts_opecoeffs[0] = ope1
+            if OPE_fix > 1:
+                self.shifts_opecoeffs[1] = ope2
+            if OPE_fix > 2:
+                self.shifts_opecoeffs[2] = ope3
 
         # ---Starting Point Parameters---
         # initial configuration to explore around

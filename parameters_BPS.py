@@ -191,7 +191,8 @@ class ParametersBPS_SAC(ParametersBPS):
         self.guessing_run_list_deltas = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])        
         
         # set guessing run list for ope coefficients        
-        self.guessing_run_list_opes = np.array([0, 0, 0, 1, 1, 1, 1, 1, 1, 1])
+        self.guessing_run_list_opes = np.concatenate((np.zeros(OPE_fix), np.ones(self.num_of_operators-OPE_fix)))
+        #self.guessing_run_list_opes = np.array([0, 0, 0, 1, 1, 1, 1, 1, 1, 1])
         
         self.reward_scale = config['reward_scale']
         

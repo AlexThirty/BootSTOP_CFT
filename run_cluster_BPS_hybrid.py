@@ -1,6 +1,6 @@
 from ast import Param
 import sys
-from parameters_BPS import ParametersBPS_SAC
+from parameters_BPS_hybrid import ParametersBPS_SAC
 from environment.blocks_BPS import BPS_SAC
 from environment.data_z_sample import ZData
 import environment.utils as utils
@@ -46,6 +46,9 @@ if __name__ == '__main__':
     g_index = np.argwhere(gs==g)[0]
     integral_mode = 2
     
+    res_path = 'results_BPS_deltaunk_3fix'
+    if not os.path.exists(os.path.join('.', res_path)):
+        os.makedirs(os.path.join('.', res_path))
     
     ray.init(address='172.16.18.254:6379', _node_ip_address="172.16.18.254")
     print("Connected to Ray cluster.")
@@ -90,7 +93,10 @@ if __name__ == '__main__':
                       verbose=verbose)
     
     remaining_ids = []
-        
+    blocks_unk = utils.generate_BPS_block_list_free()
+    int1_list_unk = utils.generate_BPS_int1_list_free()
+    int2_list_unk = utils.generate_BPS_int2_list_free()
+    
     for i in range(args.runs_per_args):
         run_config = {}
         run_config['faff_max'] = args.faff_max
@@ -130,14 +136,14 @@ if __name__ == '__main__':
         int2_list = utils.generate_BPS_int2_list(g_index=g_index)
 
         # ---Instantiate the crossing_eqn class---
-        cft = BPS_SAC(params, zd, blocks, int1_list, int2_list)
+        cft = BPS_SAC(params, zd, blocks, int1_list, int2_list, 1, blocks_unk, int1_list_unk, int2_list_unk)
 
         # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
         array_index = i
 
         # form the file_name where the code output is saved to
-        file_name = os.path.join('results_BPS_3fix', params.filename_stem + str(array_index) + '.csv')
-        file_name_steps = os.path.join('results_BPS_3fix', params.filename_stem + str(array_index) + '_steps.csv')
+        file_name = os.path.join(res_path, params.filename_stem + str(array_index) + '.csv')
+        file_name_steps = os.path.join(res_path, params.filename_stem + str(array_index) + '_steps.csv')
         output = str(array_index)
         utils.output_to_file(file_name=file_name, output=output)
         # determine initial starting point in the form needed for the soft_actor_critic function
@@ -145,7 +151,7 @@ if __name__ == '__main__':
         print(f'Starting run {array_index}')
             
 
-        remaining_ids.append(run_exp.remote(func=cft.crossing_precalc,
+        remaining_ids.append(run_exp.remote(func=cft.crossing_hybrid,
                         max_window_changes=params.max_window_exp,
                         window_decrease_rate=params.window_rate,
                         pc_max=params.pc_max,

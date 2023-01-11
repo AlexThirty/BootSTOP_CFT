@@ -182,6 +182,7 @@ class Learn:
                 step_output = [self.window_scale_exponent, self.pc, self.step]
                 if self.output_steps:
                     utils.output_to_file(file_name=file_name_steps, output=step_output)
+                    utils.output_to_file(file_name=file_name, output=step_output)
 
             # form the output for the console
             console_output = 'step %.1f' % self.step, 'avg reward %.10f' % np.mean(self.rewards[-25:]), \

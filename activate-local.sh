@@ -60,4 +60,4 @@ for ((i = 0; i < worker_num; i++)); do
 done
 
 # ray/doc/source/cluster/examples/simple-trainer.py
-python -u run_BPS_grid.py
+python -u run_cluster_BPS_hybrid.py
