@@ -46,13 +46,13 @@ if __name__ == '__main__':
     g_index = np.argwhere(gs==g)[0]
     integral_mode = 2
     
-    res_path = 'results_BPS_deltaunk_3fix'
-    res_path_steps = 'results_BPS_deltaunk_3fix_steps'
-    if not os.path.exists(os.path.join('/data/trenta', res_path)):
-        os.makedirs(os.path.join('/data/trenta', res_path))
+    res_path = '/data/trenta/results_BPS_deltaunk_3fix'
+    res_path_steps = '/data/trenta/results_BPS_deltaunk_3fix_steps'
+    if not os.path.exists(res_path):
+        os.makedirs(res_path)
         
-    if not os.path.exists(os.path.join('/data/trenta', res_path_steps)):
-        os.makedirs(os.path.join('/data/trenta', res_path_steps))
+    if not os.path.exists(res_path_steps):
+        os.makedirs(res_path_steps)
     
     ray.init(address='172.16.18.254:6379', _node_ip_address="172.16.18.254")
     print("Connected to Ray cluster.")
@@ -146,8 +146,8 @@ if __name__ == '__main__':
         array_index = i
 
         # form the file_name where the code output is saved to
-        file_name = os.path.join('/data/trenta', res_path, params.filename_stem + str(array_index) + '.csv')
-        file_name_steps = os.path.join('/data/trenta', res_path_steps, params.filename_stem + str(array_index) + '_steps.csv')
+        file_name = os.path.join(res_path, params.filename_stem + str(array_index) + '.csv')
+        file_name_steps = os.path.join(res_path_steps, params.filename_stem + str(array_index) + '_steps.csv')
         output = str(array_index)
         utils.output_to_file(file_name=file_name, output=output)
         # determine initial starting point in the form needed for the soft_actor_critic function

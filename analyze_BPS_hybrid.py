@@ -62,7 +62,7 @@ orderer = np.argsort(rewards)
 OPEs_ordered = OPEs[orderer]
 deltas_ordered = deltas[orderer]
 
-best_rew_to_take = 10
+best_rew_to_take = 25
 
 vals = OPEs_ordered[-best_rew_to_take:]
 OPE_means = np.mean(vals, axis=0)

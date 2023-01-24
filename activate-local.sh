@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=ray-tune-trenta
 ### Modify this according to your Ray workload.
-#SBATCH --nodes=7
+#SBATCH --nodes=8
 #SBATCH --exclusive
 #SBATCH --tasks-per-node=1
 ### Modify this according to your Ray workload.
@@ -48,7 +48,7 @@ ray start --head --node-ip-address=$head_node_ip --port=$port
 
 # optional, though may be useful in certain versions of Ray < 1.0.
 # number of nodes other than the head node
-worker_num=7
+worker_num=8
 
 for ((i = 0; i < worker_num; i++)); do
     node_i=${nodes_array[$i]}
@@ -60,4 +60,4 @@ for ((i = 0; i < worker_num; i++)); do
 done
 
 # ray/doc/source/cluster/examples/simple-trainer.py
-python -u run_cluster_BPS_hybrid.py
+python -u run_cluster_BPS.py
