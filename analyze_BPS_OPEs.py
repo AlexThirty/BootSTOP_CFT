@@ -14,12 +14,12 @@ gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      #np.arange(start=4.25, stop=5.25, step=0.25)
                      ))
 gs = np.around(gs, decimals=2)
-g = 0.5
+g = 1.5
 g_index = np.argwhere(gs==g)[0]
 
-path = join('/data/trenta', 'results_BPS_3fix_g05')
-save_path = join('.', 'BPS_analyzed_g05')
-prefix = 'g05'
+path = join('/data/trenta', 'results_BPS_3fix_g15')
+save_path = join('.', 'BPS_analyzed_g15')
+prefix = 'g15'
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 r = re.compile('sac[0-9]+.csv')
 onlyfiles = list(filter(r.match, onlyfiles))
@@ -62,15 +62,22 @@ orderer = np.argsort(rewards)
 
 OPEs_ordered = OPEs[orderer]
 
-best_rew_to_take = 25
+best_rew_to_take = 10
 
-
+analysis_path = f'./BPS_analysis/{prefix}'
+if not os.path.exists(analysis_path):
+        os.makedirs(analysis_path)
 vals = OPEs_ordered[-best_rew_to_take:]
 OPE_means = np.mean(vals, axis=0)
 OPE_stds = np.std(vals, axis=0)
-print(OPE_means)
-print(OPE_stds)
-print(100*OPE_stds/OPE_means)
+with open(join(analysis_path, f'{prefix}_OPE4_10_{best_rew_to_take}.txt'), 'w') as f:
+    print(f'Best {best_rew_to_take} rewards', file=f)
+    print('OPE means:', file=f)
+    print(OPE_means, file=f)
+    print('OPE stds:', file=f)
+    print(OPE_stds, file=f)
+    print('std relative to mean', file=f)
+    print(100*OPE_stds/OPE_means, file=f)
 
 plt.figure()
 for i in range(lambda_fix+1, lambda_len+1):
@@ -80,4 +87,4 @@ plt.errorbar(range(lambda_fix+1, lambda_len+1), OPE_means, yerr=OPE_stds, color=
 plt.xlabel('index')
 plt.ylabel('OPE[index]')
 plt.title(f'OPE coefficients for best {best_rew_to_take} tries')
-plt.savefig(f'{prefix}_OPE4_10_{best_rew_to_take}.jpg')
+plt.savefig(join(analysis_path, f'{prefix}_OPE4_10_{best_rew_to_take}.jpg'))

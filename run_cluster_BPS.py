@@ -42,11 +42,11 @@ if __name__ == '__main__':
     gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01), np.arange(start=0.25, stop=4.05, step=0.05)))
     gs = np.around(gs, decimals=2)
     
-    g = 0.5
+    g = 2.5
     g_index = np.argwhere(gs==g)[0]
     integral_mode = 2
-    res_path = '/data/trenta/results_BPS_3fix_g05'
-    res_path_steps = '/data/trenta/results_BPS_3fix_g05_steps'
+    res_path = '/data/trenta/results_BPS_3fix_g25'
+    res_path_steps = '/data/trenta/results_BPS_3fix_g25_steps'
     if not os.path.exists(res_path):
         os.makedirs(res_path)
         
