@@ -14,12 +14,11 @@ gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      #np.arange(start=4.25, stop=5.25, step=0.25)
                      ))
 gs = np.around(gs, decimals=2)
-g = 1.5
+g = 0.25
 g_index = np.argwhere(gs==g)[0]
 
-path = join('/data/trenta', 'results_BPS_3fix_g15')
-save_path = join('.', 'BPS_analyzed_g15')
-prefix = 'g15'
+path = join('/data/trenta', 'results_BPS_1fix_g025')
+prefix = 'g025'
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 r = re.compile('sac[0-9]+.csv')
 onlyfiles = list(filter(r.match, onlyfiles))
@@ -32,7 +31,7 @@ best_reward = 0.
 delta_len = 10
 lambda_len = 10
 
-lambda_fix = 3
+lambda_fix = 1
 
 rewards = np.zeros(n_files)
 OPEs = np.zeros((n_files, lambda_len-lambda_fix))
@@ -62,7 +61,7 @@ orderer = np.argsort(rewards)
 
 OPEs_ordered = OPEs[orderer]
 
-best_rew_to_take = 10
+best_rew_to_take = 500
 
 analysis_path = f'./BPS_analysis/{prefix}'
 if not os.path.exists(analysis_path):

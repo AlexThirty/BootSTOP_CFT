@@ -42,11 +42,11 @@ if __name__ == '__main__':
     gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01), np.arange(start=0.25, stop=4.05, step=0.05)))
     gs = np.around(gs, decimals=2)
     
-    g = 2.5
+    g = 0.25
     g_index = np.argwhere(gs==g)[0]
     integral_mode = 2
-    res_path = '/data/trenta/results_BPS_3fix_g25'
-    res_path_steps = '/data/trenta/results_BPS_3fix_g25_steps'
+    res_path = '/data/trenta/results_BPS_1fix_g025'
+    res_path_steps = '/data/trenta/results_BPS_1fix_g025_steps'
     if not os.path.exists(res_path):
         os.makedirs(res_path)
         
@@ -125,7 +125,7 @@ if __name__ == '__main__':
 
         
         # ---Instantiating some relevant classes---
-        params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode, g_index=g_index, OPE_fix=3)
+        params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode, g_index=g_index, OPE_fix=1)
         agent_config['w1'] = params.w1
         agent_config['w2'] = params.w2
         zd = ZData()
