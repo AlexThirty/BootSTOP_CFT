@@ -14,11 +14,11 @@ gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      #np.arange(start=4.25, stop=5.25, step=0.25)
                      ))
 gs = np.around(gs, decimals=2)
-g = 0.25
+g = 0.35
 g_index = np.argwhere(gs==g)[0]
-
-path = join('/data/trenta', 'results_BPS_1fix_g025')
-prefix = 'g025'
+OPE_fix=1
+path = join('/data/trenta', f'results_BPS_{OPE_fix}fix_g035')
+prefix = 'g035'
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 r = re.compile('sac[0-9]+.csv')
 onlyfiles = list(filter(r.match, onlyfiles))
@@ -31,10 +31,9 @@ best_reward = 0.
 delta_len = 10
 lambda_len = 10
 
-lambda_fix = 1
 
 rewards = np.zeros(n_files)
-OPEs = np.zeros((n_files, lambda_len-lambda_fix))
+OPEs = np.zeros((n_files, lambda_len-OPE_fix))
 
 for i, f in enumerate(onlyfiles):
     currf = open(join(path, f))
@@ -53,23 +52,23 @@ for i, f in enumerate(onlyfiles):
     curr_OPE = [float(data[i]) for i in range(5+delta_len, 5+delta_len+lambda_len)]
 
     rewards[i] = curr_rew
-    OPEs[i] = curr_OPE[lambda_fix:]
+    OPEs[i] = curr_OPE[OPE_fix:]
         
     currf.close()
     
 orderer = np.argsort(rewards)
-
+orderer = np.flip(orderer)
 OPEs_ordered = OPEs[orderer]
 
-best_rew_to_take = 500
+best_rew_to_take = 10
 
 analysis_path = f'./BPS_analysis/{prefix}'
 if not os.path.exists(analysis_path):
         os.makedirs(analysis_path)
-vals = OPEs_ordered[-best_rew_to_take:]
+vals = OPEs_ordered[:best_rew_to_take]
 OPE_means = np.mean(vals, axis=0)
 OPE_stds = np.std(vals, axis=0)
-with open(join(analysis_path, f'{prefix}_OPE4_10_{best_rew_to_take}.txt'), 'w') as f:
+with open(join(analysis_path, f'{prefix}_OPE{OPE_fix+1}_10_{best_rew_to_take}.txt'), 'w') as f:
     print(f'Best {best_rew_to_take} rewards', file=f)
     print('OPE means:', file=f)
     print(OPE_means, file=f)
@@ -79,11 +78,11 @@ with open(join(analysis_path, f'{prefix}_OPE4_10_{best_rew_to_take}.txt'), 'w') 
     print(100*OPE_stds/OPE_means, file=f)
 
 plt.figure()
-for i in range(lambda_fix+1, lambda_len+1):
-    plt.scatter(np.ones(best_rew_to_take)*i, vals[:, i-lambda_fix-1], color='blue')
-plt.plot(range(lambda_fix+1, lambda_len+1), OPE_means, color='orange')
-plt.errorbar(range(lambda_fix+1, lambda_len+1), OPE_means, yerr=OPE_stds, color='orange')
+for i in range(OPE_fix+1, lambda_len+1):
+    plt.scatter(np.ones(best_rew_to_take)*i, vals[:, i-OPE_fix-1], color='blue')
+plt.plot(range(OPE_fix+1, lambda_len+1), OPE_means, color='orange')
+plt.errorbar(range(OPE_fix+1, lambda_len+1), OPE_means, yerr=OPE_stds, color='orange')
 plt.xlabel('index')
 plt.ylabel('OPE[index]')
 plt.title(f'OPE coefficients for best {best_rew_to_take} tries')
-plt.savefig(join(analysis_path, f'{prefix}_OPE4_10_{best_rew_to_take}.jpg'))
+plt.savefig(join(analysis_path, f'{prefix}_OPE{OPE_fix+1}_10_{best_rew_to_take}.jpg'))

@@ -35,7 +35,7 @@ gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      ))
 integral_mode = 2
 print(gs)
-g = 1.
+g = 0.1
 gs = np.around(gs, decimals=2)
 zd = ZData()
 params = ParametersBPS_SAC(config=run_config, g=g, integral_mode=integral_mode)
