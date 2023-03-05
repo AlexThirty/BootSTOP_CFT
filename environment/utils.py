@@ -34,7 +34,7 @@ def generate_block_list(max_spin, z_kill_list):
     return block_list
 
 
-def output_to_file(file_name, output):
+def output_to_file(file_name, output, mode='a'):
     """
     Appends row of output to a file.
 
@@ -46,7 +46,7 @@ def output_to_file(file_name, output):
         The parameter passed to writer.writerow.
 
     """
-    with open(file_name, 'a', newline='') as f_object:
+    with open(file_name, mode, newline='') as f_object:
         writer_object = writer(f_object)
         writer_object.writerow(output)
         f_object.close()
