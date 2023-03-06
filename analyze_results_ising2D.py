@@ -35,7 +35,7 @@ else:
 
 
 # Get the results files
-path = join('.', f'results_{suffix}')
+path = join('.', 'results_ising2D', f'results_{suffix}')
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 
 # Initiate the vectors

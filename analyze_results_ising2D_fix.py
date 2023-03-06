@@ -50,7 +50,7 @@ for i in range(delta_tries):
 tries_per_deltas = 50
 
 # Get the path of results files
-path = join('.', f'results_{suffix}_fix')
+path = join('.', 'results_ising2D' f'results_{suffix}_fix')
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 
 # Initialize variables and vectors
@@ -112,6 +112,7 @@ rew_to_take = 10
 
 avg_rewards = np.zeros(delta_tries)
 best_rewards = np.zeros(delta_tries)
+std_rewards = np.zeros(delta_tries)
 best_deltas = np.zeros((delta_tries, delta_len))
 best_lambdas = np.zeros((delta_tries, lambda_len))
 avg_deltas = np.zeros((delta_tries, delta_len))
@@ -129,6 +130,7 @@ all_lambdas = []
 
 
 for i in range(delta_tries):
+    print(i)
     filename = join(f'analyzed_{suffix}_fix', f'results_deltas_{i}_fix.csv')
     currf = open(filename, "r")
     csv_raw = csv.reader(currf)
@@ -148,6 +150,7 @@ for i in range(delta_tries):
     
     best_rewards[i] = rewards[0]
     avg_rewards[i] = np.mean(rewards)
+    std_rewards[i] = np.std(rewards)
     
     best_deltas[i,:] = deltas[0]
     best_lambdas[i,:] = lambdas[0]
@@ -170,7 +173,7 @@ for i in range(delta_tries):
     all_deltas.append(deltas)
     all_lambdas.append(lambdas)
     
-    with open(join(f'analyzed_{suffix}_fix', f'results_summary_{i}_fix.txt'), mode='w') as f:
+    with open(join(f'analyzed_{suffix}_fix', f'results_summary_{i}fix.txt'), mode='w') as f:
         print(f'Theoretical best reward: {teor_rew}', file=f)
         print(f'Best run: {best_runs[0]}', file=f)
         print(f'Best reward: {best_rewards[i]}', file=f)
@@ -196,9 +199,9 @@ for i in range(delta_tries):
     # Initialize the figure
     f, ax = plt.subplots()
     # Show each observation with a scatterplot
-    for i in range(rew_to_take):
+    for j in range(rew_to_take):
         sns.stripplot(
-            x=operators, y=deltas[i], color='blue',
+            x=operators, y=deltas[j], color='blue',
             dodge=True, alpha=.25, zorder=1, legend=False
         )
     # Show the conditional means, aligning each pointplot in the
@@ -223,6 +226,7 @@ for i in range(delta_tries):
     plt.ylabel('Scaling dimension')
     plt.title(f'Delta values for {correlator} correlator on best {rew_to_take} runs, {i} deltas fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'delta_best_{rew_to_take}.jpg'), dpi=300)
+    #plt.show()
     plt.close()
 
 
@@ -251,6 +255,7 @@ for i in range(delta_tries):
     plt.ylabel('Scaling dimension')
     plt.title(f'Delta values for {correlator} correlator on the best single run, {i} deltas fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'delta_best_run.jpg'), dpi=300)
+    #plt.show()
     plt.close()
 
     
@@ -258,9 +263,9 @@ for i in range(delta_tries):
     # Initialize the figure
     f, ax = plt.subplots()
     # Show each observation with a scatterplot
-    for i in range(rew_to_take):
+    for j in range(rew_to_take):
         sns.stripplot(
-            x=operators, y=lambdas[i], color='blue',
+            x=operators, y=lambdas[j], color='blue',
             dodge=True, alpha=.25, zorder=1, legend=False
         )
     # Show the conditional means, aligning each pointplot in the
@@ -285,6 +290,8 @@ for i in range(delta_tries):
     plt.ylabel('OPE coefficient')
     plt.title(f'OPE coefficients for {correlator} correlator on best {rew_to_take} runs, {i} deltas fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'lambda_best_{rew_to_take}.jpg'), dpi=300)
+    plt.yscale('log')
+    #plt.show()
     plt.close()
 
 
@@ -313,58 +320,62 @@ for i in range(delta_tries):
     plt.xlabel('Operator number')
     plt.ylabel('OPE coefficient')
     plt.title(f'OPE coefficients for {correlator} correlator on the best single run, {i} deltas fixed')
-
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'lambda_best_run.jpg'), dpi=300)
+    plt.yscale('log')
+    #plt.show()
     plt.close()
 
-    
-    
-plt.plot(range(delta_tries), obt_rewards)
-plt.title('Best reward w.r.t. deltas fixed')
-plt.xlabel('Number of deltas fixed')
-plt.ylabel('Best reward')
-plt.savefig(join(f'analyzed_{suffix}_fix', 'rew_for_deltas.jpg'), dpi=300)
+### Average and best reward plotting
+sns.lineplot(x=range(delta_tries), y=avg_rewards, color='blue', label='Average reward')
+plt.fill_between(x=range(delta_tries), y1=avg_rewards-std_rewards, y2=avg_rewards+std_rewards, color='blue', alpha=0.2)
+sns.lineplot(x=range(delta_tries), y=best_rewards, color='green', label='best run reward')
+plt.xlabel('Number of fixed scaling dimensions')
+plt.ylabel('Reward')
+plt.title(f'Best and average of top {rew_to_take} rewards as a function of deltas fixed')
+plt.savefig(join(f'analyzed_{suffix}_fix', 'rewards_for_deltas_fixed.jpg'), dpi=300)
 plt.close()
 
-plt.plot(range(delta_tries), reward_means)
-plt.title('Mean reward w.r.t. deltas fixed')
-plt.xlabel('Number of deltas fixed')
-plt.ylabel('Mean of best rewards')
-plt.savefig(join(f'analyzed_{suffix}_fix', 'rew_for_deltas_mean.jpg'), dpi=300)
-plt.close()
-
-plt.plot(range(delta_tries), lambda_error_best)
-plt.title('Mean relative error w.r.t. deltas fixed (best try)')
-plt.xlabel('Number of deltas fixed')
-plt.ylabel('Mean of lambda relative errors')
-plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_error_best.jpg'), dpi=300)
-plt.close()
-
-plt.plot(range(delta_tries), lambda_error_mean)
-plt.title('Mean relative error w.r.t. deltas fixed (mean)')
-plt.xlabel('Number of deltas fixed')
-plt.ylabel('Mean of lambda relative errors')
-plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_error_mean.jpg'), dpi=300)
-plt.close()
-
-plt.figure()
 for i in range(lambda_len):
-    plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
-plt.title('Relative error w.r.t. deltas fixed (best try)')
+    #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
+    sns.lineplot(x=range(delta_tries), y=avg_err_deltas[:,i], label=labels[i])
+plt.title(f'Delta relative error w.r.t. deltas fixed (average on best {rew_to_take} runs)')
 plt.xlabel('Number of deltas fixed')
-plt.ylabel('Mean of lambda relative errors')
+plt.ylabel('Mean of Delta relative errors')
+#plt.yscale('log')
+plt.legend(fontsize=5)
+plt.savefig(join(f'analyzed_{suffix}_fix', 'delta_mean_error.jpg'), dpi=300)
+plt.close()
+
+for i in range(lambda_len):
+    #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
+    sns.lineplot(x=range(delta_tries), y=avg_err_lambdas[:,i], label=labels[i])
+plt.title(f'OPE coefficient relative error w.r.t. deltas fixed (average on best {rew_to_take} runs)')
+plt.xlabel('Number of deltas fixed')
+plt.ylabel('Mean of OPE coefficient relative errors')
 plt.yscale('log')
 plt.legend(fontsize=5)
-plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_error_best_sing.jpg'), dpi=300)
+plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_mean_error.jpg'), dpi=300)
 plt.close()
 
-plt.figure()
+
 for i in range(lambda_len):
-    plt.plot(range(delta_tries), lambda_err_matrix_mean[i, :], label=labels[i])
-plt.title('Relative error w.r.t. deltas fixed (best try)')
+    #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
+    sns.lineplot(x=range(delta_tries), y=best_err_deltas[:,i], label=labels[i])
+plt.title(f'Delta relative error w.r.t. deltas fixed (best run)')
 plt.xlabel('Number of deltas fixed')
-plt.ylabel('Mean of lambda relative errors')
+plt.ylabel('Scaling dimension relative errors')
 plt.yscale('log')
 plt.legend(fontsize=5)
-plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_error_mean_sing.jpg'), dpi=300)
+plt.savefig(join(f'analyzed_{suffix}_fix', 'delta_best_error.jpg'), dpi=300)
+plt.close()
+
+for i in range(lambda_len):
+    #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
+    sns.lineplot(x=range(delta_tries), y=best_err_lambdas[:,i], label=labels[i])
+plt.title(f'OPE coefficient relative error w.r.t. deltas fixed (best run)')
+plt.xlabel('Number of deltas fixed')
+plt.ylabel('OPE coefficient relative errors')
+plt.yscale('log')
+plt.legend(fontsize=5)
+plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_best_error.jpg'), dpi=300)
 plt.close()
