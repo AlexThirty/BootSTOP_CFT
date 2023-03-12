@@ -50,7 +50,7 @@ for i in range(delta_tries):
 tries_per_deltas = 50
 
 # Get the path of results files
-path = join('.', 'results_ising2D' f'results_{suffix}_fix')
+path = join('.', 'results_ising2D', f'results_{suffix}_fix')
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 
 # Initialize variables and vectors

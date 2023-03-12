@@ -18,7 +18,7 @@ lambda_fix = 1
 rew_to_take = 10
 
 
-g_list = np.array([0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45])
+g_list = np.array([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45])
 g_indexes = np.zeros(len(g_list), dtype=np.int32)
 gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      np.arange(start=0.25, stop=4.05, step=0.05),
@@ -33,7 +33,7 @@ if not os.path.exists(analysis_path):
 
 
 path_list = [
-    #join('.', 'results_BPS', 'results_BPS_1fix_g005'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g005'),
     join('.', 'results_BPS', 'results_BPS_1fix_g010'),
     join('.', 'results_BPS', 'results_BPS_1fix_g015'),
     join('.', 'results_BPS', 'results_BPS_1fix_g020'),

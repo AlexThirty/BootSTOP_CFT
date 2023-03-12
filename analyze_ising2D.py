@@ -6,9 +6,10 @@ from environment.utils import output_to_file
 import seaborn as sns
 import pandas as pd
 from matplotlib import pyplot as plt
+import os
 
 # Is this the sigma correlator?
-sigma = False
+sigma = True
 
 # Values for analysis set regarding the correlator used
 if sigma:
@@ -37,6 +38,9 @@ else:
 # Get the results files
 path = join('.', 'results_ising2D', f'results_{suffix}')
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
+
+if not os.path.exists(f'analyzed_{suffix}'):
+    os.makedirs(f'analyzed_{suffix}')
 
 # Initiate the vectors
 rewards = []
