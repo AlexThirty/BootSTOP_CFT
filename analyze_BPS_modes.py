@@ -5,6 +5,8 @@ import numpy as np
 from environment.utils import output_to_file
 from ope_bounds_BPS import bounds_OPE1, bounds_OPE2, bounds_OPE3
 from matplotlib import pyplot as plt
+import os
+import seaborn as sns
 
 gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      np.arange(start=0.25, stop=4.05, step=0.05),
@@ -13,7 +15,10 @@ gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
 gs = np.around(gs, decimals=2)
 g = 1.
 g_index = np.argwhere(gs==g)[0]
+rew_to_take = 10
 
+if not os.path.exists(f'BPS_analyzed_modes'):
+        os.makedirs(f'BPS_analyzed_modes')
 
 def get_lambda_error(val, ope_index, g_index):
     if ope_index==1:
@@ -22,9 +27,9 @@ def get_lambda_error(val, ope_index, g_index):
         half = (lower+upper)/2
     
         if val < lower:
-            return abs(val-half)/half
+            return abs(val-lower)/lower
         elif val > upper:
-            return abs(val-half)/half
+            return abs(val-upper)/upper
         else:
             return 0.
     elif ope_index==2:
@@ -32,9 +37,9 @@ def get_lambda_error(val, ope_index, g_index):
         upper = bounds_OPE2[g_index, 1]
         half = (lower+upper)/2
         if val < lower:
-            return abs(val-half)/half
+            return abs(val-lower)/lower
         elif val > upper:
-            return abs(val-half)/half
+            return abs(val-upper)/upper
         else:
             return 0.
     elif ope_index==3:
@@ -42,15 +47,15 @@ def get_lambda_error(val, ope_index, g_index):
         upper = bounds_OPE3[g_index, 1]
         half = (lower+upper)/2
         if val < lower:
-            return abs(val-half)/half
+            return abs(val-lower)/lower
         elif val > upper:
-            return abs(val-half)/half
+            return abs(val-upper)/upper
         else:
             return 0.
     else:
         raise ValueError
 
-path = join('.', 'results_BPS_1000_10')
+path = join('.', 'results_BPS', 'results_BPS_1000_10')
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 best_reward = 0.
 
@@ -65,6 +70,9 @@ ope3_err = np.zeros((3, tries_per_mode))
 crossing_norms = np.zeros((3, tries_per_mode))
 constraints1 = np.zeros((3, tries_per_mode))
 constraints2 = np.zeros((3, tries_per_mode))
+ope1_vals = np.zeros((3,tries_per_mode))
+ope2_vals = np.zeros((3,tries_per_mode))
+ope3_vals = np.zeros((3,tries_per_mode))
 
 
 for integral_mode in range(3):
@@ -108,6 +116,10 @@ for integral_mode in range(3):
             ope2 = curr_lambda[1]
             ope3 = curr_lambda[2]
             
+            ope1_vals[integral_mode, j] = ope1
+            ope2_vals[integral_mode, j] = ope2
+            ope3_vals[integral_mode, j] = ope3
+            
             err1 = get_lambda_error(ope1, 1, g_index)
             err2 = get_lambda_error(ope2, 2, g_index)
             err3 = get_lambda_error(ope3, 3, g_index)
@@ -135,12 +147,12 @@ for integral_mode in range(3):
             constraints1[integral_mode] = constraint1_coll
             constraints2[integral_mode] = constraint2_coll
             output = np.concatenate(([el], [rew_coll[el]], [ope1_err[integral_mode, el]], [ope2_err[integral_mode, el]], [ope3_err[integral_mode, el]], [crossing_coll[el]], [constraint1_coll[el]], [constraint2_coll[el]], deltas_coll[el], lambdas_coll[el]))
-        output_to_file(file_name=join('BPS_singleg_analyzed','integral_mode_'+str(integral_mode)+'.csv'), output=output)
+        output_to_file(file_name=join('BPS_analyzed_modes','integral_mode_'+str(integral_mode)+'.csv'), output=output)
     
     rewards[integral_mode] = rew_coll
     crossing_norms[integral_mode] = crossing_coll
     
-    with open(join('BPS_singleg_analyzed', 'best.txt'), 'a') as f:
+    with open(join('BPS_analyzed_modes', 'best_runs.txt'), 'a') as f:
         print(f'Integral mode: {integral_mode}', file=f)
         print(f'Best run: {best_run}', file=f)
         print(f'Reward: {rew_coll[orderer[-1]]}', file=f)
@@ -157,385 +169,437 @@ for integral_mode in range(3):
         print(f'Lambdas: {lambdas_coll[orderer[-1]]}', file=f)
 
 
-
-
-
-plt.figure(figsize=(6, 6))
-for i in range(3):
-    plt.scatter(i*np.ones((tries_per_mode)), crossing_norms[i, :])
-plt.title('Crossing equation norms (all)')
-plt.xlabel('Integral constraints')
-plt.ylabel('Crossing equation vector norm')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'crossing_norms.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-for i in range(1, 3):
-    plt.scatter(i*np.ones((tries_per_mode)), constraints1[i,:])
-plt.title('Absolute value of constraint 1 (all)')
-plt.xlabel('Integral constraints')
-plt.ylabel('abs(constraint_1)')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'constraint_1.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-for i in range(2, 3):
-    plt.scatter(i*np.ones((tries_per_mode)), constraints2[i,:])
-plt.title('Absolute value of constraint 2 (all)')
-plt.xlabel('Integral constraints')
-plt.ylabel('abs(constraint_2)')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'constraint_2.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-for i in range(0, 3):
-    plt.scatter(i*np.ones((tries_per_mode)), ope1_err[i,:])
-plt.title('Relative error of OPE 1 w.r.t. bounds (all)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_1 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'ope1_err.jpg'), dpi=300)
-plt.close()
-
-
-plt.figure(figsize=(6, 6))
-for i in range(0, 3):
-    plt.scatter(i*np.ones((tries_per_mode)), ope2_err[i,:])
-plt.title('Relative error of OPE 2 w.r.t. bounds (all)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_2 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'ope2_err.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-for i in range(0, 3):
-    plt.scatter(i*np.ones((tries_per_mode)), ope3_err[i,:])
-plt.title('Relative error of OPE 3 w.r.t. bounds (all)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_3 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'ope3_err.jpg'), dpi=300)
-plt.close()
-
-
 ### Best 10 rewards
-rew_ordered_0 = np.argsort(rewards[0,:])[-10:]
-rew_ordered_1 = np.argsort(rewards[1,:])[-10:]
-rew_ordered_2 = np.argsort(rewards[2,:])[-10:]
+rew_ordered_0 = list(reversed(np.argsort(rewards[0,:])[:rew_to_take]))
+rew_ordered_1 = list(reversed(np.argsort(rewards[1,:])[:rew_to_take]))
+rew_ordered_2 = list(reversed(np.argsort(rewards[2,:])[:rew_to_take]))
 
-plt.figure(figsize=(6, 6))    
-plt.scatter(0*np.ones((10)), crossing_norms[0, rew_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), crossing_norms[1, rew_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), crossing_norms[2, rew_ordered_2], c=range(10), cmap='tab10')
-plt.title('Crossing equation norms (best rew)')
-plt.xlabel('Integral constraints')
-plt.ylabel('Crossing equation vector norm')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'rew_crossing_norms.jpg'), dpi=300)
-plt.close()
+print(rew_ordered_0)
+### Average plot
+# Initialize the figure
+f, ax = plt.subplots()
+# Show each observation with a scatterplot
+sns.stripplot(
+    x=0*np.ones(rew_to_take), y=crossing_norms[0][rew_ordered_0], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
 
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), constraints1[0, rew_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), constraints1[1, rew_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), constraints1[2, rew_ordered_2], c=range(10), cmap='tab10')
-plt.title('Absolute value of constraint 1 (best rew)')
-plt.xlabel('Integral constraints')
-plt.ylabel('abs(constraint_1)')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'rew_constraint_1.jpg'), dpi=300)
-plt.close()
+sns.stripplot(
+    x=1*np.ones(rew_to_take), y=crossing_norms[1][rew_ordered_1], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
 
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), constraints2[0, rew_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), constraints2[1, rew_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), constraints2[2, rew_ordered_2], c=range(10), cmap='tab10')
-plt.title('Absolute value of constraint 2 (best rew)')
-plt.xlabel('Integral constraints')
-plt.ylabel('abs(constraint_2)')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'rew_constraint_2.jpg'), dpi=300)
-plt.close()
+sns.stripplot(
+    x=2*np.ones(rew_to_take), y=crossing_norms[2][rew_ordered_2], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+# Show the conditional means, aligning each pointplot in the
+# center of the strips by adjusting the width allotted to each
+# category (.8 by default) by the number of hue levels
+sns.pointplot(
+    x=[0,1,2], y=[np.mean(crossing_norms[0][rew_ordered_0]),np.mean(crossing_norms[1][rew_ordered_1]),np.mean(crossing_norms[2][rew_ordered_2])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
 
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), ope1_err[0, rew_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), ope1_err[1, rew_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), ope1_err[2, rew_ordered_2], c=range(10), cmap='tab10')
-plt.title('Relative error of OPE 1 w.r.t. bounds (best rew)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_1 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'rew_ope1_err.jpg'), dpi=300)
+plt.legend()
+# Improve the legend
+sns.move_legend(
+    ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
+)
+plt.xlabel('Number of integral constraints')
+plt.ylabel('Crossing equations norm')
+plt.title(f'Crossing equations norm with different integral constraints, {rew_to_take} best runs')
+plt.savefig(join(f'BPS_analyzed_modes', f'crossing_norms.jpg'), dpi=300)
+#plt.show()
 plt.close()
 
 
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), ope2_err[0, rew_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), ope2_err[1, rew_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), ope2_err[2, rew_ordered_2], c=range(10), cmap='tab10')
-plt.title('Relative error of OPE 2 w.r.t. bounds (best rew)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_2 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'rew_ope2_err.jpg'), dpi=300)
-plt.close()
+### Average plot
+# Initialize the figure
+f, ax = plt.subplots()
+# Show each observation with a scatterplot
+sns.stripplot(
+    x=1*np.ones(rew_to_take), y=constraints1[1][rew_ordered_1], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
 
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), ope3_err[0, rew_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), ope3_err[1, rew_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), ope3_err[2, rew_ordered_2], c=range(10), cmap='tab10')
-plt.title('Relative error of OPE 3 w.r.t. bounds (best rew)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_3 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'rew_ope3_err.jpg'), dpi=300)
-plt.close()
+sns.stripplot(
+    x=2*np.ones(rew_to_take), y=constraints1[2][rew_ordered_2], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+# Show the conditional means, aligning each pointplot in the
+# center of the strips by adjusting the width allotted to each
+# category (.8 by default) by the number of hue levels
+sns.pointplot(
+    x=[1], y=[np.mean(constraints1[1][rew_ordered_1])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[2], y=[np.mean(constraints1[2][rew_ordered_2])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
 
-### Best OPE1
-ope1_ordered_0 = np.argsort(ope1_err[0,:])[:10]
-ope1_ordered_1 = np.argsort(ope1_err[1,:])[:10]
-ope1_ordered_2 = np.argsort(ope1_err[2,:])[:10]
-
-plt.figure(figsize=(6, 6))    
-plt.scatter(0*np.ones((10)), crossing_norms[0, ope1_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), crossing_norms[1, ope1_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), crossing_norms[2, ope1_ordered_2], c=range(10), cmap='tab10')
-plt.title('Crossing equation norms (best OPE1)')
-plt.xlabel('Integral constraints')
-plt.ylabel('Crossing equation vector norm')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE1_crossing_norms.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), constraints1[0, ope1_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), constraints1[1, ope1_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), constraints1[2, ope1_ordered_2], c=range(10), cmap='tab10')
-plt.title('Absolute value of constraint 1 (best OPE1)')
-plt.xlabel('Integral constraints')
-plt.ylabel('abs(constraint_1)')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE1_constraint_1.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), constraints2[0, ope1_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), constraints2[1, ope1_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), constraints2[2, ope1_ordered_2], c=range(10), cmap='tab10')
-plt.title('Absolute value of constraint 2 (best OPE1)')
-plt.xlabel('Integral constraints')
-plt.ylabel('abs(constraint_2)')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE1_constraint_2.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), ope1_err[0, ope1_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), ope1_err[1, ope1_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), ope1_err[2, ope1_ordered_2], c=range(10), cmap='tab10')
-plt.title('Relative error of OPE 1 w.r.t. bounds (best OPE1)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_1 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE1_ope1_err.jpg'), dpi=300)
+plt.legend()
+# Improve the legend
+sns.move_legend(
+    ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
+)
+plt.xlabel('Number of integral constraints')
+plt.ylabel('Integral constraint 1')
+plt.title(f'Integral constraint 1 with different integral constraints, {rew_to_take} best runs')
+plt.savefig(join(f'BPS_analyzed_modes', f'constraint1.jpg'), dpi=300)
+#plt.show()
 plt.close()
 
 
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), ope2_err[0, ope1_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), ope2_err[1, ope1_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), ope2_err[2, ope1_ordered_2], c=range(10), cmap='tab10')
-plt.title('Relative error of OPE 2 w.r.t. bounds (best OPE1)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_2 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE1_ope2_err.jpg'), dpi=300)
-plt.close()
+### Average plot
+# Initialize the figure
+f, ax = plt.subplots()
+# Show each observation with a scatterplot
+sns.stripplot(
+    x=2*np.ones(rew_to_take), y=constraints2[2][rew_ordered_2], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+# Show the conditional means, aligning each pointplot in the
+# center of the strips by adjusting the width allotted to each
+# category (.8 by default) by the number of hue levels
+sns.pointplot(
+    x=[1], y=[np.mean(constraints2[1][rew_ordered_1])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[2], y=[np.mean(constraints2[2][rew_ordered_2])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
 
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), ope3_err[0, ope1_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), ope3_err[1, ope1_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), ope3_err[2, ope1_ordered_2], c=range(10), cmap='tab10')
-plt.title('Relative error of OPE 3 w.r.t. bounds (best OPE1)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_3 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE1_ope3_err.jpg'), dpi=300)
-plt.close()
-
-
-ope2_ordered_0 = np.argsort(ope2_err[0,:])[:10]
-ope2_ordered_1 = np.argsort(ope2_err[1,:])[:10]
-ope2_ordered_2 = np.argsort(ope2_err[2,:])[:10]
-
-plt.figure(figsize=(6, 6))    
-plt.scatter(0*np.ones((10)), crossing_norms[0, ope2_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), crossing_norms[1, ope2_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), crossing_norms[2, ope2_ordered_2], c=range(10), cmap='tab10')
-plt.title('Crossing equation norms (best OPE2)')
-plt.xlabel('Integral constraints')
-plt.ylabel('Crossing equation vector norm')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE2_crossing_norms.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), constraints1[0, ope2_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), constraints1[1, ope2_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), constraints1[2, ope2_ordered_2], c=range(10), cmap='tab10')
-plt.title('Absolute value of constraint 1 (best OPE2)')
-plt.xlabel('Integral constraints')
-plt.ylabel('abs(constraint_1)')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE2_constraint_1.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), constraints2[0, ope2_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), constraints2[1, ope2_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), constraints2[2, ope2_ordered_2], c=range(10), cmap='tab10')
-plt.title('Absolute value of constraint 2 (best OPE2)')
-plt.xlabel('Integral constraints')
-plt.ylabel('abs(constraint_2)')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE2_constraint_2.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), ope1_err[0, ope2_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), ope1_err[1, ope2_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), ope1_err[2, ope2_ordered_2], c=range(10), cmap='tab10')
-plt.title('Relative error of OPE 1 w.r.t. bounds (best OPE2)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_1 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE2_ope1_err.jpg'), dpi=300)
+plt.legend()
+# Improve the legend
+sns.move_legend(
+    ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
+)
+plt.xlabel('Number of integral constraints')
+plt.ylabel('Integral constraint 2')
+plt.title(f'Integral constraint 2, {rew_to_take} best runs')
+plt.savefig(join(f'BPS_analyzed_modes', f'constraint2.jpg'), dpi=300)
+#plt.show()
 plt.close()
 
 
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), ope2_err[0, ope2_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), ope2_err[1, ope2_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), ope2_err[2, ope2_ordered_2], c=range(10), cmap='tab10')
-plt.title('Relative error of OPE 2 w.r.t. bounds (best OPE2)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_2 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE2_ope2_err.jpg'), dpi=300)
-plt.close()
 
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), ope3_err[0, ope2_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), ope3_err[1, ope2_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), ope3_err[2, ope2_ordered_2], c=range(10), cmap='tab10')
-plt.title('Relative error of OPE 3 w.r.t. bounds (best OPE2)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_3 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE2_ope3_err.jpg'), dpi=300)
-plt.close()
+### OPE 1 error
+### Average plot
+# Initialize the figure
+f, ax = plt.subplots()
+# Show each observation with a scatterplot
+sns.stripplot(
+    x=0*np.ones(rew_to_take), y=ope1_err[0][rew_ordered_0], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
 
+sns.stripplot(
+    x=1*np.ones(rew_to_take), y=ope1_err[1][rew_ordered_1], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
 
-ope3_ordered_0 = np.argsort(ope3_err[0,:])[:10]
-ope3_ordered_1 = np.argsort(ope3_err[1,:])[:10]
-ope3_ordered_2 = np.argsort(ope3_err[2,:])[:10]
+sns.stripplot(
+    x=2*np.ones(rew_to_take), y=ope1_err[2][rew_ordered_2], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+# Show the conditional means, aligning each pointplot in the
+# center of the strips by adjusting the width allotted to each
+# category (.8 by default) by the number of hue levels
+sns.pointplot(
+    x=[0], y=[np.mean(ope1_err[0][rew_ordered_0])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[1], y=[np.mean(ope1_err[1][rew_ordered_1])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[2], y=[np.mean(ope1_err[2][rew_ordered_2])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
 
-plt.figure(figsize=(6, 6))    
-plt.scatter(0*np.ones((10)), crossing_norms[0, ope3_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), crossing_norms[1, ope3_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), crossing_norms[2, ope3_ordered_2], c=range(10), cmap='tab10')
-plt.title('Crossing equation norms (best OPE3)')
-plt.xlabel('Integral constraints')
-plt.ylabel('Crossing equation vector norm')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE3_crossing_norms.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), constraints1[0, ope3_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), constraints1[1, ope3_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), constraints1[2, ope3_ordered_2], c=range(10), cmap='tab10')
-plt.title('Absolute value of constraint 1 (best OPE3)')
-plt.xlabel('Integral constraints')
-plt.ylabel('abs(constraint_1)')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE3_constraint_1.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), constraints2[0, ope3_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), constraints2[1, ope3_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), constraints2[2, ope3_ordered_2], c=range(10), cmap='tab10')
-plt.title('Absolute value of constraint 2 (best OPE3)')
-plt.xlabel('Integral constraints')
-plt.ylabel('abs(constraint_2)')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE3_constraint_2.jpg'), dpi=300)
-plt.close()
-
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), ope1_err[0, ope3_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), ope1_err[1, ope3_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), ope1_err[2, ope3_ordered_2], c=range(10), cmap='tab10')
-plt.title('Relative error of OPE 1 w.r.t. bounds (best OPE3)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_1 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE3_ope1_err.jpg'), dpi=300)
+plt.legend()
+# Improve the legend
+sns.move_legend(
+    ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
+)
+plt.xlabel('Number of integral constraints')
+plt.ylabel('Relative error on OPE 1')
+plt.title(f'OPE coefficient 1 error with different integral modes, {rew_to_take} best runs')
+plt.savefig(join(f'BPS_analyzed_modes', f'ope1_err.jpg'), dpi=300)
+#plt.show()
 plt.close()
 
 
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), ope2_err[0, ope3_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), ope2_err[1, ope3_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), ope2_err[2, ope3_ordered_2], c=range(10), cmap='tab10')
-plt.title('Relative error of OPE 2 w.r.t. bounds (best OPE3)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_2 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE3_ope2_err.jpg'), dpi=300)
+### OPE 2 error
+### Average plot
+# Initialize the figure
+f, ax = plt.subplots()
+# Show each observation with a scatterplot
+sns.stripplot(
+    x=0*np.ones(rew_to_take), y=ope2_err[0][rew_ordered_0], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+
+sns.stripplot(
+    x=1*np.ones(rew_to_take), y=ope2_err[1][rew_ordered_1], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+
+sns.stripplot(
+    x=2*np.ones(rew_to_take), y=ope2_err[2][rew_ordered_2], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+# Show the conditional means, aligning each pointplot in the
+# center of the strips by adjusting the width allotted to each
+# category (.8 by default) by the number of hue levels
+sns.pointplot(
+    x=[0], y=[np.mean(ope2_err[0][rew_ordered_0])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[1], y=[np.mean(ope2_err[1][rew_ordered_1])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[2], y=[np.mean(ope2_err[2][rew_ordered_2])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+
+plt.legend()
+# Improve the legend
+sns.move_legend(
+    ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
+)
+plt.xlabel('Number of integral constraints')
+plt.ylabel('Relative error on OPE 2')
+plt.title(f'OPE coefficient 2 error with different integral modes, {rew_to_take} best runs')
+plt.savefig(join(f'BPS_analyzed_modes', f'ope2_err.jpg'), dpi=300)
+#plt.show()
 plt.close()
 
-plt.figure(figsize=(6, 6))
-plt.scatter(0*np.ones((10)), ope3_err[0, ope3_ordered_0], c=range(10), cmap='tab10')
-plt.scatter(1*np.ones((10)), ope3_err[1, ope3_ordered_1], c=range(10), cmap='tab10')
-plt.scatter(2*np.ones((10)), ope3_err[2, ope3_ordered_2], c=range(10), cmap='tab10')
-plt.title('Relative error of OPE 3 w.r.t. bounds (best OPE3)')
-plt.xlabel('Integral constraints')
-plt.ylabel('OPE_3 relative error')
-plt.yscale('log')
-#plt.legend(fontsize=5)
-plt.savefig(join('BPS_singleg_analyzed', 'OPE3_ope3_err.jpg'), dpi=300)
+
+### OPE 3 error
+### Average plot
+# Initialize the figure
+f, ax = plt.subplots()
+# Show each observation with a scatterplot
+sns.stripplot(
+    x=0*np.ones(rew_to_take), y=ope3_err[0][rew_ordered_0], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+
+sns.stripplot(
+    x=1*np.ones(rew_to_take), y=ope3_err[1][rew_ordered_1], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+
+sns.stripplot(
+    x=2*np.ones(rew_to_take), y=ope3_err[2][rew_ordered_2], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+# Show the conditional means, aligning each pointplot in the
+# center of the strips by adjusting the width allotted to each
+# category (.8 by default) by the number of hue levels
+sns.pointplot(
+    x=[0], y=[np.mean(ope3_err[0][rew_ordered_0])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[1], y=[np.mean(ope3_err[1][rew_ordered_1])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[2], y=[np.mean(ope3_err[2][rew_ordered_2])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+
+plt.legend()
+# Improve the legend
+sns.move_legend(
+    ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
+)
+plt.xlabel('Number of integral constraints')
+plt.ylabel('Relative error on OPE 3')
+plt.title(f'OPE coefficient 3 error with different integral modes, {rew_to_take} best runs')
+plt.savefig(join(f'BPS_analyzed_modes', f'ope3_err.jpg'), dpi=300)
+#plt.show()
 plt.close()
+
+
+### OPE 1 values
+### Average plot
+# Initialize the figure
+f, ax = plt.subplots()
+# Show each observation with a scatterplot
+plt.fill_between(x=[0,1,2], y1=bounds_OPE1[g_index, 0], y2=bounds_OPE1[g_index, 1], color='green', alpha=0.2)
+sns.stripplot(
+    x=0*np.ones(rew_to_take), y=ope1_vals[0][rew_ordered_0], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+
+sns.stripplot(
+    x=1*np.ones(rew_to_take), y=ope1_vals[1][rew_ordered_1], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+
+sns.stripplot(
+    x=2*np.ones(rew_to_take), y=ope1_vals[2][rew_ordered_2], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+# Show the conditional means, aligning each pointplot in the
+# center of the strips by adjusting the width allotted to each
+# category (.8 by default) by the number of hue levels
+sns.pointplot(
+    x=[0], y=[np.mean(ope1_vals[0][rew_ordered_0])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[1], y=[np.mean(ope1_vals[1][rew_ordered_1])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[2], y=[np.mean(ope1_vals[2][rew_ordered_2])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+
+plt.legend()
+# Improve the legend
+sns.move_legend(
+    ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
+)
+
+plt.xlabel('Number of integral constraints')
+plt.ylabel('Relative error on OPE 3')
+plt.title(f'OPE coefficient 3 error with different integral modes, {rew_to_take} best runs')
+plt.savefig(join(f'BPS_analyzed_modes', f'ope1_vals.jpg'), dpi=300)
+#plt.show()
+plt.close()
+
+
+### OPE 2 values
+### Average plot
+# Initialize the figure
+f, ax = plt.subplots()
+# Show each observation with a scatterplot
+plt.fill_between(x=[0,1,2], y1=bounds_OPE2[g_index, 0], y2=bounds_OPE2[g_index, 1], color='green', alpha=0.2)
+sns.stripplot(
+    x=0*np.ones(rew_to_take), y=ope2_vals[0][rew_ordered_0], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+
+sns.stripplot(
+    x=1*np.ones(rew_to_take), y=ope2_vals[1][rew_ordered_1], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+
+sns.stripplot(
+    x=2*np.ones(rew_to_take), y=ope2_vals[2][rew_ordered_2], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+# Show the conditional means, aligning each pointplot in the
+# center of the strips by adjusting the width allotted to each
+# category (.8 by default) by the number of hue levels
+sns.pointplot(
+    x=[0], y=[np.mean(ope2_vals[0][rew_ordered_0])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[1], y=[np.mean(ope2_vals[1][rew_ordered_1])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[2], y=[np.mean(ope2_vals[2][rew_ordered_2])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+
+plt.legend()
+# Improve the legend
+sns.move_legend(
+    ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
+)
+
+plt.xlabel('Number of integral constraints')
+plt.ylabel('Relative error on OPE 3')
+plt.title(f'OPE coefficient 3 error with different integral modes, {rew_to_take} best runs')
+plt.savefig(join(f'BPS_analyzed_modes', f'ope2_vals.jpg'), dpi=300)
+#plt.show()
+plt.close()
+
+
+### OPE 3 values
+### Average plot
+# Initialize the figure
+f, ax = plt.subplots()
+# Show each observation with a scatterplot
+plt.fill_between(x=[0,1,2], y1=bounds_OPE3[g_index, 0], y2=bounds_OPE3[g_index, 1], color='green', alpha=0.2)
+sns.stripplot(
+    x=0*np.ones(rew_to_take), y=ope3_vals[0][rew_ordered_0], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+
+sns.stripplot(
+    x=1*np.ones(rew_to_take), y=ope3_vals[1][rew_ordered_1], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+
+sns.stripplot(
+    x=2*np.ones(rew_to_take), y=ope3_vals[2][rew_ordered_2], color='blue',
+    dodge=True, alpha=.25, zorder=1, legend=False
+)
+# Show the conditional means, aligning each pointplot in the
+# center of the strips by adjusting the width allotted to each
+# category (.8 by default) by the number of hue levels
+sns.pointplot(
+    x=[0], y=[np.mean(ope3_vals[0][rew_ordered_0])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[1], y=[np.mean(ope3_vals[1][rew_ordered_1])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+sns.pointplot(
+    x=[2], y=[np.mean(ope3_vals[2][rew_ordered_2])], color='blue',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean'
+)
+
+plt.legend()
+# Improve the legend
+sns.move_legend(
+    ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
+)
+
+plt.xlabel('Number of integral constraints')
+plt.ylabel('Relative error on OPE 3')
+plt.title(f'OPE coefficient 3 error with different integral modes, {rew_to_take} best runs')
+plt.savefig(join(f'BPS_analyzed_modes', f'ope3_vals.jpg'), dpi=300)
+#plt.show()
+plt.close()
+
+

@@ -8,17 +8,20 @@ from matplotlib import pyplot as plt
 import itertools
 import os
 import re
+import seaborn as sns
+import pandas as pd
 
+rew_to_take = 10
 gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      np.arange(start=0.25, stop=4.05, step=0.05),
                      #np.arange(start=4.25, stop=5.25, step=0.25)
                      ))
 gs = np.around(gs, decimals=2)
-g = 0.35
+g = 0.1
 g_index = np.argwhere(gs==g)[0]
 OPE_fix=1
-path = join('/data/trenta', f'results_BPS_{OPE_fix}fix_g035')
-prefix = 'g035'
+path = join('.', 'results_BPS', f'results_BPS_{OPE_fix}fix_g010')
+prefix = 'g010'
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 r = re.compile('sac[0-9]+.csv')
 onlyfiles = list(filter(r.match, onlyfiles))
@@ -60,16 +63,15 @@ orderer = np.argsort(rewards)
 orderer = np.flip(orderer)
 OPEs_ordered = OPEs[orderer]
 
-best_rew_to_take = 10
 
-analysis_path = f'./BPS_analysis/{prefix}'
+analysis_path = f'./BPS_analyzed/{prefix}'
 if not os.path.exists(analysis_path):
         os.makedirs(analysis_path)
-vals = OPEs_ordered[:best_rew_to_take]
+vals = OPEs_ordered[:rew_to_take]
 OPE_means = np.mean(vals, axis=0)
 OPE_stds = np.std(vals, axis=0)
-with open(join(analysis_path, f'{prefix}_OPE{OPE_fix+1}_10_{best_rew_to_take}.txt'), 'w') as f:
-    print(f'Best {best_rew_to_take} rewards', file=f)
+with open(join(analysis_path, f'{prefix}_OPE{OPE_fix+1}_10_{rew_to_take}.txt'), 'w') as f:
+    print(f'Best {rew_to_take} rewards', file=f)
     print('OPE means:', file=f)
     print(OPE_means, file=f)
     print('OPE stds:', file=f)
@@ -77,12 +79,43 @@ with open(join(analysis_path, f'{prefix}_OPE{OPE_fix+1}_10_{best_rew_to_take}.tx
     print('std relative to mean', file=f)
     print(100*OPE_stds/OPE_means, file=f)
 
-plt.figure()
-for i in range(OPE_fix+1, lambda_len+1):
-    plt.scatter(np.ones(best_rew_to_take)*i, vals[:, i-OPE_fix-1], color='blue')
-plt.plot(range(OPE_fix+1, lambda_len+1), OPE_means, color='orange')
-plt.errorbar(range(OPE_fix+1, lambda_len+1), OPE_means, yerr=OPE_stds, color='orange')
-plt.xlabel('index')
-plt.ylabel('OPE[index]')
-plt.title(f'OPE coefficients for best {best_rew_to_take} tries')
-plt.savefig(join(analysis_path, f'{prefix}_OPE{OPE_fix+1}_10_{best_rew_to_take}.jpg'))
+
+operators = np.arange(start=OPE_fix+1, stop=lambda_len+1)
+fig, ax = plt.subplots()
+### Average plot
+# Initialize the figure
+ax = sns.pointplot(
+    x=operators, y=OPE_means, color='orange',
+    join=False, dodge=.8 - .8 / 3,
+    markers="d", scale=.75, errorbar=None, label='Experimental mean', ax=ax
+)
+x_coords = []
+y_coords = []
+for point_pair in ax.collections:
+    for x, y in point_pair.get_offsets():
+        x_coords.append(x)
+        y_coords.append(y)
+ax.errorbar(x_coords, y_coords, yerr=OPE_stds,
+    color='orange', fmt=' ', zorder=1)
+# Show each observation with a scatterplot
+for j in range(rew_to_take):
+    sns.stripplot(
+        x=operators, y=OPEs_ordered[j], color='blue',
+        dodge=True, alpha=.25, zorder=-1, legend=False
+    )
+# Show the conditional means, aligning each pointplot in the
+# center of the strips by adjusting the width allotted to each
+# category (.8 by default) by the number of hue levels
+plt.legend()
+# Improve the legend
+sns.move_legend(
+    ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
+)
+plt.xlabel('Operator number')
+plt.ylabel('OPE coefficient')
+#plt.yscale('log')
+plt.title(f'OPE coefficients on best {rew_to_take} runs, {OPE_fix} coefficient fixed, g={g}')
+plt.savefig(join(analysis_path, f'{prefix}_OPE{OPE_fix+1}_10_{rew_to_take}.jpg'), dpi=300)
+
+#plt.show()
+plt.close()
