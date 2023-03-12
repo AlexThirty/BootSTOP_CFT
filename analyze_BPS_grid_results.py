@@ -25,9 +25,9 @@ def get_lambda_error(val, ope_index, g_index):
         half = (lower+upper)/2
     
         if val < lower:
-            return abs(val-half)/half
+            return abs(val-lower)/lower
         elif val > upper:
-            return abs(val-half)/half
+            return abs(val-upper)/upper
         else:
             return 0.
     elif ope_index==2:
@@ -35,9 +35,9 @@ def get_lambda_error(val, ope_index, g_index):
         upper = bounds_OPE2[g_index, 1]
         half = (lower+upper)/2
         if val < lower:
-            return abs(val-half)/half
+            return abs(val-lower)/lower
         elif val > upper:
-            return abs(val-half)/half
+            return abs(val-upper)/upper
         else:
             return 0.
     elif ope_index==3:
@@ -45,29 +45,32 @@ def get_lambda_error(val, ope_index, g_index):
         upper = bounds_OPE3[g_index, 1]
         half = (lower+upper)/2
         if val < lower:
-            return abs(val-half)/half
+            return abs(val-lower)/lower
         elif val > upper:
-            return abs(val-half)/half
+            return abs(val-upper)/upper
         else:
             return 0.
     else:
         raise ValueError
 
-path = join('.', 'results_BPS_grid_scale')
-save_path = join('.', 'BPS_grid_analyzed_scale')
+path = join('.', 'results_BPS', 'results_BPS_grid_sum')
+save_path = join('.', 'BPS_analyzed_grid_sum')
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 r = re.compile('sac[0-9]+.csv')
 onlyfiles = list(filter(r.match, onlyfiles))
 #print(onlyfiles)
 best_reward = 0.
 
-w1s = [0.0001, 0.0005, 0.001, 0.005]
-w2s = [0.001, 0.01, 0.1, 1., 10.]
+#w1s = [0.0001, 0.0005, 0.001, 0.005]
+#w2s = [0.001, 0.01, 0.1, 1., 10.]
 #w1s = [0.1, 1., 10., 100., 1000., 10000., 100000., 1e6]
 #w2s = [0.1, 1., 10., 100., 1000., 10000., 100000., 1e6]
+w1s = [1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
+w2s = [1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
+
 grid = list(itertools.product(w1s, w2s))
 grid_pts = len(grid)
-tries_per_mode = 25
+tries_per_mode = 10
 delta_len = 10
 lambda_len = 10
 
@@ -97,7 +100,7 @@ for i in range(grid_pts):
         currf = open(join(path, 'sac'+str(i*tries_per_mode+j)+'.csv'))
         csv_raw = csv.reader(currf)
         sp = list(csv_raw)
-        data = sp[-1]
+        data = sp[-2]
         
         if len(data)>10:
             curr_rew = float(data[1])
