@@ -204,9 +204,10 @@ class Ising2D_SAC(Ising2D):
 
         # add up all the components
         constraints = spin_cons  # the .sum implements summation over multiplet spins
+        cross = LA.norm(constraints)
         reward = 1 / LA.norm(constraints)
 
-        return constraints, reward, cft_data
+        return constraints, reward, cft_data, cross
     
     def crossing_recalc(self, cft_data):
         """

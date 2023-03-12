@@ -32,15 +32,24 @@ if __name__ == '__main__':
     parser.add_argument('--tau', type=float, default=0.0005, help='Tau parameter for state-value function update')
     parser.add_argument('--layer1_size', type=int, default=256, help='Dense units for first layer')
     parser.add_argument('--layer2_size', type=int, default=256, help='Dense units for the second layer')
-    parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
+    parser.add_argument('--batch_size', type=int, default=256, help='Batch size')
     parser.add_argument('--num_runs', type=int, default=1, help='Number of runs')
-    parser.add_argument('--max_cpus', type=int, default=650, help='Maximum number of CPUs')
+    parser.add_argument('--max_cpus', type=int, default=450, help='Maximum number of CPUs')
     parser.add_argument('--cpus_per_job', type=int, default=1, help='Maximum number of CPUs per job')
-    parser.add_argument('--runs_per_args', type=int, default=50, help='Number of runs for each combination of parameters')
+    parser.add_argument('--runs_per_args', type=int, default=100, help='Number of runs for each combination of parameters')
     
     args = parser.parse_args()
     
-    ray.init(address='172.16.18.254:6380', _node_ip_address="172.16.18.254")
+    
+    res_path = f'/data/trenta/results_Ising_fix_new'
+    res_path_steps = f'/data/trenta/results_Ising_fix_new_steps'
+    if not os.path.exists(res_path):
+        os.makedirs(res_path)
+        
+    if not os.path.exists(res_path_steps):
+        os.makedirs(res_path_steps)
+    
+    ray.init(address='172.16.18.254:6379', _node_ip_address="172.16.18.254")
     print("Connected to Ray cluster.")
     print(f"Available nodes: {ray.nodes()}")
 
@@ -52,6 +61,7 @@ if __name__ == '__main__':
                 window_decrease_rate,
                 pc_max,
                 file_name,
+                file_name_steps,
                 array_index,
                 lower_bounds,
                 search_window_sizes,
@@ -69,6 +79,7 @@ if __name__ == '__main__':
                       window_decrease_rate=window_decrease_rate,
                       pc_max=pc_max,
                       file_name=file_name,
+                      file_name_steps=file_name_steps,
                       array_index=array_index,
                       lower_bounds=lower_bounds,
                       search_window_sizes=search_window_sizes,
@@ -104,6 +115,8 @@ if __name__ == '__main__':
         agent_config['layer1_size'] = args.layer1_size
         agent_config['layer2_size'] = args.layer2_size
         agent_config['batch_size'] = args.batch_size
+        agent_config['output_steps'] = 1
+        agent_config['mean_output_k'] = 100
 
         params = ParametersIsing2D_SAC(run_config, sigma=sigma)
         
@@ -135,12 +148,13 @@ if __name__ == '__main__':
             teor_reward = cft.best_theoretical()
             # array_index is the cluster array number passed to the console. Set it to zero if it doesn't exist.
             array_index = 100*i+j
-
+            
             # form the file_name where the code output is saved to
-            file_name = os.path.join('pro_results', params.filename_stem + str(array_index) + '.csv')
-            utils.output_to_file(file_name=file_name, output=np.array([teor_reward]))
-            output = str(i)
+            file_name = os.path.join(res_path, params.filename_stem + str(array_index) + '.csv')
+            file_name_steps = os.path.join(res_path_steps, params.filename_stem + str(array_index) + '_steps.csv')
+            output = str(array_index)
             utils.output_to_file(file_name=file_name, output=output)
+            
             # determine initial starting point in the form needed for the soft_actor_critic function
             x0 = params.global_best - params.shifts
             print(f'Starting run {100*i+j}')
@@ -151,6 +165,7 @@ if __name__ == '__main__':
                         window_decrease_rate=params.window_rate,
                         pc_max=params.pc_max,
                         file_name=file_name,
+                        file_name_steps=file_name_steps,
                         array_index=array_index,
                         lower_bounds=params.shifts,
                         search_window_sizes=params.guess_sizes,

@@ -41,6 +41,7 @@ class Environment:
         self.current_constraints = np.zeros(self.environment_dim, dtype=np.float32)
         self.current_reward = None
         self.reward_improved = False
+        self.current_crossing = None
 
     def move(self, action, largest, solution):
         """
@@ -60,7 +61,7 @@ class Environment:
                                                         + (1 - self.guessing_run_list) * solution)
 
         # evaluate the function at the updated location and update attributes
-        self.current_constraints, self.current_reward, self.current_location \
+        self.current_constraints, self.current_reward, self.current_location, self.current_crossing \
             = self.func_wrapper.fun(self.current_location)
 
         # check if we've found a new maximum
@@ -85,7 +86,7 @@ class Learn:
     env: Environment
         Instance of `Environment` class.
     """
-    def __init__(self, env, agent_config):
+    def __init__(self, env, agent_config, pc, window_scale_exponent):
         self.env = env
         self.agent = Agent(input_dims=[env.environment_dim],
                            n_actions=env.search_space_dim,
@@ -106,8 +107,12 @@ class Learn:
         self.solution = None
         self.productivity_counter = None
         self.rewards = None
+        self.output_steps = agent_config['output_steps']
+        self.mean_output_k = agent_config['mean_output_k']
+        self.window_scale_exponent = window_scale_exponent
+        self.pc = pc
 
-    def loop(self, window_scale_exponent, file_name, array_index, current_best, faff_max, verbose, output_order=''):
+    def loop(self, window_scale_exponent, file_name, file_name_steps, array_index, current_best, faff_max, verbose, output_order=''):
         """
         Loop which implements neural net learning and exploration of parameter space landscape.
         """
@@ -131,14 +136,12 @@ class Learn:
             self.observation = self.observation_  # update observation to be the current constraints
             # append the current reward to the list of previous rewards generated within the loop
             self.rewards.append(current_reward)
-
-            #nums = int(current_location.size/2)
-            #delta_print = current_location[:nums]
-            #lambda_print = current_location[nums:]
-            #mask = np.argsort(delta_print)
-            #delta_print = delta_print[mask]
-            #lambda_print = lambda_print[mask]
-            #location_print = np.concatenate((delta_print, lambda_print), axis=None)
+            
+            if self.step % self.mean_output_k == 0:
+                rew_mean = np.mean(np.array(self.rewards[-self.mean_output_k:]))
+                step_output = np.concatenate(([self.step], [rew_mean], [self.env.current_crossing], current_location))
+                if self.output_steps:
+                    utils.output_to_file(file_name=file_name_steps, output=step_output)
             
             if self.env.reward_improved:
                 # solution is value of parameters above the lower bounds
@@ -161,6 +164,14 @@ class Learn:
             # if we hit faff_max then flip the fdone flag to exit the while loop
             if self.faff == faff_max:
                 self.fdone = True
+                
+            # if we hit faff_max then flip the fdone flag to exit the while loop
+            if self.faff == faff_max:
+                self.fdone = True
+                step_output = [self.window_scale_exponent, self.pc, self.step]
+                if self.output_steps:
+                    utils.output_to_file(file_name=file_name_steps, output=step_output)
+                    utils.output_to_file(file_name=file_name, output=step_output)
 
             # form the output for the console
             console_output = 'step %.1f' % self.step, 'avg reward %.10f' % np.mean(self.rewards[-25:]), \
@@ -190,6 +201,7 @@ def soft_actor_critic(func,
                       max_window_changes,
                       faff_max,
                       file_name,
+                      file_name_steps,
                       array_index,
                       guessing_run_list,
                       starting_reward,
@@ -254,7 +266,7 @@ def soft_actor_critic(func,
     environment = Environment(func_wrapper, environment_dim, search_space_dim, lower_bounds, search_window_sizes,
                               guessing_run_list)
     # Initialize learning class
-    lrn = Learn(environment, agent_config)
+    lrn = Learn(environment, agent_config, pc=0, window_scale_exponent=0)
     # set the initial window size reduction exponent, pc counter and best_reward (counter for reductions)
     window_scale_exponent = 0
     pc = 0  # records number of neural net reinitialisations
@@ -267,7 +279,7 @@ def soft_actor_critic(func,
     # ---Looping until a certain window size is reached---
     while window_scale_exponent < max_window_changes:
         lrn.rewards = [best_reward]
-        x0 = lrn.loop(window_scale_exponent, file_name, array_index, x0, faff_max, verbose=verbose)
+        x0 = lrn.loop(window_scale_exponent, file_name, file_name_steps, array_index, x0, faff_max, verbose=verbose)
         # update best_rewards as the maximum reward found after going through lrn.loop
         best_reward = max(lrn.rewards)
         if not lrn.productivity_counter:  # a better reward was not found by lrn.loop
@@ -289,7 +301,7 @@ def soft_actor_critic(func,
             agent_config['reward_scale'] = det_rew_scale(window_scale_exponent, start_rew_scale, 1., max_window_changes, rew_scale_schedule)
         cur_rew_scale = agent_config['reward_scale']
         #print(f'Reward scale set to {cur_rew_scale}')
-        lrn = Learn(environment, agent_config)
+        lrn = Learn(environment, agent_config, pc=pc, window_scale_exponent=window_scale_exponent)
 
     # when finished looping print the final reward and corresponding CFT data
     best_reward_location = x0 + lower_bounds

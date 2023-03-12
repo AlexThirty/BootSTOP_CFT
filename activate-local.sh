@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=ray-tune-trenta
 ### Modify this according to your Ray workload.
-#SBATCH --nodes=8
+#SBATCH --nodes=9
 #SBATCH --exclusive
 #SBATCH --tasks-per-node=1
 ### Modify this according to your Ray workload.
@@ -21,6 +21,9 @@ nodes_array=($nodes)
 head_node="localhost"
 head_node_ip=172.16.18.254
 export head_node_ip
+
+export RAY_GRAFANA_HOST=172.16.18.254:3000
+export RAY_PROMETHEUS_HOST=172.16.18.254:9090
 
 echo $head_node
 # if we detect a space character in the head node IP, we'll
@@ -60,4 +63,4 @@ for ((i = 0; i < worker_num; i++)); do
 done
 
 # ray/doc/source/cluster/examples/simple-trainer.py
-python -u run_cluster_BPS.py
+python -u run_cluster_ising2D_fix.py
