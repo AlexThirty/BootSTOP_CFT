@@ -17,11 +17,11 @@ gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      #np.arange(start=4.25, stop=5.25, step=0.25)
                      ))
 gs = np.around(gs, decimals=2)
-g = 0.1
+g = 1.5
 g_index = np.argwhere(gs==g)[0]
-OPE_fix=1
-path = join('.', 'results_BPS', f'results_BPS_{OPE_fix}fix_g010')
-prefix = 'g010'
+OPE_fix=3
+path = join('.', 'results_BPS', f'results_BPS_{OPE_fix}fix_g15')
+prefix = 'g15'
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 r = re.compile('sac[0-9]+.csv')
 onlyfiles = list(filter(r.match, onlyfiles))

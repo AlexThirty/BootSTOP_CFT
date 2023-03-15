@@ -108,7 +108,7 @@ for i in range(delta_tries):
     lambda_error_best.append(np.mean(abs(lambdas - lambda_teor)/lambda_teor))
     
 # Number of best rewards to take
-rew_to_take = 10
+rew_to_take = 5
 
 avg_rewards = np.zeros(delta_tries)
 best_rewards = np.zeros(delta_tries)

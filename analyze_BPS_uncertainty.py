@@ -51,9 +51,12 @@ def get_teor_deltas(g):
 
 mean_OPE_first = np.zeros(experiments)
 mean_OPE_second = np.zeros(experiments)
+mean_OPE_sum = np.zeros(experiments)
 std_OPE_first = np.zeros(experiments)
 std_OPE_second = np.zeros(experiments)
+std_OPE_sum = np.zeros(experiments)
 dist_OPE = np.zeros(experiments)
+
 
 for k, (g_el, path_el) in enumerate(zip(g_list, path_list)):
     
@@ -93,6 +96,7 @@ for k, (g_el, path_el) in enumerate(zip(g_list, path_list)):
     OPEs_ordered = OPEs[orderer]
 
     vals = OPEs_ordered[-best_rew_to_take:]
+    vals_sum = vals[:, OPE_first-1] + vals[:, OPE_second-1]
     OPE_means = np.mean(vals, axis=0)
     OPE_stds = np.std(vals, axis=0)
     
@@ -101,8 +105,10 @@ for k, (g_el, path_el) in enumerate(zip(g_list, path_list)):
     dist_OPE[k] = np.abs(teor_deltas[OPE_first-1] - teor_deltas[OPE_second-1])
     mean_OPE_first[k] = OPE_means[OPE_first-1]
     mean_OPE_second[k] = OPE_means[OPE_second-1]
+    mean_OPE_sum[k] = np.mean(vals_sum)
     std_OPE_first[k] = OPE_stds[OPE_first-1]
     std_OPE_second[k] = OPE_stds[OPE_second-1]
+    std_OPE_sum[k] = np.std(vals_sum)
     
 
 plt.figure()
@@ -122,3 +128,12 @@ plt.ylabel('Standard deviation/mean')
 plt.xlabel(f'Distance between delta_{OPE_first} and delta_{OPE_second}')
 plt.title(f'Percentage error w.r.t. distance best {best_rew_to_take} rewards, OPE{OPE_second}')
 plt.savefig(join('BPS_analyzed_uncertainty', f'uncertainty_analysis_OPE{OPE_second}_on_OPE{OPE_first}_best{best_rew_to_take}.jpg'), dpi=300)
+
+plt.figure()
+plt.scatter(x=dist_OPE, y=std_OPE_sum/mean_OPE_sum, color='blue')
+for i in range(8):
+    plt.text(x=dist_OPE[i]+0.0005, y=std_OPE_sum[i]/mean_OPE_sum[i]+0.005, s=f'g={str(g_list[i])}')
+plt.ylabel('Standard deviation/mean')
+plt.xlabel(f'Distance between delta_{OPE_first} and delta_{OPE_second}')
+plt.title(f'Percentage error w.r.t. distance best {best_rew_to_take} rewards, OPE{OPE_first}+OPE{OPE_second}')
+plt.savefig(join('BPS_analyzed_uncertainty', f'uncertainty_analysis_sum_OPE{OPE_first}_OPE{OPE_second}_best{best_rew_to_take}.jpg'), dpi=300)
