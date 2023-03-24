@@ -11,17 +11,17 @@ import os
 import re
 
 
-OPE_first = 5
-OPE_second = 6
+OPE_first = 9
+OPE_second = 10
 best_rew_to_take = 25
 best_reward = 0.
 delta_len = 10
 lambda_len = 10
 lambda_fix = 3
 
-g_list = [0.5, 1., 1.5, 2., 2.5, 3., 3.5, 4.]
+g_list = [1., 1.5, 2., 2.5, 3., 3.5, 4.]
 path_list = [
-    join('.', 'results_BPS', 'results_BPS_3fix_g05'),
+    #join('.', 'results_BPS', 'results_BPS_3fix_g05'),
     join('.', 'results_BPS', 'results_BPS_3fix_g1'),
     join('.', 'results_BPS', 'results_BPS_3fix_g15'),
     join('.', 'results_BPS', 'results_BPS_3fix_g2'),
@@ -113,8 +113,8 @@ for k, (g_el, path_el) in enumerate(zip(g_list, path_list)):
 
 plt.figure()
 plt.scatter(x=dist_OPE, y=std_OPE_first/mean_OPE_first, color='blue')
-for i in range(8):
-    plt.text(x=dist_OPE[i]+0.0005, y=std_OPE_first[i]/mean_OPE_first[i]+0.01, s=f'g={str(g_list[i])}')
+for i in range(len(g_list)):
+    plt.text(x=dist_OPE[i]+0.0005, y=std_OPE_first[i]/mean_OPE_first[i]+0.0001, s=f'g={str(g_list[i])}')
 plt.ylabel('Standard deviation/mean')
 plt.xlabel(f'Distance between delta_{OPE_first} and delta_{OPE_second}')
 plt.title(f'Percentage error w.r.t. distance best {best_rew_to_take} rewards, OPE{OPE_first}')
@@ -122,7 +122,7 @@ plt.savefig(join('BPS_analyzed_uncertainty', f'uncertainty_analysis_OPE{OPE_firs
 
 plt.figure()
 plt.scatter(x=dist_OPE, y=std_OPE_second/mean_OPE_second, color='blue')
-for i in range(8):
+for i in range(len(g_list)):
     plt.text(x=dist_OPE[i]+0.0005, y=std_OPE_second[i]/mean_OPE_second[i]+0.01, s=f'g={str(g_list[i])}')
 plt.ylabel('Standard deviation/mean')
 plt.xlabel(f'Distance between delta_{OPE_first} and delta_{OPE_second}')
@@ -131,8 +131,8 @@ plt.savefig(join('BPS_analyzed_uncertainty', f'uncertainty_analysis_OPE{OPE_seco
 
 plt.figure()
 plt.scatter(x=dist_OPE, y=std_OPE_sum/mean_OPE_sum, color='blue')
-for i in range(8):
-    plt.text(x=dist_OPE[i]+0.0005, y=std_OPE_sum[i]/mean_OPE_sum[i]+0.005, s=f'g={str(g_list[i])}')
+for i in range(len(g_list)):
+    plt.text(x=dist_OPE[i]+0.0005, y=std_OPE_sum[i]/mean_OPE_sum[i]+0.00001, s=f'g={str(g_list[i])}')
 plt.ylabel('Standard deviation/mean')
 plt.xlabel(f'Distance between delta_{OPE_first} and delta_{OPE_second}')
 plt.title(f'Percentage error w.r.t. distance best {best_rew_to_take} rewards, OPE{OPE_first}+OPE{OPE_second}')

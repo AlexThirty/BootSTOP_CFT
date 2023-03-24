@@ -15,10 +15,10 @@ best_reward = 0.
 delta_len = 10
 lambda_len = 10
 lambda_fix = 1
-rew_to_take = 10
+rew_to_take = 25
 
 
-g_list = np.array([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45])
+g_list = np.array([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 1.])
 g_indexes = np.zeros(len(g_list), dtype=np.int32)
 gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      np.arange(start=0.25, stop=4.05, step=0.05),
@@ -41,7 +41,10 @@ path_list = [
     join('.', 'results_BPS', 'results_BPS_1fix_g030'),
     join('.', 'results_BPS', 'results_BPS_1fix_g035'),
     join('.', 'results_BPS', 'results_BPS_1fix_g040'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g045')
+    join('.', 'results_BPS', 'results_BPS_1fix_g045'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g05'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g1'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g15')
 ]
 experiments = len(path_list)
 
