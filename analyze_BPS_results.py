@@ -12,8 +12,8 @@ import os
 import re
 
 
-OPE_first = 9
-OPE_second = 10
+OPE_first = 4
+OPE_second = 5
 best_rew_to_take = 25
 best_reward = 0.
 delta_len = 10
@@ -199,7 +199,7 @@ for oper in range(lambda_fix, lambda_len):
     plt.xlabel('Coupling constant g')
     plt.ylabel('OPE coefficient')
     #plt.yscale('log')
-    plt.title(f'{oper}-th OPE coefficient on best {best_rew_to_take} runs, {lambda_fix} coefficient fixed')
+    plt.title(f'{oper+1}-th OPE coefficient on best {best_rew_to_take} runs, {lambda_fix} coefficient fixed')
     plt.savefig(join(analysis_path, f'OPE{oper+1}_analysis_best{best_rew_to_take}.jpg'), dpi=300)
 
     #plt.show()
