@@ -200,7 +200,7 @@ for i in range(grid_pts):
     
     plt.figure(figsize=(6, 6))
     plt.scatter(range(10), ope1_err[i, rew_ordered], c=range(10), cmap='tab10')
-    plt.title('Error on OPE1 coefficient (best rew)')
+    plt.title('Error on $C_1$ (best reward)')
     plt.xlabel('Best 10 tries')
     plt.ylabel('Error')
     plt.yscale('log')
@@ -210,7 +210,7 @@ for i in range(grid_pts):
     
     plt.figure(figsize=(6, 6))
     plt.scatter(range(10), ope2_err[i, rew_ordered], c=range(10), cmap='tab10')
-    plt.title('Error on OPE2 coefficient (best rew)')
+    plt.title('Error on $C_2$ (best reward)')
     plt.xlabel('Best 10 tries')
     plt.ylabel('Error')
     plt.yscale('log')

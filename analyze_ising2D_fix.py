@@ -19,8 +19,8 @@ if sigma:
     delta_teor = np.array([1., 4., 8., 9., 2., 6., 10., 4., 5., 8., 6., 7., 10., 8., 9., 10.])
     lambda_teor = np.array([1./4, 1./4096, 81./1677721600, 1./1073741824,  1./64, 9./2621440, 45./30064771072, 9./40960, 1./65536,
                             25./234881024, 25./3670016, 1./1310720, 15527./3685081939968, 15527./57579405312, 1125./30064771072, 251145./20882130993152])
-    labels = ['s=0, delta=1', 's=0, delta=4', 's=0, delta=8', 's=0, delta=9', 's=2, delta=2', 's=2, delta=6', 's=2, delta=10', 's=4, delta=4',
-              's=4, delta=5', 's=4, delta=8', 's=6, delta=6', 's=6, delta=7', 's=6, delta=10', 's=8, delta=8', 's=8, delta=9', 's=10, delta=10']
+    labels = ['s=0, $\Delta$=1', 's=0, $\Delta$=4', 's=0, $\Delta$=8', 's=0, $\Delta$=9', 's=2, $\Delta$=2', 's=2, $\Delta$=6', 's=2, $\Delta$=10', 's=4, $\Delta$=4',
+              's=4, $\Delta$=5', 's=4, $\Delta$=8', 's=6, $\Delta$=6', 's=6, $\Delta$=7', 's=6, $\Delta$=10', 's=8, $\Delta$=8', 's=8, $\Delta$=9', 's=10, $\Delta$=10']
     correlator = 'sigma'
     teor_rew = 10590097.0153
     operators = np.arange(start=1, stop=delta_len+1)
@@ -33,8 +33,8 @@ else:
     correlator = 'epsilon'
     delta_teor = np.array([4., 8., 2., 6., 10., 4., 8., 6., 10., 8., 10.])
     lambda_teor = np.array([1., 1/100., 1., 1/10., 1/1260., 1/10., 1/126., 1/126., 1/1716., 1/1716., 1/24310.])
-    labels = ['s=0, delta=4', 's=0, delta=8', 's=2, delta=2', 's=2, delta=6', 's=2, delta=10', 's=4, delta=4',
-              's=4, delta=8', 's=6, delta=6', 's=6, delta=10', 's=8, delta=8', 's=10, delta=10']
+    labels = ['s=0, $\Delta$=4', 's=0, $\Delta$=8', 's=2, $\Delta$=2', 's=2, $\Delta$=6', 's=2, $\Delta$=10', 's=4, $\Delta$=4',
+              's=4, $\Delta$=8', 's=6, $\Delta$=6', 's=6, $\Delta$=10', 's=8, $\Delta$=8', 's=10, $\Delta$=10']
     teor_rew = 2586.0985
     operators = np.arange(start=1, stop=delta_len+1)
     spin_list = np.array([0, 0, 2, 2, 2, 4, 4, 6, 6, 8, 10])
@@ -222,9 +222,9 @@ for i in range(delta_tries):
     sns.move_legend(
         ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
     )
-    plt.xlabel('Operator number')
-    plt.ylabel('Scaling dimension')
-    plt.title(f'Delta values for {correlator} correlator on best {rew_to_take} runs, {i} deltas fixed')
+    plt.xlabel('Operator number $i$')
+    plt.ylabel('Scaling dimension $\Delta_i$')
+    plt.title(f'$\Delta$ values for {correlator} correlator on best {rew_to_take} runs, {i} scaling dimensions fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'delta_best_{rew_to_take}.jpg'), dpi=300)
     #plt.show()
     plt.close()
@@ -251,9 +251,9 @@ for i in range(delta_tries):
     sns.move_legend(
         ax, loc="lower right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
     )
-    plt.xlabel('Operator number')
-    plt.ylabel('Scaling dimension')
-    plt.title(f'Delta values for {correlator} correlator on the best single run, {i} deltas fixed')
+    plt.xlabel('Operator number $i$')
+    plt.ylabel('Scaling dimension $\Delta_i$')
+    plt.title(f'$\Delta$ values for {correlator} correlator on best run, {i} scaling dimensions fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'delta_best_run.jpg'), dpi=300)
     #plt.show()
     plt.close()
@@ -286,9 +286,9 @@ for i in range(delta_tries):
     sns.move_legend(
         ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
     )
-    plt.xlabel('Operator number')
-    plt.ylabel('OPE coefficient')
-    plt.title(f'OPE coefficients for {correlator} correlator on best {rew_to_take} runs, {i} deltas fixed')
+    plt.xlabel('Operator number $i$')
+    plt.ylabel('Squared OPE coefficient $C_i$')
+    plt.title(f'$C_i$ values for {correlator} correlator on best {rew_to_take} runs, {i} scaling dimensions fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'lambda_best_{rew_to_take}.jpg'), dpi=300)
     plt.yscale('log')
     #plt.show()
@@ -317,9 +317,9 @@ for i in range(delta_tries):
     sns.move_legend(
         ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
     )
-    plt.xlabel('Operator number')
-    plt.ylabel('OPE coefficient')
-    plt.title(f'OPE coefficients for {correlator} correlator on the best single run, {i} deltas fixed')
+    plt.xlabel('Operator number $i$')
+    plt.ylabel('Squared OPE coefficient $C_i$')
+    plt.title(f'$C_i$ values for {correlator} correlator on best run, {i} scaling dimensions fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'lambda_best_run.jpg'), dpi=300)
     plt.yscale('log')
     #plt.show()
@@ -331,16 +331,16 @@ plt.fill_between(x=range(delta_tries), y1=avg_rewards-std_rewards, y2=avg_reward
 sns.lineplot(x=range(delta_tries), y=best_rewards, color='green', label='best run reward')
 plt.xlabel('Number of fixed scaling dimensions')
 plt.ylabel('Reward')
-plt.title(f'Best and average of top {rew_to_take} rewards as a function of deltas fixed')
+plt.title(f'Best and average of top {rew_to_take} rewards as a function of scaling dimensions fixed')
 plt.savefig(join(f'analyzed_{suffix}_fix', 'rewards_for_deltas_fixed.jpg'), dpi=300)
 plt.close()
 
 for i in range(lambda_len):
     #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
     sns.lineplot(x=range(delta_tries), y=avg_err_deltas[:,i], label=labels[i])
-plt.title(f'Delta relative error w.r.t. deltas fixed (average on best {rew_to_take} runs)')
+plt.title(f'$\Delta_i$ relative error w.r.t. scaling dimensions fixed (average on best {rew_to_take} runs)')
 plt.xlabel('Number of deltas fixed')
-plt.ylabel('Mean of Delta relative errors')
+plt.ylabel('Mean of $\Delta_i$ relative errors')
 #plt.yscale('log')
 plt.legend(fontsize=5)
 plt.savefig(join(f'analyzed_{suffix}_fix', 'delta_mean_error.jpg'), dpi=300)
@@ -349,9 +349,9 @@ plt.close()
 for i in range(lambda_len):
     #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
     sns.lineplot(x=range(delta_tries), y=avg_err_lambdas[:,i], label=labels[i])
-plt.title(f'OPE coefficient relative error w.r.t. deltas fixed (average on best {rew_to_take} runs)')
-plt.xlabel('Number of deltas fixed')
-plt.ylabel('Mean of OPE coefficient relative errors')
+plt.title(f'$C_i$ relative error w.r.t. scaling dimensions fixed (average on best {rew_to_take} runs)')
+plt.xlabel('Number of $\Delta_i$ fixed')
+plt.ylabel('Mean of $C_i$ relative errors')
 plt.yscale('log')
 plt.legend(fontsize=5)
 plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_mean_error.jpg'), dpi=300)
@@ -361,9 +361,9 @@ plt.close()
 for i in range(lambda_len):
     #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
     sns.lineplot(x=range(delta_tries), y=best_err_deltas[:,i], label=labels[i])
-plt.title(f'Delta relative error w.r.t. deltas fixed (best run)')
+plt.title(f'$\Delta_i$ relative error w.r.t. scaling dimensions fixed (best run)')
 plt.xlabel('Number of deltas fixed')
-plt.ylabel('Scaling dimension relative errors')
+plt.ylabel('Mean of $\Delta_i$ relative errors')
 plt.yscale('log')
 plt.legend(fontsize=5)
 plt.savefig(join(f'analyzed_{suffix}_fix', 'delta_best_error.jpg'), dpi=300)
@@ -372,9 +372,9 @@ plt.close()
 for i in range(lambda_len):
     #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
     sns.lineplot(x=range(delta_tries), y=best_err_lambdas[:,i], label=labels[i])
-plt.title(f'OPE coefficient relative error w.r.t. deltas fixed (best run)')
-plt.xlabel('Number of deltas fixed')
-plt.ylabel('OPE coefficient relative errors')
+plt.title(f'$C_i$ relative error w.r.t. scaling dimensions fixed (best run)')
+plt.xlabel('Number of $\Delta_i$ fixed')
+plt.ylabel('Mean of $C_i$ relative errors')
 plt.yscale('log')
 plt.legend(fontsize=5)
 plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_best_error.jpg'), dpi=300)

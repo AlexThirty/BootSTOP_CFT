@@ -180,8 +180,8 @@ sns.move_legend(
 
 
 plt.xlabel('g')
-plt.ylabel('Second OPE coefficient')
-plt.title(f'Second OPE coefficient values with respect to g for best {rew_to_take} runs')
+plt.ylabel('Squared second OPE coefficient $C_2$')
+plt.title(f'$C_2$ values with respect to g for best {rew_to_take} runs')
 plt.savefig(join(analysis_path, f'OPE2_{rew_to_take}.jpg'), dpi=300)
 
 # Initialize the figure
@@ -209,6 +209,6 @@ sns.move_legend(
 
 
 plt.xlabel('g')
-plt.ylabel('Third OPE coefficient')
-plt.title(f'Third OPE coefficient values with respect to g for best {rew_to_take} runs')
+plt.ylabel('Squared third OPE coefficient $C_3$')
+plt.title(f'$C_3$ values with respect to g for best {rew_to_take} runs')
 plt.savefig(join(analysis_path, f'OPE3_{rew_to_take}.jpg'), dpi=300)
