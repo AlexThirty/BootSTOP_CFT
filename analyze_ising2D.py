@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 import os
 
 # Is this the sigma correlator?
-sigma = False
+sigma = True
 
 # Values for analysis set regarding the correlator used
 if sigma:

@@ -8,7 +8,7 @@ import seaborn as sns
 import os
 
 # Is this the sigma correlator?
-sigma = False
+sigma = True
 
 # Get correlator values
 if sigma:

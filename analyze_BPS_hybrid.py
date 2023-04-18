@@ -10,7 +10,7 @@ import os
 import re
 import seaborn as sns
 
-rew_to_take = 10
+rew_to_take = 25
 gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      np.arange(start=0.25, stop=4.05, step=0.05),
                      #np.arange(start=4.25, stop=5.25, step=0.25)

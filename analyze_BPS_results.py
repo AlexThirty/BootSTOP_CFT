@@ -9,8 +9,8 @@ import os
 import re
 
 
-OPE_first = 5
-OPE_second = 6
+OPE_first = 9
+OPE_second = 10
 best_rew_to_take = 25
 best_reward = 0.
 delta_len = 10
