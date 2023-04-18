@@ -8,7 +8,7 @@ import seaborn as sns
 import os
 
 # Is this the sigma correlator?
-sigma = True
+sigma = False
 
 # Get correlator values
 if sigma:
@@ -108,7 +108,7 @@ for i in range(delta_tries):
     lambda_error_best.append(np.mean(abs(lambdas - lambda_teor)/lambda_teor))
     
 # Number of best rewards to take
-rew_to_take = 5
+rew_to_take = 10
 
 avg_rewards = np.zeros(delta_tries)
 best_rewards = np.zeros(delta_tries)
