@@ -214,3 +214,33 @@ plt.xlabel('g')
 plt.ylabel('Squared third OPE coefficient $C_3$')
 plt.title(f'$C_3$ values with respect to g for best {rew_to_take} runs')
 plt.savefig(join(analysis_path, f'OPE3_{rew_to_take}.jpg'), dpi=300)
+
+
+# Initialize the figure
+f, ax = plt.subplots()
+# Show each observation with a scatterplot
+# Initialize the figure
+f, ax = plt.subplots()
+for i in range(rew_to_take):
+    ax.scatter(
+        x=g_list, y=all_OPE_second[:,i]+all_OPE_first[:,i], color='blue', alpha=.1, zorder=-1,
+    )
+ax.scatter(x=g_list, y=mean_OPE_second+mean_OPE_first, color='blue', marker='d', label='Experimental mean', zorder=1)
+ax.fill_between(x=g_list, y1=OPE3_lower_bounds+OPE2_lower_bounds, y2=OPE3_upper_bounds+OPE2_upper_bounds, color='green', alpha=0.2, label='Theoretical bounds')
+# Show each observation with a scatterplot
+# Show the conditional means, aligning each pointplot in the
+# center of the strips by adjusting the width allotted to each
+# category (.8 by default) by the number of hue levels
+
+
+plt.legend()
+# Improve the legend
+sns.move_legend(
+    ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
+)
+
+
+plt.xlabel('g')
+plt.ylabel('Sum of squared OPE coefficients $C_2+C_3$')
+plt.title(f'$C_2+C_3$ values with respect to g for best {rew_to_take} runs')
+plt.savefig(join(analysis_path, f'OPEsum_{rew_to_take}.jpg'), dpi=300)
