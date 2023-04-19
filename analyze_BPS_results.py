@@ -136,35 +136,35 @@ plt.title(f'Best and average of top {best_rew_to_take} rewards as a function of 
 plt.savefig(join(analysis_path, f'rewards_for_g_best{best_rew_to_take}.jpg'), dpi=300)
 plt.close()
 
-plt.figure()
+plt.figure(figsize=(8,5))
 plt.scatter(x=dist_OPE, y=std_OPE_first/mean_OPE_first, color='blue')
 for i in range(len(g_list)):
     plt.text(x=dist_OPE[i]+0.0005, y=std_OPE_first[i]/mean_OPE_first[i]+0.0001, s=f'g={str(g_list[i])}')
 plt.ylabel('Standard deviation/mean')
-plt.xlabel(f'Distance between $\Delta_{OPE_first}$ and $\Delta_{OPE_second}$')
-plt.title(f'Relative uncertainty w.r.t. distance best {best_rew_to_take} rewards, $C_{OPE_first}$')
+plt.xlabel(f'Distance between $\Delta_{{{OPE_first}}}$ and $\Delta_{{{OPE_second}}}$')
+plt.title(f'Relative uncertainty w.r.t. distance best {best_rew_to_take} rewards, $C_{{{OPE_first}}}$')
 plt.savefig(join(analysis_path, f'uncertainty_analysis_OPE{OPE_first}_on_OPE{OPE_second}_best{best_rew_to_take}.jpg'), dpi=300)
 
-plt.figure()
+plt.figure(figsize=(8,5))
 plt.scatter(x=dist_OPE, y=std_OPE_second/mean_OPE_second, color='blue')
 for i in range(len(g_list)):
     plt.text(x=dist_OPE[i]+0.0005, y=std_OPE_second[i]/mean_OPE_second[i]+0.01, s=f'g={str(g_list[i])}')
 plt.ylabel('Standard deviation/mean')
-plt.xlabel(f'Distance between $\Delta_{OPE_first}$ and $\Delta_{OPE_second}$')
-plt.title(f'Relative uncertainty w.r.t. distance best {best_rew_to_take} rewards, $C_{OPE_first}$')
+plt.xlabel(f'Distance between $\Delta_{{{OPE_first}}}$ and $\Delta_{{{OPE_second}}}$')
+plt.title(f'Relative uncertainty w.r.t. distance best {best_rew_to_take} rewards, $C_{{{OPE_first}}}$')
 plt.savefig(join(analysis_path, f'uncertainty_analysis_OPE{OPE_second}_on_OPE{OPE_first}_best{best_rew_to_take}.jpg'), dpi=300)
 
-plt.figure()
+plt.figure(figsize=(8,5))
 plt.scatter(x=dist_OPE, y=std_OPE_sum/mean_OPE_sum, color='blue')
 for i in range(len(g_list)):
     plt.text(x=dist_OPE[i]+0.0005, y=std_OPE_sum[i]/mean_OPE_sum[i]+0.00001, s=f'g={str(g_list[i])}')
 plt.ylabel('Standard deviation/mean')
-plt.xlabel(f'Distance between $\Delta_{OPE_first}$ and $\Delta_{OPE_second}$')
-plt.title(f'Relative uncertainty w.r.t. distance best {best_rew_to_take} rewards, $C_{OPE_first}+C_{OPE_second}$')
+plt.xlabel(f'Distance between $\Delta_{{{OPE_first}}}$ and $\Delta_{{{OPE_second}}}$')
+plt.title(f'Relative uncertainty w.r.t. distance best {best_rew_to_take} rewards, $C_{{{OPE_first}}}+C_{{{OPE_second}}}$')
 plt.savefig(join(analysis_path, f'uncertainty_analysis_sum_OPE{OPE_first}_OPE{OPE_second}_best{best_rew_to_take}.jpg'), dpi=300)
 
 for oper in range(lambda_fix, lambda_len):
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8,5))
     ### Average plot
     # Initialize the figure
     ax = sns.pointplot(
@@ -195,7 +195,7 @@ for oper in range(lambda_fix, lambda_len):
         ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
     )
     plt.xlabel('Coupling constant g')
-    plt.ylabel(f'Squared OPE coefficient $C_{oper+1}$')
+    plt.ylabel(f'Squared OPE coefficient $C_{{{oper+1}}}$')
     #plt.yscale('log')
     plt.title(f'{oper+1}-th squared OPE coefficient on best {best_rew_to_take} runs, {lambda_fix} coefficient fixed')
     plt.savefig(join(analysis_path, f'OPE{oper+1}_analysis_best{best_rew_to_take}.jpg'), dpi=300)
