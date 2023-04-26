@@ -215,7 +215,7 @@ sns.move_legend(
     ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
 )
 plt.xlabel('Operator number $i$')
-plt.ylabel('Squared OPE coefficient $C_i$')
+plt.ylabel('Squared OPE coefficient $C^2_i$')
 plt.title(f'Squared OPE coefficients for {correlator} correlator on best {rew_to_take} runs')
 plt.savefig(join(f'analyzed_{suffix}', f'lambda_best_{rew_to_take}.jpg'), dpi=300)
 
@@ -242,7 +242,7 @@ sns.move_legend(
     ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
 )
 plt.xlabel('Operator number $i$')
-plt.ylabel('Squared OPE coefficient $C_i$')
+plt.ylabel('Squared OPE coefficient $C^2_i$')
 plt.title(f'Squared OPE coefficients for {correlator} correlator on the best single run')
 
 plt.savefig(join(f'analyzed_{suffix}', f'lambda_best_run.jpg'), dpi=300)

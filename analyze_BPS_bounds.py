@@ -18,7 +18,7 @@ lambda_fix = 1
 rew_to_take = 25
 
 
-g_list = np.array([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 1.])
+g_list = np.array([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1.])
 g_indexes = np.zeros(len(g_list), dtype=np.int32)
 gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      np.arange(start=0.25, stop=4.05, step=0.05),
@@ -45,6 +45,8 @@ path_list = [
     join('.', 'results_BPS', 'results_BPS_1fix_g05'),
     join('.', 'results_BPS', 'results_BPS_1fix_g06'),
     join('.', 'results_BPS', 'results_BPS_1fix_g07'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g08'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g09'),
     join('.', 'results_BPS', 'results_BPS_1fix_g1'),
     #join('.', 'results_BPS', 'results_BPS_1fix_g15'),
     #join('.', 'results_BPS', 'results_BPS_1fix_g2'),
@@ -182,8 +184,8 @@ sns.move_legend(
 
 
 plt.xlabel('g')
-plt.ylabel('Squared second OPE coefficient $C_2$')
-plt.title(f'$C_2$ values with respect to g for best {rew_to_take} runs')
+plt.ylabel('Squared second OPE coefficient $C^2_2$')
+plt.title(f'$C^2_2$ values with respect to g for best {rew_to_take} runs')
 plt.savefig(join(analysis_path, f'OPE2_{rew_to_take}.jpg'), dpi=300)
 
 # Initialize the figure
@@ -211,8 +213,8 @@ sns.move_legend(
 
 
 plt.xlabel('g')
-plt.ylabel('Squared third OPE coefficient $C_3$')
-plt.title(f'$C_3$ values with respect to g for best {rew_to_take} runs')
+plt.ylabel('Squared third OPE coefficient $C^2_3$')
+plt.title(f'$C^2_3$ values with respect to g for best {rew_to_take} runs')
 plt.savefig(join(analysis_path, f'OPE3_{rew_to_take}.jpg'), dpi=300)
 
 
@@ -241,6 +243,6 @@ sns.move_legend(
 
 
 plt.xlabel('g')
-plt.ylabel('Sum of squared OPE coefficients $C_2+C_3$')
-plt.title(f'$C_2+C_3$ values with respect to g for best {rew_to_take} runs')
+plt.ylabel('Sum of squared OPE coefficients $C^2_2+C^2_3$')
+plt.title(f'$C^2_2+C^2_3$ values with respect to g for best {rew_to_take} runs')
 plt.savefig(join(analysis_path, f'OPEsum_{rew_to_take}.jpg'), dpi=300)

@@ -8,7 +8,7 @@ import seaborn as sns
 import os
 
 # Is this the sigma correlator?
-sigma = False
+sigma = True
 
 # Get correlator values
 if sigma:
@@ -287,8 +287,8 @@ for i in range(delta_tries):
         ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
     )
     plt.xlabel('Operator number $i$')
-    plt.ylabel('Squared OPE coefficient $C_i$')
-    plt.title(f'$C_i$ values for {correlator} correlator on best {rew_to_take} runs, {i} scaling dimensions fixed')
+    plt.ylabel('Squared OPE coefficient $C^2_i$')
+    plt.title(f'$C^2_i$ values for {correlator} correlator on best {rew_to_take} runs, {i} scaling dimensions fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'lambda_best_{rew_to_take}.jpg'), dpi=300)
     plt.yscale('log')
     #plt.show()
@@ -318,8 +318,8 @@ for i in range(delta_tries):
         ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
     )
     plt.xlabel('Operator number $i$')
-    plt.ylabel('Squared OPE coefficient $C_i$')
-    plt.title(f'$C_i$ values for {correlator} correlator on best run, {i} scaling dimensions fixed')
+    plt.ylabel('Squared OPE coefficient $C^2_i$')
+    plt.title(f'$C^2_i$ values for {correlator} correlator on best run, {i} scaling dimensions fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'lambda_best_run.jpg'), dpi=300)
     plt.yscale('log')
     #plt.show()
@@ -349,9 +349,9 @@ plt.close()
 for i in range(lambda_len):
     #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
     sns.lineplot(x=range(delta_tries), y=avg_err_lambdas[:,i], label=labels[i])
-plt.title(f'$C_i$ relative error w.r.t. scaling dimensions fixed (average on best {rew_to_take} runs)')
+plt.title(f'$C^2_i$ relative error w.r.t. scaling dimensions fixed (average on best {rew_to_take} runs)')
 plt.xlabel('Number of $\Delta_i$ fixed')
-plt.ylabel('Mean of $C_i$ relative errors')
+plt.ylabel('Mean of $C^2_i$ relative errors')
 plt.yscale('log')
 plt.legend(fontsize=5)
 plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_mean_error.jpg'), dpi=300)
@@ -372,9 +372,9 @@ plt.close()
 for i in range(lambda_len):
     #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
     sns.lineplot(x=range(delta_tries), y=best_err_lambdas[:,i], label=labels[i])
-plt.title(f'$C_i$ relative error w.r.t. scaling dimensions fixed (best run)')
+plt.title(f'$C^2_i$ relative error w.r.t. scaling dimensions fixed (best run)')
 plt.xlabel('Number of $\Delta_i$ fixed')
-plt.ylabel('Mean of $C_i$ relative errors')
+plt.ylabel('Mean of $C^2_i$ relative errors')
 plt.yscale('log')
 plt.legend(fontsize=5)
 plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_best_error.jpg'), dpi=300)

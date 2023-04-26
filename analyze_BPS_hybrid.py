@@ -123,7 +123,7 @@ sns.move_legend(
     ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
 )
 plt.xlabel('Operator number $i$')
-plt.ylabel('Squared OPE coefficient $C_i$')
+plt.ylabel('Squared OPE coefficient $C^2_i$')
 #plt.yscale('log')
 plt.title(f'Squared OPE coefficients on best {rew_to_take} runs, {OPE_fix} coefficient fixed, g={g}')
 plt.savefig(join(analysis_path, f'{prefix}_OPE{OPE_fix+1}_10_{rew_to_take}.jpg'), dpi=300)

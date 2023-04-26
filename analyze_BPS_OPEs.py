@@ -20,8 +20,8 @@ gs = np.around(gs, decimals=2)
 g = 0.5
 g_index = np.argwhere(gs==g)[0]
 OPE_fix = 1
-path = join('.', 'results_BPS', f'results_BPS_{OPE_fix}fix_g05')
-prefix = 'g050'
+path = join('.', 'results_BPS', f'results_BPS_{OPE_fix}fix_g4')
+prefix = 'g4'
 onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
 r = re.compile('sac[0-9]+.csv')
 onlyfiles = list(filter(r.match, onlyfiles))
@@ -112,7 +112,7 @@ sns.move_legend(
     ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
 )
 plt.xlabel('Operator number $i$')
-plt.ylabel('Squared OPE coefficient $C_i$')
+plt.ylabel('Squared OPE coefficient $C^2_i$')
 #plt.yscale('log')
 plt.title(f'Squared OPE coefficients on best {rew_to_take} runs, {OPE_fix} coefficients fixed, g={g}')
 plt.savefig(join(analysis_path, f'{prefix}_OPE{OPE_fix+1}_10_{rew_to_take}.jpg'), dpi=300)
