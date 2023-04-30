@@ -46,7 +46,7 @@ for i in range(delta_tries):
     if not os.path.exists(join(f'analyzed_{suffix}_fix', f'{i}_fix')):
         os.makedirs(join(f'analyzed_{suffix}_fix', f'{i}_fix'))
     
-# Number of tries for every number of delas fixed
+# Number of tries for every number of deltas fixed
 tries_per_deltas = 50
 
 # Get the path of results files
@@ -227,7 +227,7 @@ for i in range(delta_tries):
     )
     plt.xlabel('Operator number $i$')
     plt.ylabel('Scaling dimension $\Delta_i$')
-    plt.title(f'$\Delta$ values for {correlator} correlator on best {rew_to_take} runs, {i} scaling dimensions fixed')
+    plt.title(f'$\Delta$ values for {correlator} correlator on best {rew_to_take} runs, {i} $\Delta$\'s fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'delta_best_{rew_to_take}.jpg'), dpi=300)
     #plt.show()
     plt.close()
@@ -256,7 +256,7 @@ for i in range(delta_tries):
     )
     plt.xlabel('Operator number $i$')
     plt.ylabel('Scaling dimension $\Delta_i$')
-    plt.title(f'$\Delta$ values for {correlator} correlator on best run, {i} scaling dimensions fixed')
+    plt.title(f'$\Delta$ values for {correlator} correlator on best run, {i} $\Delta$\'s fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'delta_best_run.jpg'), dpi=300)
     #plt.show()
     plt.close()
@@ -291,7 +291,7 @@ for i in range(delta_tries):
     )
     plt.xlabel('Operator number $i$')
     plt.ylabel('Squared OPE coefficient $C^2_i$')
-    plt.title(f'$C^2_i$ values for {correlator} correlator on best {rew_to_take} runs, {i} scaling dimensions fixed')
+    plt.title(f'$C^2_i$ values for {correlator} correlator on best {rew_to_take} runs, {i} $\Delta$\'s fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'lambda_best_{rew_to_take}.jpg'), dpi=300)
     plt.yscale('log')
     #plt.show()
@@ -322,7 +322,7 @@ for i in range(delta_tries):
     )
     plt.xlabel('Operator number $i$')
     plt.ylabel('Squared OPE coefficient $C^2_i$')
-    plt.title(f'$C^2_i$ values for {correlator} correlator on best run, {i} scaling dimensions fixed')
+    plt.title(f'$C^2_i$ values for {correlator} correlator on best run, {i} $\Delta$\'s fixed')
     plt.savefig(join(f'analyzed_{suffix}_fix', f'{i}_fix', f'lambda_best_run.jpg'), dpi=300)
     plt.yscale('log')
     #plt.show()
@@ -334,14 +334,14 @@ plt.fill_between(x=range(delta_tries), y1=avg_rewards-std_rewards, y2=avg_reward
 sns.lineplot(x=range(delta_tries), y=best_rewards, color='green', label='best run reward')
 plt.xlabel('Number of fixed scaling dimensions')
 plt.ylabel('Reward')
-plt.title(f'Best and average of top {rew_to_take} rewards as a function of scaling dimensions fixed')
+plt.title(f'Best and average of top {rew_to_take} rewards as a function of $\Delta$\'s fixed')
 plt.savefig(join(f'analyzed_{suffix}_fix', 'rewards_for_deltas_fixed.jpg'), dpi=300)
 plt.close()
 
 for i in range(lambda_len):
     #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
     sns.lineplot(x=range(delta_tries), y=avg_err_deltas[:,i], label=labels[i])
-plt.title(f'$\Delta_i$ relative error w.r.t. scaling dimensions fixed (average on best {rew_to_take} runs)')
+plt.title(f'$\Delta_i$ relative error w.r.t. scaling dimensions fixed, best {rew_to_take} runs')
 plt.xlabel('Number of deltas fixed')
 plt.ylabel('Mean of $\Delta_i$ relative errors')
 #plt.yscale('log')
@@ -352,7 +352,7 @@ plt.close()
 for i in range(lambda_len):
     #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
     sns.lineplot(x=range(delta_tries), y=avg_err_lambdas[:,i], label=labels[i])
-plt.title(f'$C^2_i$ relative error w.r.t. scaling dimensions fixed (average on best {rew_to_take} runs)')
+plt.title(f'$C^2_i$ relative error w.r.t. $\Delta$\'s fixed, best {rew_to_take} runs')
 plt.xlabel('Number of $\Delta_i$ fixed')
 plt.ylabel('Mean of $C^2_i$ relative errors')
 plt.yscale('log')
@@ -364,7 +364,7 @@ plt.close()
 for i in range(lambda_len):
     #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
     sns.lineplot(x=range(delta_tries), y=best_err_deltas[:,i], label=labels[i])
-plt.title(f'$\Delta_i$ relative error w.r.t. scaling dimensions fixed (best run)')
+plt.title(f'$\Delta_i$ relative error w.r.t. scaling dimensions fixed, best run')
 plt.xlabel('Number of deltas fixed')
 plt.ylabel('Mean of $\Delta_i$ relative errors')
 plt.yscale('log')
@@ -375,7 +375,7 @@ plt.close()
 for i in range(lambda_len):
     #plt.plot(range(delta_tries), lambda_err_matrix[i, :], label=labels[i])
     sns.lineplot(x=range(delta_tries), y=best_err_lambdas[:,i], label=labels[i])
-plt.title(f'$C^2_i$ relative error w.r.t. scaling dimensions fixed (best run)')
+plt.title(f'$C^2_i$ relative error w.r.t. scaling dimensions fixed, best run')
 plt.xlabel('Number of $\Delta_i$ fixed')
 plt.ylabel('Mean of $C^2_i$ relative errors')
 plt.yscale('log')

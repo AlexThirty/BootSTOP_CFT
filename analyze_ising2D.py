@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 import os
 
 # Is this the sigma correlator?
-sigma = True
+sigma = False
 
 # Values for analysis set regarding the correlator used
 if sigma:
@@ -157,7 +157,7 @@ sns.move_legend(
 )
 plt.xlabel('Operator number $i$')
 plt.ylabel('Scaling dimension $\Delta_i$')
-plt.title(f'Scaling dimension values for {correlator} correlator on best {rew_to_take} runs')
+plt.title(f'Scaling dimensions for {correlator} correlator on best {rew_to_take} runs')
 plt.savefig(join(f'analyzed_{suffix}', f'delta_best_{rew_to_take}.jpg'), dpi=300)
 
 ### Best one plot
@@ -183,7 +183,7 @@ sns.move_legend(
 )
 plt.xlabel('Operator number $i$')
 plt.ylabel('Scaling dimension $\Delta_i$')
-plt.title(f'Scaling dimension values for {correlator} correlator on the best single run')
+plt.title(f'Scaling dimensions for {correlator} correlator on the best run')
 plt.savefig(join(f'analyzed_{suffix}', f'delta_best_run.jpg'), dpi=300)
 
 
@@ -243,6 +243,6 @@ sns.move_legend(
 )
 plt.xlabel('Operator number $i$')
 plt.ylabel('Squared OPE coefficient $C^2_i$')
-plt.title(f'Squared OPE coefficients for {correlator} correlator on the best single run')
+plt.title(f'Squared OPE coefficients for {correlator} correlator on the best run')
 
 plt.savefig(join(f'analyzed_{suffix}', f'lambda_best_run.jpg'), dpi=300)
