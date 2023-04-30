@@ -8,7 +8,7 @@ import seaborn as sns
 import os
 
 # Is this the sigma correlator?
-sigma = True
+sigma = False
 
 # Get correlator values
 if sigma:
@@ -78,7 +78,10 @@ for i in range(delta_tries):
         currf = open(join(path, 'sac'+str(100*i+j)+'.csv'))
         csv_raw = csv.reader(currf)
         sp = list(csv_raw)
-        data = sp[-1]
+        last_index = -1
+        while len(sp[last_index]) < 5:
+            last_index = last_index-1
+        data = sp[last_index]
         if len(data)>10:
             curr_rew = float(data[1])
             coll.append(curr_rew)
@@ -342,7 +345,7 @@ plt.title(f'$\Delta_i$ relative error w.r.t. scaling dimensions fixed (average o
 plt.xlabel('Number of deltas fixed')
 plt.ylabel('Mean of $\Delta_i$ relative errors')
 #plt.yscale('log')
-plt.legend(fontsize=5)
+plt.legend(fontsize=7)
 plt.savefig(join(f'analyzed_{suffix}_fix', 'delta_mean_error.jpg'), dpi=300)
 plt.close()
 
@@ -353,7 +356,7 @@ plt.title(f'$C^2_i$ relative error w.r.t. scaling dimensions fixed (average on b
 plt.xlabel('Number of $\Delta_i$ fixed')
 plt.ylabel('Mean of $C^2_i$ relative errors')
 plt.yscale('log')
-plt.legend(fontsize=5)
+plt.legend(fontsize=7)
 plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_mean_error.jpg'), dpi=300)
 plt.close()
 
@@ -365,7 +368,7 @@ plt.title(f'$\Delta_i$ relative error w.r.t. scaling dimensions fixed (best run)
 plt.xlabel('Number of deltas fixed')
 plt.ylabel('Mean of $\Delta_i$ relative errors')
 plt.yscale('log')
-plt.legend(fontsize=5)
+plt.legend(fontsize=7)
 plt.savefig(join(f'analyzed_{suffix}_fix', 'delta_best_error.jpg'), dpi=300)
 plt.close()
 
@@ -376,6 +379,6 @@ plt.title(f'$C^2_i$ relative error w.r.t. scaling dimensions fixed (best run)')
 plt.xlabel('Number of $\Delta_i$ fixed')
 plt.ylabel('Mean of $C^2_i$ relative errors')
 plt.yscale('log')
-plt.legend(fontsize=5)
+plt.legend(fontsize=7)
 plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_best_error.jpg'), dpi=300)
 plt.close()
