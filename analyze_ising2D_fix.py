@@ -8,7 +8,7 @@ import seaborn as sns
 import os
 
 # Is this the sigma correlator?
-sigma = False
+sigma = True
 
 # Get correlator values
 if sigma:
@@ -366,7 +366,7 @@ for i in range(lambda_len):
     sns.lineplot(x=range(delta_tries), y=best_err_deltas[:,i], label=labels[i])
 plt.title(f'$\Delta_i$ relative error w.r.t. scaling dimensions fixed, best run')
 plt.xlabel('Number of deltas fixed')
-plt.ylabel('Mean of $\Delta_i$ relative errors')
+plt.ylabel('$\Delta_i$ relative errors')
 plt.yscale('log')
 plt.legend(fontsize=7)
 plt.savefig(join(f'analyzed_{suffix}_fix', 'delta_best_error.jpg'), dpi=300)
@@ -377,7 +377,7 @@ for i in range(lambda_len):
     sns.lineplot(x=range(delta_tries), y=best_err_lambdas[:,i], label=labels[i])
 plt.title(f'$C^2_i$ relative error w.r.t. scaling dimensions fixed, best run')
 plt.xlabel('Number of $\Delta_i$ fixed')
-plt.ylabel('Mean of $C^2_i$ relative errors')
+plt.ylabel('$C^2_i$ relative errors')
 plt.yscale('log')
 plt.legend(fontsize=7)
 plt.savefig(join(f'analyzed_{suffix}_fix', 'lambda_best_error.jpg'), dpi=300)

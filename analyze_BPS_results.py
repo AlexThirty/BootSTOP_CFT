@@ -9,39 +9,39 @@ import os
 import re
 
 
-OPE_first = 5
-OPE_second = 6
+OPE_first = 9
+OPE_second = 10
 best_rew_to_take = 25
 best_reward = 0.
 delta_len = 10
 lambda_len = 10
 lambda_fix = 1
-analysis_path = 'BPS_analyzed_results'
-#g_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1.]
-g_list = [1., 1.5, 2., 2.5, 3., 3.5, 4.]
+analysis_path = 'BPS_analyzed_results_weak'
+g_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1.]
+#g_list = [1., 1.5, 2., 2.5, 3., 3.5, 4.]
 #g_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1., 1.5, 2., 2.5, 3., 3.5, 4.]
 path_list = [
-    #join('.', 'results_BPS', 'results_BPS_1fix_g005'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g010'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g015'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g020'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g025'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g030'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g035'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g040'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g045'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g05'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g06'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g07'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g08'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g09'),
-    join('.', 'results_BPS', 'results_BPS_3fix_g1'),
-    join('.', 'results_BPS', 'results_BPS_3fix_g15'),
-    join('.', 'results_BPS', 'results_BPS_3fix_g2'),
-    join('.', 'results_BPS', 'results_BPS_3fix_g25'),
-    join('.', 'results_BPS', 'results_BPS_3fix_g3'),
-    join('.', 'results_BPS', 'results_BPS_3fix_g35'),
-    join('.', 'results_BPS', 'results_BPS_3fix_g4')
+    join('.', 'results_BPS', 'results_BPS_1fix_g005'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g010'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g015'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g020'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g025'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g030'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g035'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g040'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g045'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g05'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g06'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g07'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g08'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g09'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g1'),
+    #join('.', 'results_BPS', 'results_BPS_3fix_g15'),
+    #join('.', 'results_BPS', 'results_BPS_3fix_g2'),
+    #join('.', 'results_BPS', 'results_BPS_3fix_g25'),
+    #join('.', 'results_BPS', 'results_BPS_3fix_g3'),
+    #join('.', 'results_BPS', 'results_BPS_3fix_g35'),
+    #join('.', 'results_BPS', 'results_BPS_3fix_g4')
 ]
 experiments = len(path_list)
 
@@ -166,7 +166,7 @@ for i in range(len(g_list)):
     plt.text(x=dist_OPE[i]+0.0005, y=std_OPE_second[i]/mean_OPE_second[i]+0.01, s=f'g={str(g_list[i])}')
 plt.ylabel('Standard deviation/mean')
 plt.xlabel(f'Distance between $\Delta_{{{OPE_first}}}$ and $\Delta_{{{OPE_second}}}$')
-plt.title(f'Relative uncertainty w.r.t. distance best {best_rew_to_take} rewards, $C^2_{{{OPE_first}}}$')
+plt.title(f'Relative uncertainty w.r.t. distance best {best_rew_to_take} rewards, $C^2_{{{OPE_second}}}$')
 plt.savefig(join(analysis_path, f'uncertainty_analysis_OPE{OPE_second}_on_OPE{OPE_first}_best{best_rew_to_take}.jpg'), dpi=300)
 
 plt.figure(figsize=(8,5))
@@ -212,7 +212,7 @@ for oper in range(lambda_fix, lambda_len):
     plt.xlabel('Coupling constant g')
     plt.ylabel(f'Squared OPE coefficient $C^2_{{{oper+1}}}$')
     #plt.yscale('log')
-    plt.title(f'{oper+1}-th squared OPE coefficient on best {best_rew_to_take} runs, {lambda_fix} coefficient fixed')
+    plt.title(f'{oper+1}-th squared OPE coefficient on best {best_rew_to_take} runs, {lambda_fix} coefficient(s) fixed')
     plt.savefig(join(analysis_path, f'OPE{oper+1}_analysis_best{best_rew_to_take}.jpg'), dpi=300)
 
     #plt.show()
