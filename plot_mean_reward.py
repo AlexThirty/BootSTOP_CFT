@@ -357,6 +357,7 @@ rewards_final = [rewards[:timesteps_min] for rewards in rewards_coll]
 rewards_final = np.array(rewards_final)
 rewards_avg = np.mean(rewards_final, axis=0)
 rewards_stds = np.std(rewards_final, axis=0)
+
 resets_positions = resets_positions_coll[timesteps_arg]
 resets_labels = resets_labels_coll[timesteps_arg]
 

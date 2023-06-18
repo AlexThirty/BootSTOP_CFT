@@ -33,6 +33,36 @@ def get_teor_lambdads(g_index):
     OPE3 = (lower+upper)/2
     
     return OPE1, OPE2, OPE3
+
+def get_upper_lambda(g_index):
+    lower = bounds_OPE1[g_index, 0]
+    upper = bounds_OPE1[g_index, 1]
+    OPE1 = lower
+    
+    lower = bounds_OPE2[g_index, 0]
+    upper = bounds_OPE2[g_index, 1]
+    OPE2 = (lower+upper)/2
+    
+    lower = bounds_OPE3[g_index, 0]
+    upper = bounds_OPE3[g_index, 1]
+    OPE3 = (lower+upper)/2
+    
+    return OPE1, OPE2, OPE3
+
+def get_lower_lambda(g_index):
+    lower = bounds_OPE1[g_index, 0]
+    upper = bounds_OPE1[g_index, 1]
+    OPE1 = upper
+    
+    lower = bounds_OPE2[g_index, 0]
+    upper = bounds_OPE2[g_index, 1]
+    OPE2 = (lower+upper)/2
+    
+    lower = bounds_OPE3[g_index, 0]
+    upper = bounds_OPE3[g_index, 1]
+    OPE3 = (lower+upper)/2
+    
+    return OPE1, OPE2, OPE3
     
 
 class ParametersBPS:
@@ -163,7 +193,7 @@ class ParametersBPS_SAC(ParametersBPS):
     No validation of the inputs is done.
     """
 
-    def __init__(self, config, g, integral_mode, g_index=0, OPE_fix=0):
+    def __init__(self, config, g, integral_mode, g_index=0, OPE_fix=0, OPE1_mode='avg'):
         super().__init__(g, integral_mode)
         
         
@@ -213,7 +243,12 @@ class ParametersBPS_SAC(ParametersBPS):
         # set minimum values for OPE coeffs
         self.shifts_opecoeffs = np.zeros(self.num_of_operators)
         if OPE_fix > 0:
-            ope1, ope2, ope3 = get_teor_lambdads(g_index=g_index)
+            if OPE1_mode == 'avg':
+                ope1, ope2, ope3 = get_teor_lambdads(g_index=g_index)
+            elif OPE1_mode == 'upper':
+                ope1, ope2, ope3 = get_upper_lambda(g_index=g_index)
+            elif OPE1_mode == 'lower':
+                ope1, ope2, ope3 = get_lower_lambda(g_index=g_index)
             if OPE_fix > 0:
                 self.shifts_opecoeffs[0] = ope1
             if OPE_fix > 1:

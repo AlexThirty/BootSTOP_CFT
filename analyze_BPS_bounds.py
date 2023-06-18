@@ -18,7 +18,8 @@ lambda_fix = 1
 rew_to_take = 25
 
 
-g_list = np.array([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1.])
+#g_list = np.array([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1.])
+g_list = np.array([1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3., 3.25, 3.5, 4.])
 g_indexes = np.zeros(len(g_list), dtype=np.int32)
 gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      np.arange(start=0.25, stop=4.05, step=0.05),
@@ -27,33 +28,38 @@ gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
 gs = np.around(gs, decimals=2)
 for i in range(len(g_list)):
     g_indexes[i] = int(np.argwhere(g_list[i] == gs)[0])
-analysis_path = f'./BPS_analyzed_bounds/'
+analysis_path = f'./BPS_analyzed_bounds_strong_lower/'
 if not os.path.exists(analysis_path):
         os.makedirs(analysis_path)
 
 
 path_list = [
-    join('.', 'results_BPS', 'results_BPS_1fix_g005'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g010'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g015'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g020'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g025'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g030'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g035'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g040'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g045'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g05'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g06'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g07'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g08'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g09'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g005'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g010'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g015'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g020'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g025'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g030'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g035'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g040'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g045'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g05'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g06'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g07'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g08'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g09'),
     join('.', 'results_BPS', 'results_BPS_1fix_g1'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g15'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g2'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g25'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g3'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g35'),
-    #join('.', 'results_BPS', 'results_BPS_1fix_g4')
+    join('.', 'results_BPS', 'results_BPS_1fix_g125'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g15'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g175'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g2_lower'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g225'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g25'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g275'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g3'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g325'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g35'),
+    join('.', 'results_BPS', 'results_BPS_1fix_g4')
 ]
 experiments = len(path_list)
 
@@ -146,6 +152,8 @@ with open(join(analysis_path, f'numerical_values_{rew_to_take}.txt'), 'w') as f:
     print(mean_OPE_second, file=f)
     print('OPE 3 stds:', file=f)
     print(std_OPE_second, file=f)
+    print('OPE 2+3 means:', file=f)
+    print(mean_OPE_second+mean_OPE_first, file=f)
     print('std relative to mean', file=f)
     print(100*OPE_stds/OPE_means, file=f)
     print('OPE 2 lower bounds: ', file=f)
@@ -156,6 +164,10 @@ with open(join(analysis_path, f'numerical_values_{rew_to_take}.txt'), 'w') as f:
     print(OPE3_lower_bounds, file=f)
     print('OPE 3 upper bounds: ', file=f)
     print(OPE3_upper_bounds, file=f)
+    print('OPE 2+3 lower bounds: ', file=f)
+    print(OPE3_lower_bounds+OPE2_lower_bounds, file=f)
+    print('OPE 2+3 upper bounds: ', file=f)
+    print(OPE3_upper_bounds+OPE2_upper_bounds, file=f)
 
 
 
