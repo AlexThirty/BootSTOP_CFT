@@ -8,6 +8,8 @@ import values_BPS
 import seaborn as sns
 import os
 import re
+plt.rcParams.update({'font.size': 16})
+
 
 weak = False
 
@@ -43,14 +45,20 @@ if weak:
     ]
     lambda_fix = 1
 else:
-    g_list = [1., 1.5, 2., 2.5, 3., 3.5, 4.]
+    g_list = [1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3., 3.25, 3.5, 3.75, 4.]
     path_list = [
         join('.', 'results_BPS', 'results_BPS_3fix_g1'),
+        join('.', 'results_BPS', 'results_BPS_3fix_g125'),
         join('.', 'results_BPS', 'results_BPS_3fix_g15'),
+        join('.', 'results_BPS', 'results_BPS_3fix_g175'),
         join('.', 'results_BPS', 'results_BPS_3fix_g2'),
+        join('.', 'results_BPS', 'results_BPS_3fix_g225'),
         join('.', 'results_BPS', 'results_BPS_3fix_g25'),
+        join('.', 'results_BPS', 'results_BPS_3fix_g275'),
         join('.', 'results_BPS', 'results_BPS_3fix_g3'),
+        join('.', 'results_BPS', 'results_BPS_3fix_g325'),
         join('.', 'results_BPS', 'results_BPS_3fix_g35'),
+        join('.', 'results_BPS', 'results_BPS_3fix_g375'),
         join('.', 'results_BPS', 'results_BPS_3fix_g4')
     ]
     lambda_fix = 3
@@ -76,20 +84,13 @@ def get_teor_deltas(g):
 if not os.path.exists(analysis_path):
     os.makedirs(analysis_path)
 
-mean_OPE_4 = np.zeros(experiments)
-mean_OPE_5 = np.zeros(experiments)
-mean_OPE_6 = np.zeros(experiments)
-mean_OPE_7 = np.zeros(experiments)
-mean_OPE_8 = np.zeros(experiments)
-mean_OPE_9 = np.zeros(experiments)
-
-var_OPE_4 = np.zeros(experiments)
-var_OPE_5 = np.zeros(experiments)
-var_OPE_6 = np.zeros(experiments)
-var_OPE_7 = np.zeros(experiments)
-var_OPE_8 = np.zeros(experiments)
-var_OPE_9 = np.zeros(experiments)
-
+OPE4_vals = np.zeros((experiments, best_rew_to_take))
+OPE5_vals = np.zeros((experiments, best_rew_to_take))
+OPE6_vals = np.zeros((experiments, best_rew_to_take))
+OPE7_vals = np.zeros((experiments, best_rew_to_take))
+OPE8_vals = np.zeros((experiments, best_rew_to_take))
+OPE9_vals = np.zeros((experiments, best_rew_to_take))
+OPEsum_vals = np.zeros((experiments, best_rew_to_take))
 
 OPE_vals = np.zeros((best_rew_to_take, experiments, lambda_len))
 OPE_m = np.zeros((lambda_len, experiments))
@@ -144,52 +145,89 @@ for k, (g_el, path_el) in enumerate(zip(g_list, path_list)):
     
     teor_deltas = get_teor_deltas(g_el)
     
-    mean_OPE_4[k] = OPE_means[3]
-    mean_OPE_5[k] = OPE_means[4]
-    mean_OPE_6[k] = OPE_means[5]
-    mean_OPE_7[k] = OPE_means[6]
-    mean_OPE_8[k] = OPE_means[7]
-    mean_OPE_9[k] = OPE_means[8]
-
-    var_OPE_4[k] = OPE_vars[3]
-    var_OPE_5[k] = OPE_vars[4]
-    var_OPE_6[k] = OPE_vars[5]
-    var_OPE_7[k] = OPE_vars[6]
-    var_OPE_8[k] = OPE_vars[7]
-    var_OPE_9[k] = OPE_vars[8]
+    
+    OPE4_vals[k] = vals[:,3]
+    OPE5_vals[k] = vals[:,4]
+    OPE6_vals[k] = vals[:,5]
+    OPE7_vals[k] = vals[:,6]
+    OPE8_vals[k] = vals[:,7]
+    OPE9_vals[k] = vals[:,8]
 
 #delta_raw_string = 
 gs, avg = get_avg(weak=weak)
 
 if weak:
+    vals = np.zeros((len(g_list), best_rew_to_take))
     to_plot = np.zeros(len(g_list))
-    variances = np.zeros(len(g_list))
+    stds = np.zeros(len(g_list))
     for i in range(len(g_list)):
-        to_plot[i] = mean_OPE_4[i] + mean_OPE_5[i]+ mean_OPE_6[i] + mean_OPE_7[i] + mean_OPE_8[i] + mean_OPE_9[i]
-        variances[i] = var_OPE_4[i] + var_OPE_5[i]+ var_OPE_6[i] + var_OPE_7[i] + var_OPE_8[i] + var_OPE_9[i]
-        variances[i] = np.sqrt(variances[i])
+        vals[i] = OPE4_vals[i] + OPE5_vals[i] + OPE6_vals[i] + OPE7_vals[i] + OPE8_vals[i] + OPE9_vals[i]
+        to_plot[i] = np.mean(vals[i])
+        stds[i] = np.std(vals[i])
+    print(stds)
     plt.figure(figsize=(8,5))
     plt.plot(gs, avg, color='green', label='Expected values')
     plt.plot(g_list, to_plot, color='red', label='Experimental values')
-    plt.errorbar(g_list, y=to_plot, yerr=variances, color='red')
+    plt.errorbar(g_list, y=to_plot, yerr=stds, color='red')
     plt.ylabel('Sum of squared OPE coefficients $C_4^2+C_5^2+C_6^2+C_7^2+C_8^2+C_9^2$')
     plt.xlabel(f'g')
-    plt.legend()
+    #plt.legend()
     plt.title(f'$C_4^2+C_5^2+C_6^2+C_7^2+C_8^2+C_9^2$ expectation vs. predicted (weak coupling)')
-    plt.savefig(join(analysis_path, f'4sum_analysis_weak.png'), dpi=300)
+    plt.savefig(join(analysis_path, f'4sum_analysis_weak.png'))
 else:
+    vals = np.zeros((len(g_list), best_rew_to_take))
     to_plot = np.zeros(len(g_list))
-    variances = np.zeros(len(g_list))
+    stds = np.zeros(len(g_list))
     for i in range(len(g_list)):
-        to_plot[i] = mean_OPE_4[i] + mean_OPE_5[i]+ mean_OPE_6[i] + mean_OPE_8[i]
-        variances[i] = var_OPE_4[i] + var_OPE_5[i]+ var_OPE_6[i] + var_OPE_8[i]
-        variances[i] = np.sqrt(variances[i])
+        vals[i] = OPE4_vals[i] + OPE5_vals[i] + OPE6_vals[i] + OPE8_vals[i]
+        to_plot[i] = np.mean(vals[i])
+        stds[i] = np.std(vals[i])
+    #print(stds)
     plt.figure(figsize=(8,5))
     plt.plot(gs, avg, color='green', label='Expected values')
     plt.plot(g_list, to_plot, color='red', label='Experimental values')
-    plt.errorbar(g_list, y=to_plot, yerr=variances, color='red')
-    plt.ylabel('Sum of squared OPE coefficients $C_4^2+C_5^2+C_6^2+C_8^2$')
+    plt.errorbar(g_list, y=to_plot, yerr=stds, color='red')
+    #plt.ylabel('Sum of squared OPE coefficients $C_4^2+C_5^2+C_6^2+C_8^2$')
     plt.xlabel(f'g')
-    plt.legend()
-    plt.title(f'$C_4^2+C_5^2+C_6^2+C_8^2$ expectation vs. predicted (strong coupling)')
-    plt.savefig(join(analysis_path, f'4sum_analysis_strong.png'), dpi=300)
+    #plt.legend()
+    #plt.title(f'$C_4^2+C_5^2+C_6^2+C_8^2$ expectation vs. predicted (strong coupling)')
+    plt.savefig(join(analysis_path, f'4sum_analysis_strong.png'))
+    print('Std on overall errors')
+    print(stds/to_plot)
+    
+    vals = np.zeros((len(g_list), best_rew_to_take))
+    to_plot = np.zeros(len(g_list))
+    mean4 = np.zeros(len(g_list))
+    stds4 = np.zeros(len(g_list))
+    mean5 = np.zeros(len(g_list))
+    stds5 = np.zeros(len(g_list))
+    mean6 = np.zeros(len(g_list))
+    stds6 = np.zeros(len(g_list))
+    mean8 = np.zeros(len(g_list))
+    stds8 = np.zeros(len(g_list))
+    stds = np.zeros(len(g_list))
+    for i in range(len(g_list)):
+        vals[i] = OPE4_vals[i] + OPE5_vals[i] + OPE6_vals[i] + OPE8_vals[i]
+        to_plot[i] = np.mean(vals[i])
+        mean4[i] = np.mean(OPE4_vals[i])
+        stds4[i] = np.std(OPE4_vals[i])
+        mean5[i] = np.mean(OPE5_vals[i])
+        stds5[i] = np.std(OPE5_vals[i])
+        mean6[i] = np.mean(OPE6_vals[i])
+        stds6[i] = np.std(OPE6_vals[i])
+        mean8[i] = np.mean(OPE8_vals[i])
+        stds8[i] = np.std(OPE8_vals[i])
+        stds[i] = np.sqrt(stds4[i]**2+stds5[i]**2+stds6[i]**2+stds8[i]**2)/4
+        #stds[i] = to_plot[i]* (stds4[i]/mean4[i] + stds5[i]/mean5[i] + stds6[i]/mean6[i] + stds8[i]/mean8[i])/4
+    #print(stds)
+    print('Std on overall errors')
+    print(stds/to_plot)
+    plt.figure(figsize=(8,5))
+    plt.plot(gs, avg, color='green', label='Expected values')
+    plt.plot(g_list, to_plot, color='red', label='Experimental values')
+    plt.errorbar(g_list, y=to_plot, yerr=stds, color='red')
+    #plt.ylabel('Sum of squared OPE coefficients $C_4^2+C_5^2+C_6^2+C_8^2$')
+    plt.xlabel(f'g')
+    #plt.legend()
+    #plt.title(f'$C_4^2+C_5^2+C_6^2+C_8^2$ expectation vs. predicted (strong coupling)')
+    plt.savefig(join(analysis_path, f'4sum_analysis_strong_prop.png'))

@@ -7,6 +7,7 @@ import values_BPS
 import seaborn as sns
 import os
 import re
+plt.rcParams.update({'font.size': 16})
 
 
 OPE_first = 9
@@ -16,32 +17,32 @@ best_reward = 0.
 delta_len = 10
 lambda_len = 10
 lambda_fix = 1
-analysis_path = 'BPS_analyzed_results_weak'
-g_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1.]
-#g_list = [1., 1.5, 2., 2.5, 3., 3.5, 4.]
+analysis_path = 'BPS_analyzed_results_strong'
+#g_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1.]
+g_list = [1., 1.5, 2., 2.5, 3., 3.5, 4.]
 #g_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1., 1.5, 2., 2.5, 3., 3.5, 4.]
 path_list = [
-    join('.', 'results_BPS', 'results_BPS_1fix_g005'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g010'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g015'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g020'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g025'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g030'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g035'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g040'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g045'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g05'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g06'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g07'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g08'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g09'),
-    join('.', 'results_BPS', 'results_BPS_1fix_g1'),
-    #join('.', 'results_BPS', 'results_BPS_3fix_g15'),
-    #join('.', 'results_BPS', 'results_BPS_3fix_g2'),
-    #join('.', 'results_BPS', 'results_BPS_3fix_g25'),
-    #join('.', 'results_BPS', 'results_BPS_3fix_g3'),
-    #join('.', 'results_BPS', 'results_BPS_3fix_g35'),
-    #join('.', 'results_BPS', 'results_BPS_3fix_g4')
+    #join('.', 'results_BPS', 'results_BPS_1fix_g005'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g010'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g015'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g020'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g025'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g030'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g035'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g040'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g045'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g05'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g06'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g07'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g08'),
+    #join('.', 'results_BPS', 'results_BPS_1fix_g09'),
+    join('.', 'results_BPS', 'results_BPS_3fix_g1'),
+    join('.', 'results_BPS', 'results_BPS_3fix_g15'),
+    join('.', 'results_BPS', 'results_BPS_3fix_g2'),
+    join('.', 'results_BPS', 'results_BPS_3fix_g25'),
+    join('.', 'results_BPS', 'results_BPS_3fix_g3'),
+    join('.', 'results_BPS', 'results_BPS_3fix_g35'),
+    join('.', 'results_BPS', 'results_BPS_3fix_g4')
 ]
 experiments = len(path_list)
 
@@ -140,15 +141,22 @@ for k, (g_el, path_el) in enumerate(zip(g_list, path_list)):
     std_OPE_sum[k] = np.std(vals_sum)
 
 #delta_raw_string = 
+for i, g in enumerate(g_list):
+    print(f'g = {g}, C_7^2 = {OPE_m[6,i]}')
     
+with open(join(analysis_path, 'OPE_coefs.txt'), 'w') as f:
+    for i, g in enumerate(g_list):
+        print(g, file=f)
+        print(OPE_m[:,i], file=f)
+
 ### Average and best reward plotting
 sns.lineplot(x=g_list, y=rew_best, color='green', label='Best run reward')
 sns.lineplot(x=g_list, y=rew_m, color='blue', label='Average reward')
 plt.fill_between(x=g_list, y1=rew_m-rew_s, y2=rew_m+rew_s, color='blue', alpha=0.2)
-plt.xlabel('Coupling constant g')
+plt.xlabel('g')
 plt.ylabel('Reward')
-plt.title(f'Best and average of top {best_rew_to_take} rewards as a function of g')
-plt.savefig(join(analysis_path, f'rewards_for_g_best{best_rew_to_take}.jpg'), dpi=300)
+#plt.title(f'Best and average of top {best_rew_to_take} rewards as a function of g')
+plt.savefig(join(analysis_path, f'rewards_for_g_best{best_rew_to_take}.jpg'))
 plt.close()
 
 plt.figure(figsize=(8,5))
@@ -183,7 +191,7 @@ for oper in range(lambda_fix, lambda_len):
     ### Average plot
     # Initialize the figure
     ax = sns.pointplot(
-        x=g_list, y=OPE_m[oper,:], color='orange',
+        x=g_list, y=OPE_m[oper,:], color='red',
         join=False, dodge=.8 - .8 / 3,
         markers="d", scale=.75, errorbar=None, label='Experimental mean', ax=ax
     )
@@ -194,7 +202,9 @@ for oper in range(lambda_fix, lambda_len):
             x_coords.append(x)
             y_coords.append(y)
     ax.errorbar(x_coords, y_coords, yerr=OPE_s[oper,:],
-        color='orange', fmt=' ', zorder=1)
+        color='red', fmt=' ', zorder=1)
+    print(f'{oper+1}-th relative errors on g')
+    print(OPE_s[oper,:]/OPE_m[oper,:])
     # Show each observation with a scatterplot
     for j in range(experiments):
         sns.stripplot(
@@ -204,16 +214,16 @@ for oper in range(lambda_fix, lambda_len):
     # Show the conditional means, aligning each pointplot in the
     # center of the strips by adjusting the width allotted to each
     # category (.8 by default) by the number of hue levels
-    plt.legend()
+    #plt.legend()
     # Improve the legend
-    sns.move_legend(
-        ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
-    )
-    plt.xlabel('Coupling constant g')
-    plt.ylabel(f'Squared OPE coefficient $C^2_{{{oper+1}}}$')
+    #sns.move_legend(
+    #    ax, loc="upper right", ncol=1, frameon=True, columnspacing=1, handletextpad=0
+    #)
+    plt.xlabel('g')
+    #plt.ylabel(f'Squared OPE coefficient $C^2_{{{oper+1}}}$')
     #plt.yscale('log')
-    plt.title(f'{oper+1}-th squared OPE coefficient on best {best_rew_to_take} runs, {lambda_fix} coefficient(s) fixed')
-    plt.savefig(join(analysis_path, f'OPE{oper+1}_analysis_best{best_rew_to_take}.jpg'), dpi=300)
+    #plt.title(f'{oper+1}-th squared OPE coefficient on best {best_rew_to_take} runs, {lambda_fix} coefficient(s) fixed')
+    plt.savefig(join(analysis_path, f'OPE{oper+1}_analysis_best{best_rew_to_take}.jpg'))
 
     #plt.show()
     plt.close()
