@@ -7,7 +7,7 @@ from ope_bounds_BPS import bounds_OPE1, bounds_OPE2, bounds_OPE3
 from matplotlib import pyplot as plt
 import os
 import seaborn as sns
-plt.rcParams.update({'font.size': 12})
+plt.rcParams.update({'font.size': 14})
 
 gs = np.concatenate((np.arange(start=0.01, stop=0.25, step=0.01),
                      np.arange(start=0.25, stop=4.05, step=0.05),
@@ -26,7 +26,7 @@ def get_lambda_error(val, ope_index, g_index):
         lower = bounds_OPE1[g_index, 0]
         upper = bounds_OPE1[g_index, 1]
         half = (lower+upper)/2
-    
+        return abs(val-half)/half
         if val < lower:
             return abs(val-lower)/lower
         elif val > upper:
@@ -37,6 +37,7 @@ def get_lambda_error(val, ope_index, g_index):
         lower = bounds_OPE2[g_index, 0]
         upper = bounds_OPE2[g_index, 1]
         half = (lower+upper)/2
+        return abs(val-half)/half
         if val < lower:
             return abs(val-lower)/lower
         elif val > upper:
@@ -47,6 +48,7 @@ def get_lambda_error(val, ope_index, g_index):
         lower = bounds_OPE3[g_index, 0]
         upper = bounds_OPE3[g_index, 1]
         half = (lower+upper)/2
+        return abs(val-half)/half
         if val < lower:
             return abs(val-lower)/lower
         elif val > upper:
